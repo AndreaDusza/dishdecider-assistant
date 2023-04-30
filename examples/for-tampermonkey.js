@@ -9,18 +9,25 @@
 // @grant        none
 // ==/UserScript==
 
-(async function() {
-    'use strict';
-    const URL = 'https://raw.githubusercontent.com/AndreaDusza/teletal-assistant/master/dist/index.js';
+(() => {
+  'use strict';
+  const URL_PROD = 'https://raw.githubusercontent.com/AndreaDusza/teletal-assistant/master/dist/index.js';
 
-    const resp = await fetch(URL);
+  main().catch(error => {
+    alert(`Teletál Asszisztens betöltése sikertelen`);
+    console.error(`Failed to load Teletál Assistant`, error);
+  });
+
+  async function main() {
+    eval(await fetchGet(URL_PROD));
+  }
+
+  async function fetchGet(url) {
+    const resp = await fetch(url);
     if (!resp.ok) {
-        throw new Error(`Download error ${resp.status} (${resp.statusText}): ${await resp.text()}`);
+      throw new Error(`Download error ${resp.status} (${resp.statusText}): ${await resp.text()}`);
     }
+    return await resp.text();
+  }
 
-    const script = await resp.text();
-    eval(script);
-})().catch(x => {
-    alert(`Asszisztens betöltése sikertelen`);
-    console.error(`Asszisztens betöltése sikertelen`, x);
-});
+})();

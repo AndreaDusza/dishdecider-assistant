@@ -9,35 +9,39 @@
 // @grant        none
 // ==/UserScript==
 
-(async function() {
-    'use strict';
-    const URL = 'http://localhost:8078/index.js';
+(() => {
+  'use strict';
+  const URL_DEV = 'http://localhost:8078/index.js';
 
-    let oldScript = undefined;
-    for (;;) {
-        const resp = await fetch(URL);
-        if (!resp.ok) {
-            throw new Error(`Download error ${resp.status} (${resp.statusText}): ${await resp.text()}`);
-        }
+  main().catch(error => {
+    alert(`Teletál Asszisztens betöltése sikertelen`);
+    console.error(`Failed to load Teletál Assistant`, error);
+  });
 
-        const newScript = await resp.text();
-
-        if (oldScript === undefined) {
-            // eslint-disable-next-line no-eval
-            eval(newScript);
-            oldScript = newScript;
-        } else if (newScript !== oldScript) {
-            location.reload();
-            return;
-        }
-        await sleep(1000);
+  async function main() {
+    const devScript = await fetchGet(URL_DEV);
+    eval(devScript);
+    for (; ;) {
+      await sleep(1000);
+      const newScript = await fetchGet(URL_DEV);
+      if (newScript !== devScript) {
+        location.reload();
+        return;
+      }
     }
+  }
 
-    async function sleep(delay) {
-        return new Promise(resolve => {
-            setTimeout(resolve, delay);
-        });
+  async function fetchGet(url) {
+    const resp = await fetch(url);
+    if (!resp.ok) {
+      throw new Error(`Download error ${resp.status} (${resp.statusText}): ${await resp.text()}`);
     }
-})().catch(error => {
-    alert(`Failed to load Teletál Assistant: ${error}`);
-});
+    return await resp.text();
+  }
+
+  async function sleep(delay) {
+    return new Promise(resolve => {
+      setTimeout(resolve, delay);
+    });
+  }
+})();
