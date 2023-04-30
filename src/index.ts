@@ -1,4 +1,6 @@
 import * as $ from 'jquery';
+
+import { fromEvent, throttleTime } from 'rxjs';
 import UIkit from 'uikit';
 import { evaluateCardText } from './logic';
 import { LikeLevel, UserConfig } from './userconfig';
@@ -130,6 +132,12 @@ function mainWithUserConfig(uc: UserConfig) {
     if (['1', '2'].includes(key as any)) {
       checkAllVisibleFoods(Number(key));
     }
+  });
+
+  fromEvent(window, 'scroll').pipe(
+    throttleTime(1000, undefined, { leading: false, trailing: true })
+  ).subscribe(() => {
+    checkAllVisibleFoods(2);
   });
 
   function checkAllVisibleFoods(acceptanceLevel) {

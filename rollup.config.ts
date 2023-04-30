@@ -1,5 +1,6 @@
 import typescript from '@rollup/plugin-typescript';
-import {RollupOptions} from "rollup";
+import { RollupOptions } from 'rollup';
+import nodeResolve from 'rollup-plugin-node-resolve';
 
 export default {
   input: 'src/index.ts',
@@ -20,5 +21,8 @@ export default {
       }
     },
   },
-  plugins: [typescript()],
+  plugins: [
+    typescript(),
+    nodeResolve(),
+  ],
 } satisfies RollupOptions;
