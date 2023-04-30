@@ -1371,6 +1371,39 @@
         return false;
     }
 
+    function items(jq) {
+        return jq.toArray().map(elem => $(elem));
+    }
+
+    function ensureStylePatches() {
+        const $rows = $('.menu-slider-logged:not(.assistant-styled)');
+        for (const $row of items($rows)) {
+            $row.attr('x-original-height', $row.css('height'));
+            const originalHeight = $row.height();
+            if (originalHeight !== undefined) {
+                $row.height(originalHeight + 8);
+            }
+            $row.addClass('assistant-styled');
+        }
+        if ($('#assistant-styles').empty()) {
+            $(document.body).append(`
+    <style id="assistant-styles">
+      .menu-slider-logged {
+        margin-bottom: 0;
+      }
+      .menu section > div .menu-cell-text.menu-cell-text {
+        border: none;
+      }
+      .menu-card {
+        border: 6px solid #eeeeee;
+        box-sizing: border-box;
+      }
+
+    </style>
+  `);
+        }
+    }
+
     const AndiConfig = {
         userNameToFind: 'Dusza Andrea',
         blacklist: [],
@@ -1422,10 +1455,6 @@
         return fn();
     }
 
-    function items(jq) {
-        return jq.toArray().map(elem => $(elem));
-    }
-
     function sleep(delayMs) {
         return new Promise(resolve => {
             setTimeout(() => {
@@ -1464,6 +1493,7 @@
         try {
             //alert('Tampermonkey script started...');
             console.log('Tampermonkey script started...');
+            ensureStylePatches();
             const uc = getCurrentUserConfig();
             if (uc === null || uc === undefined) {
                 insertFeedbackText('Tampermonkey script will NOT run. Could not identify user.');

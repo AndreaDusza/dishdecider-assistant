@@ -3,6 +3,8 @@
     "strict": true,
     "target": "ESNext",
     "noImplicitAny": false,
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "importHelpers": true,
+    "allowSyntheticDefaultImports": true
   }
 }

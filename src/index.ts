@@ -1,8 +1,9 @@
-import * as $ from 'jquery';
+import $ from 'jquery';
 
 import { fromEvent, throttleTime } from 'rxjs';
 import UIkit from 'uikit';
 import { evaluateCardText } from './logic';
+import { ensureStylePatches } from './styles';
 import { LikeLevel, UserConfig } from './userconfig';
 import { AndiConfig } from './userconfig.andi';
 import { HegeConfig } from './userconfig.hege';
@@ -17,7 +18,7 @@ function main() {
   try {
     //alert('Tampermonkey script started...');
     console.log('Tampermonkey script started...');
-
+    ensureStylePatches();
     const uc = getCurrentUserConfig();
     if (uc === null || uc === undefined) {
       insertFeedbackText('Tampermonkey script will NOT run. Could not identify user.');
@@ -135,7 +136,7 @@ function mainWithUserConfig(uc: UserConfig) {
   });
 
   fromEvent(window, 'scroll').pipe(
-    throttleTime(1000, undefined, { leading: false, trailing: true })
+    throttleTime(1000, undefined, { leading: false, trailing: true }),
   ).subscribe(() => {
     checkAllVisibleFoods(2);
   });

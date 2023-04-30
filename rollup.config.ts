@@ -1,6 +1,6 @@
+import nodeResolve from '@rollup/plugin-node-resolve';
 import typescript from '@rollup/plugin-typescript';
 import { RollupOptions } from 'rollup';
-import nodeResolve from 'rollup-plugin-node-resolve';
 
 export default {
   input: 'src/index.ts',
@@ -15,7 +15,7 @@ export default {
     interop: dep => {
       switch (dep) {
         case 'jquery':
-          return 'esModule';
+          return 'default';
         default:
           return 'compat';
       }
@@ -23,6 +23,8 @@ export default {
   },
   plugins: [
     typescript(),
-    nodeResolve(),
+    nodeResolve({
+      resolveOnly: ["rxjs"],
+    }),
   ],
 } satisfies RollupOptions;
