@@ -4,7 +4,12 @@ import { evaluateCardText } from './logic';
 import { LikeLevel, UserConfig } from './userconfig';
 import { AndiConfig } from './userconfig.andi';
 import { HegeConfig } from './userconfig.hege';
-import { UnreachableCaseError } from './utils';
+import { iife } from './utils/iife';
+import * as jqex from './utils/jquery-ex';
+import { poll, PollTimeoutError } from './utils/poll';
+import { sleep } from './utils/sleep';
+import { unique } from './utils/unique';
+import { UnreachableCaseError } from './utils/unreachable';
 
 function main() {
   try {
@@ -20,7 +25,7 @@ function main() {
         + 'When pressing key 1/2, every visible item\'s title will be evaluated. Results will be indicated by color code / opacity.<br/> '
         + 'Ingredients check only happens when an item is added to the basket.<br/>');
     }
-    runWithUserConfig(uc);
+    mainWithUserConfig(uc);
   } catch (error) {
     console.error('Initialization error', error);
   }
@@ -35,93 +40,96 @@ function getCurrentUserConfig(): UserConfig | undefined {
   });
 }
 
-function runWithUserConfig(uc: UserConfig) {
-  $('body').delegate('.menu-button-plus', 'click', function (e) {
-    e.preventDefault();
+class AssistantError extends Error {}
 
-    var $elem = $(this);
-    $elem = $elem.parent();
-    $elem = $elem.parent();
-    $elem = $elem.parent();
-    console.log('Menu element tagName:', $elem.prop('tagName') + '; class: ' + $elem.attr('class'));
+async function checkIngredients(
+  $elem: JQuery,
+  uc: UserConfig,
+) {
 
-    var $infoButton = $elem.find('.menu-info-button').first();
-    console.log('Info button:' + $infoButton);
-    UIkit.toggle($infoButton).toggle();  //.click() did not work
+  console.log('Menu element tagName:', $elem.prop('tagName') + '; class: ' + $elem.attr('class'));
 
-    var modal = UIkit.modal('#info-modal');
-    setTimeout(function () {
-      if (modal.isToggled()) {
-        modal.hide();
+  const $infoButton = $elem.find('.menu-info-button').first();
+  console.log('Info button:' + $infoButton);
+  UIkit.toggle($infoButton).toggle();  //.click() did not work
+
+  await sleep(30);
+
+  UIkit.modal('#info-modal').hide();
+
+  const ingredientLabelSpans = await iife(async () => {
+    try {
+      return await poll({
+        fn: i => {
+          console.log(`Polling ${i}`);
+          //There can be multiple spans if I order a multi course menu. That's why I need a loop
+          const ingredientLabelSpans = $('span:contains("Összetevők")');
+
+          //console.log(ingredientLabelSpans.length);
+          if (ingredientLabelSpans.length >= 1) {
+            return ingredientLabelSpans;
+          }
+        },
+        timeout: 5000,
+      });
+    } catch (error) {
+      if (error instanceof PollTimeoutError) {
+        throw new AssistantError('Tampermonkey script hiba: összetevők címke hiányzik!');
       }
+      throw error;
+    }
+  });
 
-      setTimeout(function () {
+  const ingredientsString = jqex.items(ingredientLabelSpans).map(currIngredientLabelSpan => {
+    const currIngredientsString = currIngredientLabelSpan.next().text();
+    if (currIngredientsString.length < 20) {
+      throw new AssistantError('Tampermonkey script hiba: összetevők listája hiányzik / túl rövid! ');
+    }
+    return currIngredientsString + '\n\n';
+  }).join('');
 
-        //There can be multiple spans if I order a multi course menu. That's why I need a loop
-        var ingredientLabelSpans = $('span:contains("Összetevők")');
-        var ingredientsString = '';
+  const totalBlacklist = uc.blacklist.concat(uc.warnList);
+  const foundItems = unique(totalBlacklist.flatMap(item => {
+    //let regex = '[a-z ]*' + item.toLowerCase() + '[a-z ]*';
+    const regex = new RegExp('\\b[a-záéíóóöőúüű \p{L}]*' + item.toLowerCase() + '[a-záéíóóöőúüű \p{L}]*\\b', 'g');
+    return ingredientsString.toLowerCase().match(regex) ?? [];
+  }));
 
-        //console.log(ingredientLabelSpans.length);
-        if (ingredientLabelSpans.length < 1) {
-          alert('Tampermonkey script hiba: összetevők címke hiányzik! ');
-          return;
-        }
+  console.log('founditems: ' + foundItems);
 
-        ingredientLabelSpans.each(function () {
-          var currIngredientLabelSpan = $(this);
-          var currIngredientListSpan = currIngredientLabelSpan.next();
-          var currIngredientsString = currIngredientListSpan.text();
-          if (currIngredientsString.length < 20) {
-            alert('Tampermonkey script hiba: összetevők listája hiányzik / túl rövid! ');
-            return;
-          }
-          //console.log(currIngredientsString);
-          ingredientsString += currIngredientsString + '\n\n';
-        });
+  if (foundItems.length > 0) {
+    alert('FIGYELMEZTETÉS: ' + foundItems.join(', ') + '\n\n' + ingredientsString);
+    $elem.css('color', 'red');
+  } else {
+    /*if (modal.isToggled()) {
+        modal.hide();
+    }*/
+    $elem.css('color', 'green');
+  }
+}
 
-        var foundItems = [];
-        let totalBlacklist = uc.blacklist.concat(uc.warnList);
-        totalBlacklist.forEach(function (item) {
-          //let regex = '[a-z ]*' + item.toLowerCase() + '[a-z ]*';
-          let regex = new RegExp('\\b[a-záéíóóöőúüű \p{L}]*' + item.toLowerCase() + '[a-záéíóóöőúüű \p{L}]*\\b', 'g');
-          let matchObj = ingredientsString.toLowerCase().match(regex);
-          if (matchObj != null) {
-            console.log(matchObj);
-            foundItems = foundItems.concat(matchObj);
-          }
-        });
+function fireCheckIngredients($elem: JQuery, uc: UserConfig) {
+  checkIngredients($elem, uc).catch(error => {
+    if (error instanceof AssistantError) {
+      alert(error.message);
+    } else {
+      console.error(error);
+    }
+  });
+}
 
-        console.log('founditems: ' + foundItems);
-
-        if (foundItems.length > 0) {
-          foundItems = [...new Set(foundItems)]; //remove duplicates
-          alert('FIGYELMEZTETÉS: ' + foundItems.join(', ') + '\n\n' + ingredientsString);
-          $elem.css('color', 'red');
-        } else {
-          /*if (modal.isToggled()) {
-              modal.hide();
-          }*/
-          $elem.css('color', 'green');
-        }
-
-      }, 1000);  //30 ms is too small, 100 is sometimes too small, 300 looks OK but sometimes the UI freezes, 500 sometimes does not find ingredients label, is 1000 enough?
-
-    }, 30);
-
-
+function mainWithUserConfig(uc: UserConfig) {
+  $('body').on('click', '.menu-button-plus', function (e) {
+    e.preventDefault();
+    fireCheckIngredients($(this).parent().parent().parent(), uc);
     return false;
   });
 
-  $(document).keydown(function (event) {
-    if (event.which == 49) {  // 49 is the keycode for the number 1
-      checkAllVisibleFoods(1);
-    } else if (event.which == 50) {  // 50 is the keycode for the number 2
-      debugger;
-      checkAllVisibleFoods(2);
-    } else if (event.which == 51) {  // 51 is the keycode for the number 3, no purpose at the moment
-      checkAllVisibleFoods(3);
+  $(document).on('keydown', event => {
+    const { key } = event;
+    if (['1', '2'].includes(key as any)) {
+      checkAllVisibleFoods(Number(key));
     }
-
   });
 
   function checkAllVisibleFoods(acceptanceLevel) {
@@ -129,7 +137,7 @@ function runWithUserConfig(uc: UserConfig) {
     let $allVisibleFoods = $('.menu-card.uk-card-small');
     //console.log($allVisibleFoods);
     $allVisibleFoods.each(function () {
-      let $food = $(this);
+      const $food = $(this);
       const likeLevel = evaluateCardText(
         $food.text(),
         uc,
@@ -160,7 +168,7 @@ function runWithUserConfig(uc: UserConfig) {
       }
     });
   }
-};
+}
 
 function insertFeedbackText(text: string) {
   var $mainTable = $('section:contains("Reggeli")').first();
