@@ -1,5 +1,9 @@
-(function (UIkit) {
+(function (UIkit, $) {
     'use strict';
+
+    function _interopDefaultCompat (e) { return e && typeof e === 'object' && 'default' in e ? e : { default: e }; }
+
+    var UIkit__default = /*#__PURE__*/_interopDefaultCompat(UIkit);
 
     const FruitsRegex = 'gyümölcs|alma|körte|barack|szilva|cseresznye|málna|eper|meggy|citrom|narancs|szőlő|'
         + 'dinnye|kivi|banán|ananász|datolya|mangó|szeder|ribizli|áfonya|'
@@ -149,8 +153,8 @@
             console.log('Menu element tagName:', $elem.prop('tagName') + '; class: ' + $elem.attr('class'));
             var $infoButton = $elem.find('.menu-info-button').first();
             console.log('Info button:' + $infoButton);
-            UIkit.toggle($infoButton).toggle(); //.click() did not work
-            var modal = UIkit.modal('#info-modal');
+            UIkit__default.default.toggle($infoButton).toggle(); //.click() did not work
+            var modal = UIkit__default.default.modal('#info-modal');
             setTimeout(function () {
                 if (modal.isToggled()) {
                     modal.hide();
@@ -261,4 +265,4 @@
     }
     main();
 
-})(UIkit);
+})(UIkit, $);

@@ -29,5 +29,4 @@
     }
     return await resp.text();
   }
-
 })();

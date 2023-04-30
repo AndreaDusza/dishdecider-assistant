@@ -1,9 +1,10 @@
-import { evaluateCardText } from "./logic";
-import { LikeLevel, UserConfig } from "./userconfig";
-import { AndiConfig } from "./userconfig.andi";
-import { HegeConfig } from "./userconfig.hege";
+import {evaluateCardText} from "./logic";
+import {LikeLevel, UserConfig} from "./userconfig";
+import {AndiConfig} from "./userconfig.andi";
+import {HegeConfig} from "./userconfig.hege";
+import {UnreachableCaseError} from "./utils";
 import UIkit from 'uikit';
-import { UnreachableCaseError } from "./utils";
+import * as $ from 'jquery';
 
 function main() {
     try {
@@ -22,7 +23,7 @@ function main() {
         runWithUserConfig(uc);
     } catch (error) {
         console.error("Initialization error", error);
-    } 
+    }
 }
 
 

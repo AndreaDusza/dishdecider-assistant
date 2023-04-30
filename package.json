@@ -1,9 +1,9 @@
 {
   "scripts": {
-    "dev": "concurrently --kill-others \"node scripts/server.mjs\" \"rollup --config rollup.config.mjs --watch\"",
+    "dev": "concurrently --kill-others \"node scripts/server.mjs\" \"npm run compile -- --watch\"",
     "test": "jest",
     "test:watch": "jest --watch",
-    "compile": "rollup --config rollup.config.mjs"
+    "compile": "rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript"
   },
   "devDependencies": {
     "@rollup/plugin-typescript": "^11.1.0",
