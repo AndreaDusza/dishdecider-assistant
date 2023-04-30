@@ -1,4 +1,4 @@
-(function (UIkit, $) {
+(function ($, UIkit) {
     'use strict';
 
     function _interopDefaultCompat (e) { return e && typeof e === 'object' && 'default' in e ? e : { default: e }; }
@@ -64,7 +64,7 @@
     }
 
     const AndiConfig = {
-        userNameToFind: "Dusza Andrea",
+        userNameToFind: 'Dusza Andrea',
         blacklist: [],
         warnList: [],
         blacklistExceptions: [],
@@ -75,7 +75,7 @@
     };
 
     const HegeConfig = {
-        userNameToFind: "Hegedűs Tamás László",
+        userNameToFind: 'Hegedűs Tamás László',
         blacklist: [
             'lazac', 'harcsa', 'hekk', 'halfilé', 'halrud', 'rákragu',
             'tonhal', 'szardínia',
@@ -85,10 +85,10 @@
             'zúza',
             'ceruzabab', 'héjas zöldborsó',
         ],
-        warnList: ['hal', 'rák', 'máj',],
-        blacklistExceptions: ['[^a-z]dhal', 'kagylótészta', 'kultúrák',],
+        warnList: ['hal', 'rák', 'máj'],
+        blacklistExceptions: ['[^a-z]dhal', 'kagylótészta', 'kultúrák'],
         mehList: ['tarhonya', 'főzelék', 'zöldbab', 'csirkeszárny',
-            'wok zöldség', 'fahéj',],
+            'wok zöldség', 'fahéj'],
         favList1: ['kijevi', 'brassói', 'lyoni', 'floridai', 'borzas',
             'szűz', 'chilis bab',
             '^(?!.*leves).*(tepsis|házi|falusi|tejföl).*(burgony|krumpli)(?!püré)',
@@ -112,7 +112,7 @@
 
     class UnreachableCaseError extends Error {
         constructor(value) {
-            super("Unreachable case: " + value);
+            super('Unreachable case: ' + value);
         }
     }
 
@@ -122,18 +122,18 @@
             console.log('Tampermonkey script started...');
             const uc = getCurrentUserConfig();
             if (uc === null || uc === undefined) {
-                insertFeedbackText("Tampermonkey script will NOT run. Could not identify user.");
+                insertFeedbackText('Tampermonkey script will NOT run. Could not identify user.');
                 return;
             }
             else {
-                insertFeedbackText("Tampermonkey script will run based on the preferences of " + uc.userNameToFind + ".<br/> "
-                    + "When pressing key 1/2, every visible item's title will be evaluated. Results will be indicated by color code / opacity.<br/> "
-                    + "Ingredients check only happens when an item is added to the basket.<br/>");
+                insertFeedbackText('Tampermonkey script will run based on the preferences of ' + uc.userNameToFind + '.<br/> '
+                    + 'When pressing key 1/2, every visible item\'s title will be evaluated. Results will be indicated by color code / opacity.<br/> '
+                    + 'Ingredients check only happens when an item is added to the basket.<br/>');
             }
             runWithUserConfig(uc);
         }
         catch (error) {
-            console.error("Initialization error", error);
+            console.error('Initialization error', error);
         }
     }
     function getCurrentUserConfig() {
@@ -165,7 +165,7 @@
                     var ingredientsString = '';
                     //console.log(ingredientLabelSpans.length);
                     if (ingredientLabelSpans.length < 1) {
-                        alert("Tampermonkey script hiba: összetevők címke hiányzik! ");
+                        alert('Tampermonkey script hiba: összetevők címke hiányzik! ');
                         return;
                     }
                     ingredientLabelSpans.each(function () {
@@ -173,7 +173,7 @@
                         var currIngredientListSpan = currIngredientLabelSpan.next();
                         var currIngredientsString = currIngredientListSpan.text();
                         if (currIngredientsString.length < 20) {
-                            alert("Tampermonkey script hiba: összetevők listája hiányzik / túl rövid! ");
+                            alert('Tampermonkey script hiba: összetevők listája hiányzik / túl rövid! ');
                             return;
                         }
                         //console.log(currIngredientsString);
@@ -183,14 +183,14 @@
                     let totalBlacklist = uc.blacklist.concat(uc.warnList);
                     totalBlacklist.forEach(function (item) {
                         //let regex = '[a-z ]*' + item.toLowerCase() + '[a-z ]*';
-                        let regex = new RegExp("\\b[a-záéíóóöőúüű \p{L}]*" + item.toLowerCase() + "[a-záéíóóöőúüű \p{L}]*\\b", "g");
+                        let regex = new RegExp('\\b[a-záéíóóöőúüű \p{L}]*' + item.toLowerCase() + '[a-záéíóóöőúüű \p{L}]*\\b', 'g');
                         let matchObj = ingredientsString.toLowerCase().match(regex);
                         if (matchObj != null) {
                             console.log(matchObj);
                             foundItems = foundItems.concat(matchObj);
                         }
                     });
-                    console.log("founditems: " + foundItems);
+                    console.log('founditems: ' + foundItems);
                     if (foundItems.length > 0) {
                         foundItems = [...new Set(foundItems)]; //remove duplicates
                         alert('FIGYELMEZTETÉS: ' + foundItems.join(', ') + '\n\n' + ingredientsString);
@@ -219,7 +219,7 @@
             }
         });
         function checkAllVisibleFoods(acceptanceLevel) {
-            console.log("Running checkAllVisibleFoods()");
+            console.log('Running checkAllVisibleFoods()');
             let $allVisibleFoods = $('.menu-card.uk-card-small');
             //console.log($allVisibleFoods);
             $allVisibleFoods.each(function () {
@@ -259,10 +259,10 @@
         $newDiv.css({
             'width': '50%',
             'margin-left': 'auto',
-            'margin-right': 'auto' // center the div horizontally
+            'margin-right': 'auto', // center the div horizontally
         });
         $newDiv.insertBefore($mainTable);
     }
     main();
 
-})(UIkit, $);
+})($, UIkit);
