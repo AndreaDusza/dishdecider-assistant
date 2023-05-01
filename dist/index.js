@@ -1478,7 +1478,7 @@
         warnList: [],
         blacklistExceptions: [],
         mehList: ['tarhonya'],
-        favList1: ['juhtúró', 'camembert', 'grillezett sajt', 'grill sajt', 'tápiókapuding', 'rák', 'lazac'],
+        favList1: ['juhtúró', 'camembert', 'grill.{0,10}sajt', 'tápiókapuding', 'garnéla', 'lazac'],
         favList2: ['aszalt paradicsom'],
         testingList: [],
     };
@@ -1583,17 +1583,7 @@
             //alert('Tampermonkey script started...');
             console.log('Tampermonkey script started...');
             const uc = getCurrentUserConfig();
-            if (location.href.includes('https://www.teletal.hu')) {
-                if (uc === undefined) {
-                    insertFeedbackText('Tampermonkey script will NOT run. Could not identify user.');
-                    return;
-                }
-                else {
-                    insertFeedbackText(`Tampermonkey script will run based on the preferences of ${uc.name}.<br/> `
-                        + 'When pressing key 1/2, every visible item\'s title will be evaluated. Results will be indicated by color code / opacity.<br/> '
-                        + 'Ingredients check only happens when an item is added to the basket.<br/>');
-                }
-            }
+            insertFeedbackText(uc);
             console.log(`Food Order Assistant - user name: ${uc.name}`);
             console.log('Food Order Assistant - user preferences:', uc.config);
             mainWithUserConfig(uc);
@@ -1607,8 +1597,7 @@
         const UserConfigs = [...storedUserConfigs, HegeConfig, AndiConfig];
         for (const config of UserConfigs) {
             for (const name of config.userNamesToFind) {
-                const userNameSpans = $$1(`*:contains(${CSS.escape(name)})`);
-                if (userNameSpans.length > 0) {
+                if (anyElementinTheDomContainsText(name)) {
                     return { name, config };
                 }
             }
@@ -1717,28 +1706,10 @@
         }
         function checkAllVisibleFoods(acceptanceLevel) {
             console.log('Running checkAllVisibleFoods()');
-            let $allVisibleFoods;
-            if (location.href.includes('https://www.teletal.hu')) {
-                $allVisibleFoods = $$1('.menu-card.uk-card-small'); //looks great
-            }
-            else if (location.href.includes('https://pizzaforte.hu')) {
-                $allVisibleFoods = $$1('.product'); //looks great
-            }
-            else if (location.href.includes('https://wolt.com')) {
-                $allVisibleFoods = $$1('.sc-8c9b94e6-2'); //opacity change works, but no border
-            }
-            else if (location.href.includes('https://app.ordit.hu')) {
-                $allVisibleFoods = $$1('.food-card'); //looks OK
-            }
-            else if (location.href.includes('https://www.foodora.hu')) {
-                $allVisibleFoods = $$1('.product-button-overlay'); //NOT working at all
-                //TODO: handle the fact that food name is in aria-label. The value of .text() is empty
-            }
-            else {
-                throw new AssistantError('Assistant error: Unknown URL ' + location.href);
-            }
-            console.log('Number of visible food items: ' + $allVisibleFoods.length + ', avg text() length: ' + avgTextLength($allVisibleFoods));
-            for (const $food of jxItems($allVisibleFoods)) {
+            insertFeedbackText(uc);
+            let $allVisibleFoodCardObjects = determineFoodCardsObject(location.href);
+            console.log('Number of visible food items: ' + $allVisibleFoodCardObjects.length + ', avg text() length: ' + avgTextLength($allVisibleFoodCardObjects));
+            for (const $food of jxItems($allVisibleFoodCardObjects)) {
                 const foodText = $food.text();
                 const likeLevel = evaluateCardText(foodText, uc.config, acceptanceLevel);
                 switch (foodText) {
@@ -1753,17 +1724,71 @@
             }
         }
     }
-    function insertFeedbackText(text) {
-        var $mainTable = $$1('section:contains("Reggeli")').first();
-        //var $mainTable = $('table:contains("Reggeli")').first();
-        //var $mainTable = $('#etlap');
+    function determineFoodCardsObject(url) {
+        if (url.includes('https://www.teletal.hu')) {
+            return $$1('.menu-card.uk-card-small'); //looks great
+        }
+        else if (url.includes('https://pizzaforte.hu')) {
+            return $$1('.product'); //looks great
+        }
+        else if (url.includes('https://wolt.com')) {
+            return $$1('.sc-8c9b94e6-2'); //opacity change works, but no border
+        }
+        else if (url.includes('https://app.ordit.hu')) {
+            return $$1('.food-card'); //looks OK
+        }
+        else if (url.includes('https://www.foodora.hu')) {
+            return $$1('.product-button-overlay'); //NOT working at all
+            //TODO: handle the fact that food name is in aria-label. The value of .text() is empty
+        }
+        else {
+            throw new AssistantError('Assistant error: Unknown URL ' + url);
+        }
+    }
+    function determineMainTableElement(url) {
+        if (url.includes('https://www.teletal.hu')) {
+            return $$1('section:contains("Reggeli")').first();
+        }
+        else if (url.includes('https://pizzaforte.hu')) {
+            return $$1('.container.content-top').first();
+        }
+        else {
+            console.log('determineMainTableElement not implemented for URL ' + url);
+        }
+    }
+    function insertFeedbackText(uc) {
+        var $mainTable = determineMainTableElement(location.href);
+        if ($mainTable === undefined)
+            return;
+        let feedbackText = (uc === undefined) ?
+            'Food Order Assistant Info: Tampermonkey script will NOT run. Could not identify user.' :
+            `Food Order Assistant Info: Tampermonkey script is running based on the preferences of ${uc.name}.<br/> `
+                + 'When pressing key 1/2, every visible item\'s title will be evaluated. Results will be indicated by color code / opacity.<br/> ';
+        if (uc === undefined)
+            return;
+        if (location.href.includes('https://www.teletal.hu')) {
+            feedbackText += 'Ingredients check only happens when an item is added to the basket.<br/>';
+        }
+        insertFeedbackTextBeforeElementIfNeeded($mainTable, feedbackText);
+    }
+    function insertFeedbackTextBeforeElementIfNeeded($mainTable, text) {
+        //This only works if the first 30 characters of the text are distinctive, and it has nothing to escape
+        if (anyElementinTheDomContainsText(text.substring(0, 30))) {
+            return;
+        }
+        console.log('Inserting Assistant Information text...');
         const $newDiv = $$1('<div><br/>' + text + '</div>');
         $newDiv.css({
             'width': '50%',
             'margin-left': 'auto',
-            'margin-right': 'auto', // center the div horizontally
+            'margin-right': 'auto',
+            'background-color': 'white',
+            'color': 'black'
         });
         $newDiv.insertBefore($mainTable);
+    }
+    function anyElementinTheDomContainsText(text) {
+        return $$1(`*:contains(${CSS.escape(text)})`).length > 0;
     }
     main();
 

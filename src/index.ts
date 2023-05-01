@@ -22,16 +22,8 @@ function main() {
     //alert('Tampermonkey script started...');
     console.log('Tampermonkey script started...');
     const uc = getCurrentUserConfig();
-    if (location.href.includes('https://www.teletal.hu')) {
-      if (uc === undefined) {
-        insertFeedbackText('Tampermonkey script will NOT run. Could not identify user.');
-        return;
-      } else {
-        insertFeedbackText(`Tampermonkey script will run based on the preferences of ${uc.name}.<br/> `
-          + 'When pressing key 1/2, every visible item\'s title will be evaluated. Results will be indicated by color code / opacity.<br/> '
-          + 'Ingredients check only happens when an item is added to the basket.<br/>');
-      }
-    }
+    insertFeedbackText(uc);
+
     console.log(`Food Order Assistant - user name: ${uc.name}`);
     console.log('Food Order Assistant - user preferences:', uc.config);
     mainWithUserConfig(uc);
@@ -47,8 +39,7 @@ function getCurrentUserConfig(): CurrentUserConfig {
   const UserConfigs = [...storedUserConfigs, HegeConfig, AndiConfig];
   for (const config of UserConfigs) {
     for (const name of config.userNamesToFind) {
-      const userNameSpans = $(`*:contains(${CSS.escape(name)})`);
-      if (userNameSpans.length > 0) {
+      if (anyElementinTheDomContainsText(name)){
         return { name, config };
       }
     }
@@ -179,26 +170,12 @@ function mainWithUserConfig(uc: CurrentUserConfig) {
 
   function checkAllVisibleFoods(acceptanceLevel) {
     console.log('Running checkAllVisibleFoods()');
-    let $allVisibleFoods;
+    insertFeedbackText(uc);
+    let $allVisibleFoodCardObjects = determineFoodCardsObject(location.href);
 
-    if (location.href.includes('https://www.teletal.hu')) {
-      $allVisibleFoods = $('.menu-card.uk-card-small');  //looks great
-    } else if (location.href.includes('https://pizzaforte.hu')) {
-      $allVisibleFoods = $('.product');                  //looks great
-    } else if (location.href.includes('https://wolt.com')) {
-      $allVisibleFoods = $('.sc-8c9b94e6-2');            //opacity change works, but no border
-    } else if (location.href.includes('https://app.ordit.hu')) {
-      $allVisibleFoods = $('.food-card');                //looks OK
-    } else if (location.href.includes('https://www.foodora.hu')) {
-      $allVisibleFoods = $('.product-button-overlay');   //NOT working at all
-      //TODO: handle the fact that food name is in aria-label. The value of .text() is empty
-    } else {
-      throw new AssistantError('Assistant error: Unknown URL ' + location.href);
-    }
+    console.log('Number of visible food items: ' + $allVisibleFoodCardObjects.length + ', avg text() length: ' + avgTextLength($allVisibleFoodCardObjects));
 
-    console.log('Number of visible food items: ' + $allVisibleFoods.length + ', avg text() length: ' + avgTextLength($allVisibleFoods));
-
-    for (const $food of jxItems($allVisibleFoods)) {
+    for (const $food of jxItems($allVisibleFoodCardObjects)) {
       const foodText = $food.text();
 
       const likeLevel = evaluateCardText(
@@ -219,10 +196,60 @@ function mainWithUserConfig(uc: CurrentUserConfig) {
   }
 }
 
-function insertFeedbackText(text: string) {
-  var $mainTable = $('section:contains("Reggeli")').first();
-  //var $mainTable = $('table:contains("Reggeli")').first();
-  //var $mainTable = $('#etlap');
+function determineFoodCardsObject(url: string){
+  if (url.includes('https://www.teletal.hu')) {
+    return $('.menu-card.uk-card-small');  //looks great
+  } else if (url.includes('https://pizzaforte.hu')) {
+    return $('.product');                  //looks great
+  } else if (url.includes('https://wolt.com')) {
+    return $('.sc-8c9b94e6-2');            //opacity change works, but no border
+  } else if (url.includes('https://app.ordit.hu')) {
+    return $('.food-card');                //looks OK
+  } else if (url.includes('https://www.foodora.hu')) {
+    return $('.product-button-overlay');   //NOT working at all
+    //TODO: handle the fact that food name is in aria-label. The value of .text() is empty
+  } else {
+    throw new AssistantError('Assistant error: Unknown URL ' + url);
+  }
+}
+
+function determineMainTableElement(url: string){
+  if (url.includes('https://www.teletal.hu')) {
+      return $('section:contains("Reggeli")').first();
+  } else if (url.includes('https://pizzaforte.hu')) {
+      return $('.container.content-top').first();
+  } else {
+      console.log('determineMainTableElement not implemented for URL ' + url);
+  }
+}
+
+function insertFeedbackText(uc: CurrentUserConfig){
+  var $mainTable = determineMainTableElement(location.href);
+
+  if ($mainTable === undefined) return;
+
+  let feedbackText = (uc === undefined) ? 
+    'Food Order Assistant Info: Tampermonkey script will NOT run. Could not identify user.' :
+    `Food Order Assistant Info: Tampermonkey script is running based on the preferences of ${uc.name}.<br/> `
+      + 'When pressing key 1/2, every visible item\'s title will be evaluated. Results will be indicated by color code / opacity.<br/> ';
+
+  if (uc === undefined) return;
+
+  if (location.href.includes('https://www.teletal.hu')){
+    feedbackText += 'Ingredients check only happens when an item is added to the basket.<br/>';
+  }
+
+  insertFeedbackTextBeforeElementIfNeeded($mainTable, feedbackText);
+}
+
+function insertFeedbackTextBeforeElementIfNeeded($mainTable: JQuery, text: string) {
+
+  //This only works if the first 30 characters of the text are distinctive, and it has nothing to escape
+  if (anyElementinTheDomContainsText(text.substring(0,30))){
+    return;
+  }
+
+  console.log('Inserting Assistant Information text...');
 
   const $newDiv = $('<div><br/>' + text + '</div>');
 
@@ -230,9 +257,15 @@ function insertFeedbackText(text: string) {
     'width': '50%', // set a fixed width for the div
     'margin-left': 'auto', // center the div horizontally
     'margin-right': 'auto', // center the div horizontally
+    'background-color': 'white',
+    'color': 'black'
   });
 
   $newDiv.insertBefore($mainTable);
+}
+
+function anyElementinTheDomContainsText(text: string){
+  return $(`*:contains(${CSS.escape(text)})`).length > 0;
 }
 
 main();
