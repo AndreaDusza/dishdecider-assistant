@@ -1,7 +1,7 @@
 import { UserConfig } from './userconfig';
 
 export const TestUserConfig = {
-    userNamesToFind: ['Test User - Custom'],
+    userNamesToFind: ['Hardcoded Default Test User'],
     blacklist: ['mushroom', 'salmon', 'shell', '[^\p{L}]egg[^\p{L}]', 'gomb(a|á)','lazac','kagyló', '[^\p{L}]hal[^\p{L}]'],
     warnList: ['fish', 'egg', 'hal'],
     blacklistExceptions: ['shell pasta', 'fish sauce', 'eggplant', 'kagylótészt(a|á)', 'halszósz'],

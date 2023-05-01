@@ -1526,7 +1526,7 @@
     };
 
     const TestUserConfig = {
-        userNamesToFind: ['Test User - Custom'],
+        userNamesToFind: ['Hardcoded Default Test User'],
         blacklist: ['mushroom', 'salmon', 'shell', '[^\p{L}]egg[^\p{L}]', 'gomb(a|á)', 'lazac', 'kagyló', '[^\p{L}]hal[^\p{L}]'],
         warnList: ['fish', 'egg', 'hal'],
         blacklistExceptions: ['shell pasta', 'fish sauce', 'eggplant', 'kagylótészt(a|á)', 'halszósz'],
@@ -1594,9 +1594,6 @@
                         + 'Ingredients check only happens when an item is added to the basket.<br/>');
                 }
             }
-            else if (uc === undefined) {
-                throw new AssistantError('Tampermonkey hiba: alapértelmezett felhasználó nincs definiálva');
-            }
             console.log(`Food Order Assistant - user name: ${uc.name}`);
             console.log('Food Order Assistant - user preferences:', uc.config);
             mainWithUserConfig(uc);
@@ -1607,7 +1604,7 @@
     }
     function getCurrentUserConfig() {
         const storedUserConfigs = loadUserConfigsFromStorage();
-        const UserConfigs = [AndiConfig, HegeConfig, ...storedUserConfigs];
+        const UserConfigs = [...storedUserConfigs, HegeConfig, AndiConfig];
         for (const config of UserConfigs) {
             for (const name of config.userNamesToFind) {
                 const userNameSpans = $$1(`*:contains(${CSS.escape(name)})`);
@@ -1620,11 +1617,11 @@
     }
     function getDefaultUserConfig(storedUserConfigs) {
         if (storedUserConfigs.length <= 0) {
-            return { name: TestUserConfig.userNamesToFind[0] ?? 'Test User Default', config: TestUserConfig };
+            return { name: TestUserConfig.userNamesToFind[0], config: TestUserConfig };
         }
         const config = storedUserConfigs[0];
-        const name = config.userNamesToFind[0] ?? 'Unknown User';
-        return { name, config: TestUserConfig };
+        const name = config.userNamesToFind[0] ?? 'Unnamed User';
+        return { name, config };
     }
     function loadUserConfigsFromStorage() {
         const setting = localStorage.getItem('food-order-assistant-config');
@@ -1659,7 +1656,7 @@
             }
             catch (error) {
                 if (error instanceof PollTimeoutError) {
-                    throw new AssistantError('Tampermonkey script hiba: összetevők címke hiányzik!');
+                    throw new AssistantError('Assistant error: Ingredients label missing!');
                 }
                 throw error;
             }
@@ -1667,25 +1664,21 @@
         const ingredientsString = jxItems(ingredientLabelSpans).map(currIngredientLabelSpan => {
             const currIngredientsString = currIngredientLabelSpan.next().text();
             if (currIngredientsString.length < 20) {
-                throw new AssistantError('Tampermonkey script hiba: összetevők listája hiányzik / túl rövid! ');
+                throw new AssistantError('Assistant error: Ingredients label missing or too short!');
             }
             return currIngredientsString + '\n\n';
         }).join('');
         const totalBlacklist = uc.blacklist.concat(uc.warnList);
         const foundItems = unique(totalBlacklist.flatMap(item => {
-            //let regex = '[a-z ]*' + item.toLowerCase() + '[a-z ]*';
             const regex = new RegExp('\\b[a-záéíóóöőúüű \p{L}]*' + item.toLowerCase() + '[a-záéíóóöőúüű \p{L}]*\\b', 'g');
             return ingredientsString.toLowerCase().match(regex) ?? [];
         }));
         console.log('founditems: ' + foundItems);
         if (foundItems.length > 0) {
-            alert('FIGYELMEZTETÉS: ' + foundItems.join(', ') + '\n\n' + ingredientsString);
+            alert('WARNING: ' + foundItems.join(', ') + '\n\n' + ingredientsString);
             $elem.css('color', 'red');
         }
         else {
-            /*if (modal.isToggled()) {
-                modal.hide();
-            }*/
             $elem.css('color', 'green');
         }
     }
@@ -1742,7 +1735,7 @@
                 //TODO: handle the fact that food name is in aria-label. The value of .text() is empty
             }
             else {
-                throw new AssistantError('Tampermonkey script hiba: ismeretlen URL ' + location.href);
+                throw new AssistantError('Assistant error: Unknown URL ' + location.href);
             }
             console.log('Number of visible food items: ' + $allVisibleFoods.length + ', avg text() length: ' + avgTextLength($allVisibleFoods));
             for (const $food of jxItems($allVisibleFoods)) {

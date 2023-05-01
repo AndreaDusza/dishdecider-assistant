@@ -3,6 +3,7 @@
 'hal' / 'dhal' (indiai étel) / 'kardhal'
 'rák' / 'oltóenzim-kultúrák'
 'keszeg' / 'lepkeszegmag'
+'egg' / 'meggyes rétes'
 
 http://center-food.com/etlap : this does not work because it is a pdf, not html
 

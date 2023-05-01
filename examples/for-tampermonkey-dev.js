@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         Teletal Assistant Dev
-// @namespace    http://tampermonkey.net/
+// @name         Food Order Assistant Dev
+// @namespace    https://github.com/AndreaDusza/teletal-assistant
 // @version      0.1
 // @description  Indicate unwanted and favorite foods or ingredients
-// @author       Andrea Dusza, Tamas Laszlo Hegedus
+// @author       Andrea Dusza, Tamas Laszlo Hegedus, ChatGPT
 // @match        https://www.teletal.hu/etlap*
 // @match        https://pizzaforte.hu/*
 // @match        https://wolt.com/*
@@ -13,25 +13,16 @@
 // @grant        none
 // ==/UserScript==
 
-const USER_CONFIS = [{
-  userNamesToFind: ['John Doe'],
-  blacklist: [],
-  warnList: [],
-  blacklistExceptions: [],
-  mehList: ['tarhonya'],
-  favList1: ['juhtúró', 'camembert', 'grillezett sajt', 'grill sajt', 'tápiókapuding', 'rák', 'lazac'],
-  favList2: ['aszalt paradicsom'],
-  testingList: [],
-}];
+const USER_CONFIGS = [];
 
 (() => {
   'use strict';
-  localStorage.setItem('food-order-assistant-config', JSON.stringify(USER_CONFIS));
+  localStorage.setItem('food-order-assistant-config', JSON.stringify(USER_CONFIGS));
   const URL_DEV = 'http://localhost:8078/index.js';
 
   main().catch(error => {
-    alert(`Teletál Asszisztens betöltése sikertelen`);
-    console.error(`Failed to load Teletál Assistant`, error);
+    alert(`Failed to load Food Order Assistant`);
+    console.error(`Failed to load Food Order Assistant`, error);
   });
 
   async function main() {

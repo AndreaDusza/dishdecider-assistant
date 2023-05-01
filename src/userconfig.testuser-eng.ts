@@ -1,10 +1,21 @@
 export const TestUserEnglishConfig = {
-    userNamesToFind: 'Test User - English',
+    userNamesToFind: ['Mr. John Henry Doe', 'jdoe_1976@something.com'],
     blacklist: ['mushroom', 'salmon', 'shell', '[^\p{L}]egg[^\p{L}]'],
     warnList: ['fish', 'egg'],
     blacklistExceptions: ['shell pasta', 'fish sauce', 'eggplant'],
-    mehList: ['shell pasta', 'fish sauce', 'eggplant'],
+    mehList: ['brussels sprout', 'chicken wings'],
     favList1: ['chicken'],
     favList2: ['onion'],
-    testingList: [/*'a'*/],
+    testingList: [],
+};
+
+export const TestUserEnglish2Config = {
+    userNamesToFind: ['Mrs. Jane Ursula Doe', 'janeursuladoe@example.com'],
+    blacklist: ['chicken', 'pork', 'beef', 'meat'],
+    warnList: ['ham'],
+    blacklistExceptions: ['hamburger', 'without', 'vegan', 'vegetarian'],
+    mehList: [],
+    favList1: ['vegan'],
+    favList2: ['vegetarian'],
+    testingList: [],
 };
