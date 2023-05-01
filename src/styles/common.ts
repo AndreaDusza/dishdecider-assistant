@@ -3,6 +3,7 @@ import { UnreachableCaseError } from '../utils/unreachable';
 
 export function applyHighlightToCellStyle($food: JQuery, likeLevel: LikeLevel) {
   myApplyCss($food, getStyleForLevel(likeLevel));
+  $food.addClass('fo-assistant-styled')
 }
 
 function myApplyCss(

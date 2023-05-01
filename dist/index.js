@@ -1382,6 +1382,7 @@
 
     function applyHighlightToCellStyle($food, likeLevel) {
         myApplyCss($food, getStyleForLevel(likeLevel));
+        $food.addClass('fo-assistant-styled');
     }
     function myApplyCss($elem, { children, ...rest }) {
         $elem.css(rest);
@@ -1437,12 +1438,12 @@
             $row.attr('x-original-height', $row.css('height') ?? '');
             $row.css('height', '');
         }
-        const $newCells = $$1('.menu-card:not(.assistant-styled)');
+        const $newCells = $$1('.menu-card:not(.fo-assistant-styled)');
         for (const $cell of jxItems($newCells)) {
             jxItems($cell.children('> .menu-cell-text')).forEach((text, i) => {
                 text.css('flex', i === 0 ? '1 1 auto' : '');
             });
-            $cell.addClass('.assistant-styled');
+            $cell.addClass('.fo-assistant-styled');
         }
         if ($$1('#assistant-teletal-styles').length === 0) {
             $$1(document.body).append(`
@@ -1453,10 +1454,14 @@
           display: flex;
           flex-flow: row nowrap;
         }
-        /* artificially increase specificity by duplicating the same class over enough times */
+        .menu .menu-card.menu-card.menu-card.fo-assistant-styled {
+          border-style: solid;
+        }
         .menu .menu-card.menu-card.menu-card {
-          border: 6px solid #eeeeee;
-          border-radius: 6px;
+          /* artificially increase specificity by duplicating the same class over enough times */
+          border: 2px dashed #a0a020;
+          border-bottom: 6px dashed #a0a020;
+          /* border-radius: 6px; */
           box-shadow: 1px 1px 4px 1px rgba(0, 0, 0, 0.4) inset;
           box-sizing: border-box;
           height: unset;
@@ -1464,8 +1469,13 @@
           flex-flow: column nowrap;
         }
         .menu .menu-cell-text.menu-cell-text.menu-cell-text.menu-cell-text.menu-cell-text {
+          /* artificially increase specificity by duplicating the same class over enough times */
           border: none;
           height: unset;
+        }
+        .menu .menu-cell-text.menu-cell-text.menu-cell-text.menu-cell-text.menu-cell-spinner {
+          /* artificially increase specificity by duplicating the same class over enough times */
+          background: none;
         }
         .menu-card > .menu-cell-text.menu-cell-text-description {
           flex: 1 1 auto;
