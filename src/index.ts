@@ -1,20 +1,20 @@
 import $ from 'jquery';
 
 import { fromEvent, throttleTime } from 'rxjs';
-import { UIkit } from './teletal';
 import { evaluateCardText } from './logic';
 import { applyHighlightToCellStyle } from './styles/common';
+import { patchPizzaforteStyles } from './styles/pizzaforte';
 import { patchTeletalStyles } from './styles/teletal';
+import { UIkit } from './teletal';
 import { LikeLevel, UserConfig } from './userconfig';
 import { AndiConfig } from './userconfig.andi';
 import { HegeConfig } from './userconfig.hege';
+import { avgTextLength } from './utils/debug';
 import { iife } from './utils/iife';
-import { jxItems } from './utils/jquery-ex';
+import { jxItems, jxNthParent } from './utils/jquery-ex';
 import { poll, PollTimeoutError } from './utils/poll';
 import { sleep } from './utils/sleep';
 import { unique } from './utils/unique';
-import { avgTextLength } from './utils/debug';
-import { UnreachableCaseError } from './utils/unreachable';
 
 function main() {
   try {
@@ -130,10 +130,11 @@ function fireCheckIngredients($elem: JQuery, uc: UserConfig) {
   });
 }
 
+
 function mainWithUserConfig(uc: UserConfig) {
   $('body').on('click', '.menu-button-plus', function (e) {
     e.preventDefault();
-    fireCheckIngredients($(this).parent().parent().parent(), uc);
+    fireCheckIngredients(jxNthParent($(this), 3), uc);
     return false;
   });
 
@@ -154,6 +155,7 @@ function mainWithUserConfig(uc: UserConfig) {
   })
   function refreshColoring() {
     patchTeletalStyles();
+    patchPizzaforteStyles();
     checkAllVisibleFoods(2);
   }
 
@@ -164,7 +166,7 @@ function mainWithUserConfig(uc: UserConfig) {
     if (location.href.includes("https://www.teletal.hu")){
       $allVisibleFoods = $('.menu-card.uk-card-small');
     } else if (location.href.includes("https://pizzaforte.hu")){
-      $allVisibleFoods = $('.product-meta');
+      $allVisibleFoods = $('.product');
     } else if (location.href.includes("https://wolt.com")){
       $allVisibleFoods = $('.sc-8c9b94e6-2');
     } else if (location.href.includes("https://app.ordit.hu")){

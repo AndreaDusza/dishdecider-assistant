@@ -1309,8 +1309,6 @@
         return throttle(function () { return duration$; }, config);
     }
 
-    const UIkit = self.UIkit;
-
     const FruitsRegex = 'gyümölcs|alma|körte|barack|szilva|cseresznye|málna|eper|szamóca|meggy|citrom|narancs|szőlő|'
         + 'dinnye|kivi|banán|ananász|datolya|mangó|szeder|ribizli|áfonya|'
         + 'barack|kaki|mandarin|karambola|kókusz|lime|pomelo|csipkebogyó|gránátalma|füge|'
@@ -1407,8 +1405,26 @@
         }
     }
 
+    function patchPizzaforteStyles() {
+        if ($$1('#assistant-pizzaforte-styles').length === 0) {
+            $$1(document.body).append(`
+      <style id="assistant-pizzaforte-styles">
+        .product {
+          border-left: 16px solid #eeeeee;
+        }
+      </style>
+    `);
+        }
+    }
+
     function jxItems(jq) {
         return jq.toArray().map(elem => $$1(elem));
+    }
+    function jxNthParent($elem, n) {
+        for (let i = 0; i < n; i++) {
+            $elem = $elem.parent();
+        }
+        return $elem;
     }
 
     function patchTeletalStyles() {
@@ -1424,9 +1440,9 @@
             });
             $cell.addClass('.assistant-styled');
         }
-        if ($$1('#assistant-styles').length === 0) {
+        if ($$1('#assistant-teletal-styles').length === 0) {
             $$1(document.body).append(`
-      <style id="assistant-styles">
+      <style id="assistant-teletal-styles">
         .menu-slider-logged, .menu-slider {
           margin-bottom: 0;
           height: unset;
@@ -1452,6 +1468,8 @@
     `);
         }
     }
+
+    const UIkit = self.UIkit;
 
     const AndiConfig = {
         userNameToFind: 'Dusza Andrea',
@@ -1506,6 +1524,16 @@
         testingList: [],
     };
 
+    function avgTextLength(elements) {
+        if (elements.length === 0)
+            return 0;
+        let totalLength = 0;
+        elements.each(function () {
+            totalLength += $(this).text().length;
+        });
+        return totalLength / elements.length;
+    }
+
     function iife(fn) {
         return fn();
     }
@@ -1536,16 +1564,6 @@
 
     function unique(items) {
         return Array.from(new Set(items));
-    }
-
-    function avgTextLength(elements) {
-        if (elements.length === 0)
-            return 0;
-        let totalLength = 0;
-        elements.each(function () {
-            totalLength += $(this).text().length;
-        });
-        return totalLength / elements.length;
     }
 
     function main() {
@@ -1652,7 +1670,7 @@
     function mainWithUserConfig(uc) {
         $$1('body').on('click', '.menu-button-plus', function (e) {
             e.preventDefault();
-            fireCheckIngredients($$1(this).parent().parent().parent(), uc);
+            fireCheckIngredients(jxNthParent($$1(this), 3), uc);
             return false;
         });
         $$1(document).on('keydown', event => {
@@ -1669,6 +1687,7 @@
         });
         function refreshColoring() {
             patchTeletalStyles();
+            patchPizzaforteStyles();
             checkAllVisibleFoods(2);
         }
         function checkAllVisibleFoods(acceptanceLevel) {
@@ -1678,7 +1697,7 @@
                 $allVisibleFoods = $$1('.menu-card.uk-card-small');
             }
             else if (location.href.includes("https://pizzaforte.hu")) {
-                $allVisibleFoods = $$1('.product-meta');
+                $allVisibleFoods = $$1('.product');
             }
             else if (location.href.includes("https://wolt.com")) {
                 $allVisibleFoods = $$1('.sc-8c9b94e6-2');

@@ -17,9 +17,9 @@ export function patchTeletalStyles() {
   }
 
 
-  if ($('#assistant-styles').length === 0) {
+  if ($('#assistant-teletal-styles').length === 0) {
     $(document.body).append(`
-      <style id="assistant-styles">
+      <style id="assistant-teletal-styles">
         .menu-slider-logged, .menu-slider {
           margin-bottom: 0;
           height: unset;
