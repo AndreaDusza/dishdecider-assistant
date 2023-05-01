@@ -12,7 +12,7 @@ Language: Hungarian/English mix.
 1. Install the Tampermonkey extension (or any other userscript manager) in your browser.
 2. Go to Tampermonkey's Dashboard. Create a new project.
 3. Copy-paste the below file in the code editor.
-   * https://github.com/AndreaDusza/teletal-assistant/blob/master/examples/for-tampermonkey.js
+   * https://github.com/AndreaDusza/dishdecider-assistant/blob/master/examples/for-tampermonkey.js
 3. In the userscript header, the '// @match' lines show which websites are supported.
 4. Save the project and make sure that both the project and the userscript manager is enabled. Then go to a supported food order website and check if the userscript is running, by opening Developer Tools and checking the console log. It should print 'Tampermonkey script started...'.
 5. In the userscript, take a look at the USER_CONFIGS variable (a sample preference configuration) but do not modify it yet. 
@@ -64,7 +64,7 @@ In case of the "real" assistant script, you can only experiment with the user pr
 1. Go to Tampermonkey's Dashboard.
 2. Disable the "real" assistant script. Otherwise, it would interfere with the learning sample script.
 3. Create another new project in Tampermonkey and copy-paste the below file in the code editor.
-   * https://raw.githubusercontent.com/AndreaDusza/teletal-assistant/master/examples/minimalCode.js
+   * https://raw.githubusercontent.com/AndreaDusza/dishdecider-assistant/master/examples/minimalCode.js
 
 In the learning sample, scrolling does not trigger the Assistant: you have to press key '2'.
    
