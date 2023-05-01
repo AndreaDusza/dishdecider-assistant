@@ -8,6 +8,7 @@ export default {
   output: {
     dir: 'dist',
     format: 'iife',
+    name: 'FoAssistant',
     globals: {
       jquery: 'CUSTOM_GLOBAL_DISABLED', // please use libs from provided.ts instead
       uikit: 'CUSTOM_GLOBAL_DISABLED', // please use libs from provided.ts instead
