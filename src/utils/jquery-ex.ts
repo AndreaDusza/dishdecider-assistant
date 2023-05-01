@@ -1,4 +1,4 @@
-import $ from 'jquery';
+import { $ } from '../provided';
 
 export function jxItems<T extends HTMLElement>(jq: JQuery<T>) {
   return jq.toArray().map(elem => $(elem));

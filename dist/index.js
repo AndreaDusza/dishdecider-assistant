@@ -1,4 +1,4 @@
-(function ($$1) {
+(function () {
     'use strict';
 
     /******************************************************************************
@@ -1371,6 +1371,9 @@
         return false;
     }
 
+    const UIkit = self.UIkit;
+    const $$1 = self.$;
+
     class UnreachableCaseError extends Error {
         constructor(value) {
             super('Unreachable case: ' + value);
@@ -1469,8 +1472,6 @@
     `);
         }
     }
-
-    const UIkit = self.UIkit;
 
     const AndiConfig = {
         userNamesToFind: ['Dusza Andrea'],
@@ -1792,4 +1793,4 @@
     }
     main();
 
-})($);
+})();

@@ -1,4 +1,4 @@
-import $ from 'jquery';
+import { $ } from '../provided';
 import { jxItems } from '../utils/jquery-ex';
 
 export function patchTeletalStyles() {

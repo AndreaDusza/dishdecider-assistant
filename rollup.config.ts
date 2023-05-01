@@ -9,17 +9,17 @@ export default {
     dir: 'dist',
     format: 'iife',
     globals: {
-      jquery: '$',
-      uikit: 'UIkit',
+      jquery: 'CUSTOM_GLOBAL_DISABLED', // please use libs from provided.ts instead
+      uikit: 'CUSTOM_GLOBAL_DISABLED', // please use libs from provided.ts instead
     },
-    interop: dep => {
-      switch (dep) {
-        case 'jquery':
-          return 'default';
-        default:
-          return 'compat';
-      }
-    },
+    //interop: dep => {
+    //  switch (dep) {
+    //    case 'jquery':
+    //      return 'default';
+    //    default:
+    //      return 'compat';
+    //  }
+    //},
   },
   plugins: [
     typescript(),

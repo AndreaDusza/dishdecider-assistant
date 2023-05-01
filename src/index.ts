@@ -1,11 +1,9 @@
-import $ from 'jquery';
-
 import { fromEvent, throttleTime } from 'rxjs';
 import { evaluateCardText } from './logic';
+import { $, UIkit } from './provided';
 import { applyHighlightToCellStyle } from './styles/common';
 import { patchPizzaforteStyles } from './styles/pizzaforte';
 import { patchTeletalStyles } from './styles/teletal';
-import { UIkit } from './teletal';
 import { LikeLevel, UserConfig } from './userconfig';
 import { AndiConfig } from './userconfig.andi';
 import { HegeConfig } from './userconfig.hege';
@@ -228,7 +226,7 @@ function insertFeedbackText(uc: CurrentUserConfig){
 
   if ($mainTable === undefined) return;
 
-  let feedbackText = (uc === undefined) ? 
+  let feedbackText = (uc === undefined) ?
     'Food Order Assistant Info: Tampermonkey script will NOT run. Could not identify user.' :
     `Food Order Assistant Info: Tampermonkey script is running based on the preferences of ${uc.name}.<br/> `
       + 'When pressing key 1/2, every visible item\'s title will be evaluated. Results will be indicated by color code / opacity.<br/> ';

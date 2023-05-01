@@ -1,4 +1,4 @@
-import $ from 'jquery';
+import { $ } from '../provided';
 
 export function patchPizzaforteStyles() {
   if ($('#assistant-pizzaforte-styles').length === 0) {
