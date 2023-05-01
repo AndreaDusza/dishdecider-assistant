@@ -17,11 +17,18 @@ export type UserConfig = {
   readonly favList2: readonly string[];
 };
 
-export const FruitsRegex = 'gyümölcs|alma|körte|barack|szilva|cseresznye|málna|eper|meggy|citrom|narancs|szőlő|'
+export const FruitsRegex = 'gyümölcs|alma|körte|barack|szilva|cseresznye|málna|eper|szamóca|meggy|citrom|narancs|szőlő|'
   + 'dinnye|kivi|banán|ananász|datolya|mangó|szeder|ribizli|áfonya|'
   + 'barack|kaki|mandarin|karambola|kókusz|lime|pomelo|csipkebogyó|gránátalma|füge|'
   + 'galagonya|hurma|kajszi|kumkvat|licsi|mangosztán|maracuja|nektarin|papaya|passiógyümölcs|'
   + 'pitahaya|pitaja|egres';
+
+export const FishSpeciesList = [
+    'ponty', 'süllő', 'harcsa', 'tokhal', 'lazac', 'pisztráng', 'tonhal', 
+    'pangasius', 'tőkehal', 'keszeg', 'szardínia', 'makréla', 'hering', 'hekk', 'sügér', 
+    'tilápia',
+    //'csuka'
+];
 
 export const LikeLevel = {
   favorite1: 'favorite1',
