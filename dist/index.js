@@ -1,9 +1,5 @@
-(function ($, UIkit) {
+(function ($$1) {
     'use strict';
-
-    function _interopDefaultCompat (e) { return e && typeof e === 'object' && 'default' in e ? e : { default: e }; }
-
-    var UIkit__default = /*#__PURE__*/_interopDefaultCompat(UIkit);
 
     /******************************************************************************
     Copyright (c) Microsoft Corporation.
@@ -1313,11 +1309,19 @@
         return throttle(function () { return duration$; }, config);
     }
 
-    const FruitsRegex = 'gyümölcs|alma|körte|barack|szilva|cseresznye|málna|eper|meggy|citrom|narancs|szőlő|'
+    const UIkit = self.UIkit;
+
+    const FruitsRegex = 'gyümölcs|alma|körte|barack|szilva|cseresznye|málna|eper|szamóca|meggy|citrom|narancs|szőlő|'
         + 'dinnye|kivi|banán|ananász|datolya|mangó|szeder|ribizli|áfonya|'
         + 'barack|kaki|mandarin|karambola|kókusz|lime|pomelo|csipkebogyó|gránátalma|füge|'
         + 'galagonya|hurma|kajszi|kumkvat|licsi|mangosztán|maracuja|nektarin|papaya|passiógyümölcs|'
         + 'pitahaya|pitaja|egres';
+    const FishSpeciesList = [
+        'ponty', 'süllő', 'harcsa', 'tokhal', 'lazac', 'pisztráng', 'tonhal',
+        'pangasius', 'tőkehal', 'keszeg', 'szardínia', 'makréla', 'hering', 'hekk', 'sügér',
+        'tilápia',
+        //'csuka'
+    ];
     const LikeLevel = {
         favorite1: 'favorite1',
         favorite2: 'favorite2',
@@ -1372,11 +1376,11 @@
     }
 
     function items(jq) {
-        return jq.toArray().map(elem => $(elem));
+        return jq.toArray().map(elem => $$1(elem));
     }
 
     function ensureStylePatches() {
-        const $rows = $('.menu-slider-logged:not(.assistant-styled)');
+        const $rows = $$1('.menu-slider-logged:not(.assistant-styled)');
         for (const $row of items($rows)) {
             $row.attr('x-original-height', $row.css('height'));
             const originalHeight = $row.height();
@@ -1385,8 +1389,8 @@
             }
             $row.addClass('assistant-styled');
         }
-        if ($('#assistant-styles').empty()) {
-            $(document.body).append(`
+        if ($$1('#assistant-styles').empty()) {
+            $$1(document.body).append(`
     <style id="assistant-styles">
       .menu-slider-logged {
         margin-bottom: 0;
@@ -1418,35 +1422,41 @@
     const HegeConfig = {
         userNameToFind: 'Hegedűs Tamás László',
         blacklist: [
-            'lazac', 'harcsa', 'hekk', 'halfilé', 'halrud', 'rákragu',
+            'halfilé', 'halszelet', 'halrud', 'rákragu', 'koktélrák',
             'tonhal', 'szardínia',
-            'garnéla', 'polip', 'tenger gyümölcs', 'tengeri gyümölcs', 'kagyló',
+            'garnéla', 'polip', 'kagyló', 'tenger gyümölcs', 'tengeri gyümölcs',
             'gomb(a|á)',
-            '(sertés|kacsa|liba|csirke)máj',
+            '(sertés|kacsa|liba|csirke|szárnyas).?máj',
             'zúza',
             'ceruzabab', 'héjas zöldborsó',
-        ],
+            'Budapest sertés', 'milánói',
+        ].concat(FishSpeciesList),
         warnList: ['hal', 'rák', 'máj'],
-        blacklistExceptions: ['[^a-z]dhal', 'kagylótészta', 'kultúrák'],
+        blacklistExceptions: ['[^a-z]dhal', 'kagylótészta', 'kultúrák', 'lepkeszegmag'],
         mehList: ['tarhonya', 'főzelék', 'zöldbab', 'csirkeszárny',
-            'wok zöldség', 'fahéj'],
+            'wok zöldség', 'fahéj', 'kávé',
+            'mátrai saláta'],
         favList1: ['kijevi', 'brassói', 'lyoni', 'floridai', 'borzas',
             'szűz', 'chilis bab',
-            '^(?!.*leves).*(tepsis|házi|falusi|tejföl).*(burgony|krumpli)(?!püré)',
+            '^(?!.*leves).*(tepsis|házi|falusi|tejföl).*(burgonya|burgonyá|krumpli)(?!püré)',
             'bors.*(mártás|szósz)',
-            '(' + FruitsRegex + ').*leves',
+            '(' + FruitsRegex + '|mézes|édes).*leves',
             'paradicsomleves',
             'tápiókapuding', 'gyümölcsrizs',
             'édesburgony(a|á)',
             'cheddar',
+            'padlizsánkrém',
         ],
         favList2: ['hidasi', 'dijoni', 'mátrai',
-            '^(?!.*leves).*(grillezett|bacon).*(burgony|krumpli)(?!püré)',
+            '^(?!.*leves).*(grillezett|bacon).*(burgonya|burgonyá|krumpli)(?!püré)',
             'aszalt paradicsom',
             'palak', 'tikka masala',
-            'tzatziki', 'tartár',
+            'tzatziki', 'tartár', 'majonéz',
             'hagym(a|á)',
+            'rózsabors',
             'rétes',
+            'burrito', 'quesadilla',
+            'coleslaw', 'káposztasaláta',
         ],
         testingList: [],
     };
@@ -1483,6 +1493,16 @@
         return Array.from(new Set(items));
     }
 
+    function avgTextLength(elements) {
+        if (elements.length === 0)
+            return 0;
+        let totalLength = 0;
+        elements.each(function () {
+            totalLength += $(this).text().length;
+        });
+        return totalLength / elements.length;
+    }
+
     class UnreachableCaseError extends Error {
         constructor(value) {
             super('Unreachable case: ' + value);
@@ -1494,15 +1514,20 @@
             //alert('Tampermonkey script started...');
             console.log('Tampermonkey script started...');
             ensureStylePatches();
-            const uc = getCurrentUserConfig();
-            if (uc === null || uc === undefined) {
-                insertFeedbackText('Tampermonkey script will NOT run. Could not identify user.');
-                return;
+            const uc = location.href.includes("https://www.teletal.hu") ? getCurrentUserConfig() : getDefaultUserConfig();
+            if (location.href.includes("https://www.teletal.hu")) {
+                if (uc === undefined) {
+                    insertFeedbackText('Tampermonkey script will NOT run. Could not identify user.');
+                    return;
+                }
+                else {
+                    insertFeedbackText('Tampermonkey script will run based on the preferences of ' + uc.userNameToFind + '.<br/> '
+                        + 'When pressing key 1/2, every visible item\'s title will be evaluated. Results will be indicated by color code / opacity.<br/> '
+                        + 'Ingredients check only happens when an item is added to the basket.<br/>');
+                }
             }
-            else {
-                insertFeedbackText('Tampermonkey script will run based on the preferences of ' + uc.userNameToFind + '.<br/> '
-                    + 'When pressing key 1/2, every visible item\'s title will be evaluated. Results will be indicated by color code / opacity.<br/> '
-                    + 'Ingredients check only happens when an item is added to the basket.<br/>');
+            else if (uc === undefined) {
+                throw new AssistantError('Tampermonkey hiba: alapértelmezett felhasználó nincs definiálva');
             }
             mainWithUserConfig(uc);
         }
@@ -1513,9 +1538,12 @@
     function getCurrentUserConfig() {
         const UserConfigs = [AndiConfig, HegeConfig];
         return UserConfigs.find(uc => {
-            let userNameSpans = $('span:contains("' + uc.userNameToFind + '")');
+            let userNameSpans = $$1('span:contains("' + uc.userNameToFind + '")');
             return userNameSpans.length > 0;
         });
+    }
+    function getDefaultUserConfig() {
+        return HegeConfig;
     }
     class AssistantError extends Error {
     }
@@ -1523,16 +1551,16 @@
         console.log('Menu element tagName:', $elem.prop('tagName') + '; class: ' + $elem.attr('class'));
         const $infoButton = $elem.find('.menu-info-button').first();
         console.log('Info button:' + $infoButton);
-        UIkit__default.default.toggle($infoButton).toggle(); //.click() did not work
+        UIkit.toggle($infoButton).toggle(); //.click() did not work
         await sleep(30);
-        UIkit__default.default.modal('#info-modal').hide();
+        UIkit.modal('#info-modal').hide();
         const ingredientLabelSpans = await iife(async () => {
             try {
                 return await poll({
                     fn: i => {
                         console.log(`Polling ${i}`);
                         //There can be multiple spans if I order a multi course menu. That's why I need a loop
-                        const ingredientLabelSpans = $('span:contains("Összetevők")');
+                        const ingredientLabelSpans = $$1('span:contains("Összetevők")');
                         //console.log(ingredientLabelSpans.length);
                         if (ingredientLabelSpans.length >= 1) {
                             return ingredientLabelSpans;
@@ -1584,12 +1612,12 @@
         });
     }
     function mainWithUserConfig(uc) {
-        $('body').on('click', '.menu-button-plus', function (e) {
+        $$1('body').on('click', '.menu-button-plus', function (e) {
             e.preventDefault();
-            fireCheckIngredients($(this).parent().parent().parent(), uc);
+            fireCheckIngredients($$1(this).parent().parent().parent(), uc);
             return false;
         });
-        $(document).on('keydown', event => {
+        $$1(document).on('keydown', event => {
             const { key } = event;
             if (['1', '2'].includes(key)) {
                 checkAllVisibleFoods(Number(key));
@@ -1600,10 +1628,29 @@
         });
         function checkAllVisibleFoods(acceptanceLevel) {
             console.log('Running checkAllVisibleFoods()');
-            let $allVisibleFoods = $('.menu-card.uk-card-small');
-            //console.log($allVisibleFoods);
+            let $allVisibleFoods;
+            if (location.href.includes("https://www.teletal.hu")) {
+                $allVisibleFoods = $$1('.menu-card.uk-card-small');
+            }
+            else if (location.href.includes("https://pizzaforte.hu")) {
+                $allVisibleFoods = $$1('.product-meta');
+            }
+            else if (location.href.includes("https://wolt.com")) {
+                $allVisibleFoods = $$1('.sc-8c9b94e6-2');
+            }
+            else if (location.href.includes("https://app.ordit.hu")) {
+                $allVisibleFoods = $$1('.food-card');
+            }
+            else if (location.href.includes("https://www.foodora.hu")) {
+                $allVisibleFoods = $$1('.product-button-overlay');
+                //TODO: handle the fact that food name is in aria-label. The value of .text() is empty
+            }
+            else {
+                throw new AssistantError('Tampermonkey script hiba: ismeretlen URL ' + location.href);
+            }
+            console.log('Number of visible food items: ' + $allVisibleFoods.length + ', avg text() length: ' + avgTextLength($allVisibleFoods));
             $allVisibleFoods.each(function () {
-                const $food = $(this);
+                const $food = $$1(this);
                 const likeLevel = evaluateCardText($food.text(), uc, acceptanceLevel);
                 switch (likeLevel) {
                     case LikeLevel.blacklist:
@@ -1632,10 +1679,10 @@
         }
     }
     function insertFeedbackText(text) {
-        var $mainTable = $('section:contains("Reggeli")').first();
+        var $mainTable = $$1('section:contains("Reggeli")').first();
         //var $mainTable = $('table:contains("Reggeli")').first();
         //var $mainTable = $('#etlap');
-        const $newDiv = $('<div><br/>' + text + '</div>');
+        const $newDiv = $$1('<div><br/>' + text + '</div>');
         $newDiv.css({
             'width': '50%',
             'margin-left': 'auto',
@@ -1645,4 +1692,4 @@
     }
     main();
 
-})($, UIkit);
+})($);

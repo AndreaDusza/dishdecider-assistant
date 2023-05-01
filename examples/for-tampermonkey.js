@@ -5,6 +5,10 @@
 // @description  Indicate unwanted ingredients
 // @author       You
 // @match        https://www.teletal.hu/etlap*
+// @match        https://pizzaforte.hu/*
+// @match        https://wolt.com/*
+// @match        https://app.ordit.hu/*
+// @match        https://www.foodora.hu/*
 // @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
 // @grant        none
 // ==/UserScript==

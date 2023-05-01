@@ -1,7 +1,7 @@
 import $ from 'jquery';
 
 import { fromEvent, throttleTime } from 'rxjs';
-import UIkit from 'uikit';
+import { UIkit } from './teletal';
 import { evaluateCardText } from './logic';
 import { ensureStylePatches } from './styles';
 import { LikeLevel, UserConfig } from './userconfig';
@@ -12,6 +12,7 @@ import * as jqex from './utils/jquery-ex';
 import { poll, PollTimeoutError } from './utils/poll';
 import { sleep } from './utils/sleep';
 import { unique } from './utils/unique';
+import { avgTextLength } from './utils/debug';
 import { UnreachableCaseError } from './utils/unreachable';
 
 function main() {
@@ -19,15 +20,19 @@ function main() {
     //alert('Tampermonkey script started...');
     console.log('Tampermonkey script started...');
     ensureStylePatches();
-    const uc = getCurrentUserConfig();
-    if (uc === null || uc === undefined) {
-      insertFeedbackText('Tampermonkey script will NOT run. Could not identify user.');
-      return;
-    } else {
-      insertFeedbackText('Tampermonkey script will run based on the preferences of ' + uc.userNameToFind + '.<br/> '
-        + 'When pressing key 1/2, every visible item\'s title will be evaluated. Results will be indicated by color code / opacity.<br/> '
-        + 'Ingredients check only happens when an item is added to the basket.<br/>');
-    }
+    const uc = location.href.includes("https://www.teletal.hu") ? getCurrentUserConfig() : getDefaultUserConfig();
+    if (location.href.includes("https://www.teletal.hu")){
+        if (uc === undefined) {
+            insertFeedbackText('Tampermonkey script will NOT run. Could not identify user.');
+            return;
+        } else {
+            insertFeedbackText('Tampermonkey script will run based on the preferences of ' + uc.userNameToFind + '.<br/> '
+            + 'When pressing key 1/2, every visible item\'s title will be evaluated. Results will be indicated by color code / opacity.<br/> '
+            + 'Ingredients check only happens when an item is added to the basket.<br/>');
+        }
+    } else if (uc === undefined) {
+        throw new AssistantError('Tampermonkey hiba: alapértelmezett felhasználó nincs definiálva');
+    } 
     mainWithUserConfig(uc);
   } catch (error) {
     console.error('Initialization error', error);
@@ -41,6 +46,10 @@ function getCurrentUserConfig(): UserConfig | undefined {
     let userNameSpans = $('span:contains("' + uc.userNameToFind + '")');
     return userNameSpans.length > 0;
   });
+}
+
+function getDefaultUserConfig(): UserConfig {
+    return HegeConfig;
 }
 
 class AssistantError extends Error {}
@@ -143,8 +152,24 @@ function mainWithUserConfig(uc: UserConfig) {
 
   function checkAllVisibleFoods(acceptanceLevel) {
     console.log('Running checkAllVisibleFoods()');
-    let $allVisibleFoods = $('.menu-card.uk-card-small');
-    //console.log($allVisibleFoods);
+    let $allVisibleFoods;
+
+    if (location.href.includes("https://www.teletal.hu")){
+        $allVisibleFoods = $('.menu-card.uk-card-small');
+    } else if (location.href.includes("https://pizzaforte.hu")){
+        $allVisibleFoods = $('.product-meta');
+    } else if (location.href.includes("https://wolt.com")){
+        $allVisibleFoods = $('.sc-8c9b94e6-2');
+    } else if (location.href.includes("https://app.ordit.hu")){
+        $allVisibleFoods = $('.food-card');
+    } else if (location.href.includes("https://www.foodora.hu")){
+        $allVisibleFoods = $('.product-button-overlay');
+        //TODO: handle the fact that food name is in aria-label. The value of .text() is empty
+    } else {
+        throw new AssistantError('Tampermonkey script hiba: ismeretlen URL ' + location.href);
+    }
+
+    console.log('Number of visible food items: ' + $allVisibleFoods.length + ', avg text() length: ' + avgTextLength($allVisibleFoods));
     $allVisibleFoods.each(function () {
       const $food = $(this);
       const likeLevel = evaluateCardText(
