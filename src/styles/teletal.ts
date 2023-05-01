@@ -29,6 +29,7 @@ export function patchTeletalStyles() {
         /* artificially increase specificity by duplicating the same class over enough times */
         .menu .menu-card.menu-card.menu-card {
           border: 6px solid #eeeeee;
+          border-radius: 8px;
           box-sizing: border-box;
           height: unset;
           display: flex;

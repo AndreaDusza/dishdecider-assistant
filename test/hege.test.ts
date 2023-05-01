@@ -1,4 +1,3 @@
-import { LikeLevel } from '../src/userconfig';
 import { HegeConfig } from '../src/userconfig.hege';
 import { testsForUser } from './helpers';
 

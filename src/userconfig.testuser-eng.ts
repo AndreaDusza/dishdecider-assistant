@@ -1,5 +1,5 @@
 export const TestUserEnglishConfig = {
-    userNameToFind: 'Test User - English',
+    userNamesToFind: 'Test User - English',
     blacklist: ['mushroom', 'salmon', 'shell', '[^\p{L}]egg[^\p{L}]'],
     warnList: ['fish', 'egg'],
     blacklistExceptions: ['shell pasta', 'fish sauce', 'eggplant'],

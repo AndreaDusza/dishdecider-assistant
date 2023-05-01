@@ -11,6 +11,17 @@
 // @grant        none
 // ==/UserScript==
 
+localStorage.setItem('food-order-assistant-config', JSON.stringify([{
+  userNamesToFind: ['John Doe'],
+  blacklist: [],
+  warnList: [],
+  blacklistExceptions: [],
+  mehList: ['tarhonya'],
+  favList1: ['juhtúró', 'camembert', 'grillezett sajt', 'grill sajt', 'tápiókapuding', 'rák', 'lazac'],
+  favList2: ['aszalt paradicsom'],
+  testingList: [],
+}]));
+
 (() => {
   'use strict';
   const URL_PROD = 'https://raw.githubusercontent.com/AndreaDusza/teletal-assistant/master/dist/index.js';

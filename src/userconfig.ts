@@ -1,5 +1,5 @@
 export type UserConfig = {
-  readonly userNameToFind: string;
+  readonly userNamesToFind: readonly string[];
   readonly blacklist: readonly string[];
   readonly blacklistExceptions: readonly string[];
   readonly testingList: readonly string[];
@@ -16,8 +16,8 @@ export const FruitsRegex = 'gyümölcs|alma|körte|barack|szilva|cseresznye|mál
   + 'pitahaya|pitaja|egres';
 
 export const FishSpeciesList = [
-    'ponty', 'süllő', 'harcsa', 'tokhal', 'lazac', 'pisztráng', 'tonhal', 
-    'pangasius', 'tőkehal', 'keszeg', 'szardínia', 'makréla', 'hering', 'hekk', 'sügér', 
+    'ponty', 'süllő', 'harcsa', 'tokhal', 'lazac', 'pisztráng', 'tonhal',
+    'pangasius', 'tőkehal', 'keszeg', 'szardínia', 'makréla', 'hering', 'hekk', 'sügér',
     'tilápia',
     //'csuka'
 ];

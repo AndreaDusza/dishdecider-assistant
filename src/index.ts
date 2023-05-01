@@ -9,8 +9,6 @@ import { UIkit } from './teletal';
 import { LikeLevel, UserConfig } from './userconfig';
 import { AndiConfig } from './userconfig.andi';
 import { HegeConfig } from './userconfig.hege';
-import { TestUserHungarianConfig } from './userconfig.testuser-hun';
-import { TestUserEnglishConfig } from './userconfig.testuser-eng';
 import { TestUserConfig } from './userconfig.testuser';
 import { avgTextLength } from './utils/debug';
 import { iife } from './utils/iife';
@@ -23,44 +21,58 @@ function main() {
   try {
     //alert('Tampermonkey script started...');
     console.log('Tampermonkey script started...');
-    const uc = location.href.includes("https://www.teletal.hu") ? getCurrentUserConfig() : getDefaultUserConfig();
-    if (location.href.includes("https://www.teletal.hu")){
-        if (uc === undefined) {
-            insertFeedbackText('Tampermonkey script will NOT run. Could not identify user.');
-            return;
-        } else {
-            insertFeedbackText('Tampermonkey script will run based on the preferences of ' + uc.userNameToFind + '.<br/> '
-            + 'When pressing key 1/2, every visible item\'s title will be evaluated. Results will be indicated by color code / opacity.<br/> '
-            + 'Ingredients check only happens when an item is added to the basket.<br/>');
-        }
+    const uc = getCurrentUserConfig();
+    if (location.href.includes('https://www.teletal.hu')) {
+      if (uc === undefined) {
+        insertFeedbackText('Tampermonkey script will NOT run. Could not identify user.');
+        return;
+      } else {
+        insertFeedbackText(`Tampermonkey script will run based on the preferences of ${uc.name}.<br/> `
+          + 'When pressing key 1/2, every visible item\'s title will be evaluated. Results will be indicated by color code / opacity.<br/> '
+          + 'Ingredients check only happens when an item is added to the basket.<br/>');
+      }
     } else if (uc === undefined) {
-        throw new AssistantError('Tampermonkey hiba: alapértelmezett felhasználó nincs definiálva');
+      throw new AssistantError('Tampermonkey hiba: alapértelmezett felhasználó nincs definiálva');
     }
-    console.log('Food Order Assistant - user name: ' + uc.userNameToFind);
-    console.log('Food Order Assistant - user preferences: ' + uc);
+    console.log(`Food Order Assistant - user name: ${uc.name}`);
+    console.log('Food Order Assistant - user preferences:', uc.config);
     mainWithUserConfig(uc);
   } catch (error) {
     console.error('Initialization error', error);
   }
 }
 
-function getCurrentUserConfig(): UserConfig | undefined {
-  const UserConfigs = [AndiConfig, HegeConfig];
-  let detectedCurrentUserConfig;
-  UserConfigs.find(uc => {
-    let userNameSpans = $('span:contains("' + uc.userNameToFind + '")');
-    if (userNameSpans.length > 0){
-       detectedCurrentUserConfig = uc;
-       return;
-    };
-  });
-  if (detectedCurrentUserConfig) return detectedCurrentUserConfig;
-  return getDefaultUserConfig();
+type CurrentUserConfig = { name: string, config: UserConfig };
+
+function getCurrentUserConfig(): CurrentUserConfig {
+  const storedUserConfigs = loadUserConfigsFromStorage();
+  const UserConfigs = [AndiConfig, HegeConfig, ...storedUserConfigs];
+  for (const config of UserConfigs) {
+    for (const name of config.userNamesToFind) {
+      const userNameSpans = $(`*:contains(${CSS.escape(name)})`);
+      if (userNameSpans.length > 0) {
+        return { name, config };
+      }
+    }
+  }
+  return getDefaultUserConfig(storedUserConfigs);
 }
 
+function getDefaultUserConfig(storedUserConfigs: UserConfig[]): CurrentUserConfig {
+  if (storedUserConfigs.length <= 0) {
+    return { name: TestUserConfig.userNamesToFind[0] ?? 'Test User Default', config: TestUserConfig };
+  }
+  const config = storedUserConfigs[0];
+  const name = config.userNamesToFind[0] ?? 'Unknown User';
+  return { name, config: TestUserConfig };
+}
 
-function getDefaultUserConfig(): UserConfig {
-    return TestUserConfig;
+function loadUserConfigsFromStorage(): UserConfig[] {
+  const setting = localStorage.getItem('food-order-assistant-config');
+  if (!setting) {
+    return [];
+  }
+  return JSON.parse(setting);
 }
 
 class AssistantError extends Error {}
@@ -142,10 +154,10 @@ function fireCheckIngredients($elem: JQuery, uc: UserConfig) {
 }
 
 
-function mainWithUserConfig(uc: UserConfig) {
+function mainWithUserConfig(uc: CurrentUserConfig) {
   $('body').on('click', '.menu-button-plus', function (e) {
     e.preventDefault();
-    fireCheckIngredients(jxNthParent($(this), 3), uc);
+    fireCheckIngredients(jxNthParent($(this), 3), uc.config);
     return false;
   });
 
@@ -163,7 +175,8 @@ function mainWithUserConfig(uc: UserConfig) {
   });
   $(document).on('loaded', () => {
     refreshColoring();
-  })
+  });
+
   function refreshColoring() {
     patchTeletalStyles();
     patchPizzaforteStyles();
@@ -174,15 +187,15 @@ function mainWithUserConfig(uc: UserConfig) {
     console.log('Running checkAllVisibleFoods()');
     let $allVisibleFoods;
 
-    if (location.href.includes("https://www.teletal.hu")){
+    if (location.href.includes('https://www.teletal.hu')) {
       $allVisibleFoods = $('.menu-card.uk-card-small');  //looks great
-    } else if (location.href.includes("https://pizzaforte.hu")){
+    } else if (location.href.includes('https://pizzaforte.hu')) {
       $allVisibleFoods = $('.product');                  //looks great
-    } else if (location.href.includes("https://wolt.com")){
+    } else if (location.href.includes('https://wolt.com')) {
       $allVisibleFoods = $('.sc-8c9b94e6-2');            //opacity change works, but no border
-    } else if (location.href.includes("https://app.ordit.hu")){
+    } else if (location.href.includes('https://app.ordit.hu')) {
       $allVisibleFoods = $('.food-card');                //looks OK
-    } else if (location.href.includes("https://www.foodora.hu")){
+    } else if (location.href.includes('https://www.foodora.hu')) {
       $allVisibleFoods = $('.product-button-overlay');   //NOT working at all
       //TODO: handle the fact that food name is in aria-label. The value of .text() is empty
     } else {
@@ -196,7 +209,7 @@ function mainWithUserConfig(uc: UserConfig) {
 
       const likeLevel = evaluateCardText(
         foodText,
-        uc,
+        uc.config,
         acceptanceLevel,
       );
       switch (foodText) {

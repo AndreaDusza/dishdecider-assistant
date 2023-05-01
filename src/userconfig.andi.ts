@@ -1,7 +1,7 @@
 import { UserConfig } from './userconfig';
 
 export const AndiConfig = {
-  userNameToFind: 'Dusza Andrea',
+  userNamesToFind: ['Dusza Andrea'],
   blacklist: [],
   warnList: [],
   blacklistExceptions: [],

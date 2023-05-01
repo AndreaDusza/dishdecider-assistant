@@ -1452,6 +1452,7 @@
         /* artificially increase specificity by duplicating the same class over enough times */
         .menu .menu-card.menu-card.menu-card {
           border: 6px solid #eeeeee;
+          border-radius: 8px;
           box-sizing: border-box;
           height: unset;
           display: flex;
@@ -1472,7 +1473,7 @@
     const UIkit = self.UIkit;
 
     const AndiConfig = {
-        userNameToFind: 'Dusza Andrea',
+        userNamesToFind: ['Dusza Andrea'],
         blacklist: [],
         warnList: [],
         blacklistExceptions: [],
@@ -1483,7 +1484,7 @@
     };
 
     const HegeConfig = {
-        userNameToFind: 'Hegedűs Tamás László',
+        userNamesToFind: ['Hegedűs Tamás László'],
         blacklist: [
             'halfilé', 'halszelet', 'halrud', 'rákragu', 'koktélrák',
             'tonhal', 'szardínia',
@@ -1525,7 +1526,7 @@
     };
 
     const TestUserConfig = {
-        userNameToFind: 'Test User - Custom',
+        userNamesToFind: ['Test User - Custom'],
         blacklist: ['mushroom', 'salmon', 'shell', '[^\p{L}]egg[^\p{L}]', 'gomb(a|á)', 'lazac', 'kagyló', '[^\p{L}]hal[^\p{L}]'],
         warnList: ['fish', 'egg', 'hal'],
         blacklistExceptions: ['shell pasta', 'fish sauce', 'eggplant', 'kagylótészt(a|á)', 'halszósz'],
@@ -1581,14 +1582,14 @@
         try {
             //alert('Tampermonkey script started...');
             console.log('Tampermonkey script started...');
-            const uc = location.href.includes("https://www.teletal.hu") ? getCurrentUserConfig() : getDefaultUserConfig();
-            if (location.href.includes("https://www.teletal.hu")) {
+            const uc = getCurrentUserConfig();
+            if (location.href.includes('https://www.teletal.hu')) {
                 if (uc === undefined) {
                     insertFeedbackText('Tampermonkey script will NOT run. Could not identify user.');
                     return;
                 }
                 else {
-                    insertFeedbackText('Tampermonkey script will run based on the preferences of ' + uc.userNameToFind + '.<br/> '
+                    insertFeedbackText(`Tampermonkey script will run based on the preferences of ${uc.name}.<br/> `
                         + 'When pressing key 1/2, every visible item\'s title will be evaluated. Results will be indicated by color code / opacity.<br/> '
                         + 'Ingredients check only happens when an item is added to the basket.<br/>');
                 }
@@ -1596,8 +1597,8 @@
             else if (uc === undefined) {
                 throw new AssistantError('Tampermonkey hiba: alapértelmezett felhasználó nincs definiálva');
             }
-            console.log('Food Order Assistant - user name: ' + uc.userNameToFind);
-            console.log('Food Order Assistant - user preferences: ' + uc);
+            console.log(`Food Order Assistant - user name: ${uc.name}`);
+            console.log('Food Order Assistant - user preferences:', uc.config);
             mainWithUserConfig(uc);
         }
         catch (error) {
@@ -1605,21 +1606,32 @@
         }
     }
     function getCurrentUserConfig() {
-        const UserConfigs = [AndiConfig, HegeConfig];
-        let detectedCurrentUserConfig;
-        UserConfigs.find(uc => {
-            let userNameSpans = $$1('span:contains("' + uc.userNameToFind + '")');
-            if (userNameSpans.length > 0) {
-                detectedCurrentUserConfig = uc;
-                return;
+        const storedUserConfigs = loadUserConfigsFromStorage();
+        const UserConfigs = [AndiConfig, HegeConfig, ...storedUserConfigs];
+        for (const config of UserConfigs) {
+            for (const name of config.userNamesToFind) {
+                const userNameSpans = $$1(`*:contains(${CSS.escape(name)})`);
+                if (userNameSpans.length > 0) {
+                    return { name, config };
+                }
             }
-        });
-        if (detectedCurrentUserConfig)
-            return detectedCurrentUserConfig;
-        return getDefaultUserConfig();
+        }
+        return getDefaultUserConfig(storedUserConfigs);
     }
-    function getDefaultUserConfig() {
-        return TestUserConfig;
+    function getDefaultUserConfig(storedUserConfigs) {
+        if (storedUserConfigs.length <= 0) {
+            return { name: TestUserConfig.userNamesToFind[0] ?? 'Test User Default', config: TestUserConfig };
+        }
+        const config = storedUserConfigs[0];
+        const name = config.userNamesToFind[0] ?? 'Unknown User';
+        return { name, config: TestUserConfig };
+    }
+    function loadUserConfigsFromStorage() {
+        const setting = localStorage.getItem('food-order-assistant-config');
+        if (!setting) {
+            return [];
+        }
+        return JSON.parse(setting);
     }
     class AssistantError extends Error {
     }
@@ -1690,7 +1702,7 @@
     function mainWithUserConfig(uc) {
         $$1('body').on('click', '.menu-button-plus', function (e) {
             e.preventDefault();
-            fireCheckIngredients(jxNthParent($$1(this), 3), uc);
+            fireCheckIngredients(jxNthParent($$1(this), 3), uc.config);
             return false;
         });
         $$1(document).on('keydown', event => {
@@ -1713,19 +1725,19 @@
         function checkAllVisibleFoods(acceptanceLevel) {
             console.log('Running checkAllVisibleFoods()');
             let $allVisibleFoods;
-            if (location.href.includes("https://www.teletal.hu")) {
+            if (location.href.includes('https://www.teletal.hu')) {
                 $allVisibleFoods = $$1('.menu-card.uk-card-small'); //looks great
             }
-            else if (location.href.includes("https://pizzaforte.hu")) {
+            else if (location.href.includes('https://pizzaforte.hu')) {
                 $allVisibleFoods = $$1('.product'); //looks great
             }
-            else if (location.href.includes("https://wolt.com")) {
+            else if (location.href.includes('https://wolt.com')) {
                 $allVisibleFoods = $$1('.sc-8c9b94e6-2'); //opacity change works, but no border
             }
-            else if (location.href.includes("https://app.ordit.hu")) {
+            else if (location.href.includes('https://app.ordit.hu')) {
                 $allVisibleFoods = $$1('.food-card'); //looks OK
             }
-            else if (location.href.includes("https://www.foodora.hu")) {
+            else if (location.href.includes('https://www.foodora.hu')) {
                 $allVisibleFoods = $$1('.product-button-overlay'); //NOT working at all
                 //TODO: handle the fact that food name is in aria-label. The value of .text() is empty
             }
@@ -1735,7 +1747,7 @@
             console.log('Number of visible food items: ' + $allVisibleFoods.length + ', avg text() length: ' + avgTextLength($allVisibleFoods));
             for (const $food of jxItems($allVisibleFoods)) {
                 const foodText = $food.text();
-                const likeLevel = evaluateCardText(foodText, uc, acceptanceLevel);
+                const likeLevel = evaluateCardText(foodText, uc.config, acceptanceLevel);
                 switch (foodText) {
                     case LikeLevel.test:
                         console.log('Test result: ' + foodText);

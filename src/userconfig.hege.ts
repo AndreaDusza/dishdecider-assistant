@@ -1,11 +1,11 @@
 import { FruitsRegex, FishSpeciesList, UserConfig } from './userconfig';
 
 export const HegeConfig = {
-  userNameToFind: 'Hegedűs Tamás László',
+  userNamesToFind: ['Hegedűs Tamás László'],
   blacklist: [
     'halfilé', 'halszelet', 'halrud', 'rákragu', 'koktélrák',
     'tonhal', 'szardínia',
-    'garnél(a|á)', 'polip', 'kagyló', 'tenger gyümölcs', 'tengeri gyümölcs', 
+    'garnél(a|á)', 'polip', 'kagyló', 'tenger gyümölcs', 'tengeri gyümölcs',
     'gomb(a|á)', 'csiperk(e|é)', 'vargány(a|á)',
     '(sertés|kacsa|liba|csirke|szárnyas).?máj',
     'zúz(a|á)',

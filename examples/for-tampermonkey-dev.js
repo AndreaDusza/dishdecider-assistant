@@ -13,8 +13,20 @@
 // @grant        none
 // ==/UserScript==
 
+localStorage.setItem('food-order-assistant-config', JSON.stringify([{
+  userNamesToFind: ['John Doe'],
+  blacklist: [],
+  warnList: [],
+  blacklistExceptions: [],
+  mehList: ['tarhonya'],
+  favList1: ['juhtúró', 'camembert', 'grillezett sajt', 'grill sajt', 'tápiókapuding', 'rák', 'lazac'],
+  favList2: ['aszalt paradicsom'],
+  testingList: [],
+}]));
+
 (() => {
   'use strict';
+
   const URL_DEV = 'http://localhost:8078/index.js';
 
   main().catch(error => {
