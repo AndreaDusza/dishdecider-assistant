@@ -1371,8 +1371,72 @@
         return false;
     }
 
-    const UIkit = self.UIkit;
-    const $$1 = self.$;
+    function sleep(delayMs) {
+        return new Promise(resolve => {
+            setTimeout(() => {
+                resolve();
+            }, delayMs);
+        });
+    }
+
+    async function poll({ fn, interval = 250, timeout, }) {
+        const ending = Date.now() + timeout;
+        for (let i = 0;; i++) {
+            const result = fn(i);
+            if (result !== undefined) {
+                return result;
+            }
+            if (Date.now() >= ending) {
+                throw new PollTimeoutError();
+            }
+            await sleep(interval);
+        }
+    }
+    class PollTimeoutError extends Error {
+    }
+
+    let UIkit = self.UIkit;
+    let $$1 = self.$;
+    async function waitForJquery() {
+        return $$1 = await poll({
+            fn: i => {
+                //console.log({
+                //  i,
+                //  x1: !!(self as any).$,
+                //  x2: '$' in self,
+                //  x3: self === top,
+                //  x4: self === window,
+                //  self,
+                //});
+                return self.$;
+            },
+            timeout: 3000,
+        });
+    }
+
+    class AssistantError extends Error {
+    }
+
+    var FoodService;
+    (function (FoodService) {
+        FoodService["teletal"] = "teletal";
+        FoodService["pizzaforte"] = "pizzaforte";
+        FoodService["wolt"] = "wolt";
+        FoodService["ordit"] = "ordit";
+        FoodService["foodora"] = "foodora";
+    })(FoodService || (FoodService = {}));
+    function getCurrentSite() {
+        const hostname = location.hostname;
+        switch (hostname) {
+            case 'www.teletal.hu': return FoodService.teletal;
+            case 'teletal.hu': return FoodService.teletal;
+            case 'pizzaforte.hu': return FoodService.pizzaforte;
+            case 'wolt.com': return FoodService.wolt;
+            case 'app.ordit.hu': return FoodService.ordit;
+            case 'www.foodora.hu': return FoodService.foodora;
+        }
+        throw new AssistantError(`Assistant error: Unknown URL '${hostname}'`);
+    }
 
     class UnreachableCaseError extends Error {
         constructor(value) {
@@ -1563,39 +1627,19 @@
         return fn();
     }
 
-    function sleep(delayMs) {
-        return new Promise(resolve => {
-            setTimeout(() => {
-                resolve();
-            }, delayMs);
-        });
-    }
-
-    async function poll({ fn, interval = 250, timeout, }) {
-        const ending = Date.now() + timeout;
-        for (let i = 0;; i++) {
-            const result = fn(i);
-            if (result !== undefined) {
-                return result;
-            }
-            if (Date.now() >= ending) {
-                throw new PollTimeoutError();
-            }
-            await sleep(interval);
-        }
-    }
-    class PollTimeoutError extends Error {
-    }
-
     function unique(items) {
         return Array.from(new Set(items));
     }
 
-    function main() {
+    async function main() {
         try {
-            //alert('Tampermonkey script started...');
             console.log('Tampermonkey script started...');
+            const currentSite = getCurrentSite();
+            //alert('Tampermonkey script started...');
             const uc = getCurrentUserConfig();
+            if ([FoodService.ordit].includes(currentSite)) {
+                await waitForJquery();
+            }
             insertFeedbackText(uc);
             console.log(`Food Order Assistant - user name: ${uc.name}`);
             console.log('Food Order Assistant - user preferences:', uc.config);
@@ -1631,8 +1675,6 @@
             return [];
         }
         return JSON.parse(setting);
-    }
-    class AssistantError extends Error {
     }
     async function checkIngredients($elem, uc) {
         console.log('Menu element tagName:', $elem.prop('tagName') + '; class: ' + $elem.attr('class'));
@@ -1774,9 +1816,12 @@
         if ($mainTable === undefined)
             return;
         let feedbackText = (uc === undefined) ?
-            'Food Order Assistant Info: Tampermonkey script will NOT run. Could not identify user.' :
-            `Food Order Assistant Info: Tampermonkey script is running based on the preferences of ${uc.name}.<br/> `
-                + 'When pressing key 1/2, every visible item\'s title will be evaluated. Results will be indicated by color code / opacity.<br/> ';
+            `Food Order Assistant Info: Tampermonkey script will NOT run. Could not identify user.` :
+            `
+      Food Order Assistant Info: Tampermonkey script is running based on the preferences of ${uc.name}.<br/>
+      When pressing key 1/2, every visible item\'s title will be evaluated.
+      Results will be indicated by color code / opacity.
+    `;
         if (uc === undefined)
             return;
         if (location.href.includes('https://www.teletal.hu')) {
@@ -1785,12 +1830,11 @@
         insertFeedbackTextBeforeElementIfNeeded($mainTable, feedbackText);
     }
     function insertFeedbackTextBeforeElementIfNeeded($mainTable, text) {
-        //This only works if the first 30 characters of the text are distinctive, and it has nothing to escape
-        if (anyElementinTheDomContainsText(text.substring(0, 30))) {
+        if (document.getElementById('fo-assistant-feedback')) {
             return;
         }
         console.log('Inserting Assistant Information text...');
-        const $newDiv = $$1('<div><br/>' + text + '</div>');
+        const $newDiv = $$1(`<div id="fo-assistant-feedback">${text}</div>`);
         $newDiv.css({
             'width': '50%',
             'margin-left': 'auto',
@@ -1801,7 +1845,7 @@
         $newDiv.insertBefore($mainTable);
     }
     function anyElementinTheDomContainsText(text) {
-        return $$1(`*:contains(${CSS.escape(text)})`).length > 0;
+        return document.body.innerText.includes(text);
     }
     main();
 

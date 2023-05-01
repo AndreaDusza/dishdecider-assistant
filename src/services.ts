@@ -1,4 +1,22 @@
+import { AssistantError } from './utils/assistant-error';
+
 export enum FoodService {
   teletal = 'teletal',
   pizzaforte = 'pizzaforte',
+  wolt = 'wolt',
+  ordit = 'ordit',
+  foodora = 'foodora',
+}
+
+export function getCurrentSite(): FoodService {
+  const hostname = location.hostname;
+  switch (hostname) {
+    case 'www.teletal.hu': return FoodService.teletal;
+    case 'teletal.hu': return FoodService.teletal;
+    case 'pizzaforte.hu': return FoodService.pizzaforte;
+    case 'wolt.com': return FoodService.wolt;
+    case 'app.ordit.hu': return FoodService.ordit;
+    case 'www.foodora.hu': return FoodService.foodora;
+  }
+  throw new AssistantError(`Assistant error: Unknown URL '${hostname}'`);
 }

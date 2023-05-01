@@ -1,6 +1,7 @@
 import { fromEvent, throttleTime } from 'rxjs';
 import { evaluateCardText } from './logic';
-import { $, UIkit } from './provided';
+import { $, UIkit, waitForJquery } from './provided';
+import { FoodService, getCurrentSite } from './services';
 import { applyHighlightToCellStyle } from './styles/common';
 import { patchPizzaforteStyles } from './styles/pizzaforte';
 import { patchTeletalStyles } from './styles/teletal';
@@ -8,6 +9,7 @@ import { LikeLevel, UserConfig } from './userconfig';
 import { AndiConfig } from './userconfig.andi';
 import { HegeConfig } from './userconfig.hege';
 import { TestUserConfig } from './userconfig.testuser';
+import { AssistantError } from './utils/assistant-error';
 import { avgTextLength } from './utils/debug';
 import { iife } from './utils/iife';
 import { jxItems, jxNthParent } from './utils/jquery-ex';
@@ -15,12 +17,18 @@ import { poll, PollTimeoutError } from './utils/poll';
 import { sleep } from './utils/sleep';
 import { unique } from './utils/unique';
 
-function main() {
+async function main() {
   try {
-    //alert('Tampermonkey script started...');
     console.log('Tampermonkey script started...');
+    const currentSite = getCurrentSite();
+    //alert('Tampermonkey script started...');
     const uc = getCurrentUserConfig();
+
+    if ([FoodService.ordit].includes(currentSite)) {
+      await waitForJquery();
+    }
     insertFeedbackText(uc);
+
 
     console.log(`Food Order Assistant - user name: ${uc.name}`);
     console.log('Food Order Assistant - user preferences:', uc.config);
@@ -62,7 +70,7 @@ function loadUserConfigsFromStorage(): UserConfig[] {
   return JSON.parse(setting);
 }
 
-class AssistantError extends Error {}
+
 
 async function checkIngredients(
   $elem: JQuery,
@@ -227,9 +235,12 @@ function insertFeedbackText(uc: CurrentUserConfig){
   if ($mainTable === undefined) return;
 
   let feedbackText = (uc === undefined) ?
-    'Food Order Assistant Info: Tampermonkey script will NOT run. Could not identify user.' :
-    `Food Order Assistant Info: Tampermonkey script is running based on the preferences of ${uc.name}.<br/> `
-      + 'When pressing key 1/2, every visible item\'s title will be evaluated. Results will be indicated by color code / opacity.<br/> ';
+    `Food Order Assistant Info: Tampermonkey script will NOT run. Could not identify user.` :
+    `
+      Food Order Assistant Info: Tampermonkey script is running based on the preferences of ${uc.name}.<br/>
+      When pressing key 1/2, every visible item\'s title will be evaluated.
+      Results will be indicated by color code / opacity.
+    `;
 
   if (uc === undefined) return;
 
@@ -242,15 +253,13 @@ function insertFeedbackText(uc: CurrentUserConfig){
 
 function insertFeedbackTextBeforeElementIfNeeded($mainTable: JQuery, text: string) {
 
-  //This only works if the first 30 characters of the text are distinctive, and it has nothing to escape
-  if (anyElementinTheDomContainsText(text.substring(0,30))){
+  if (document.getElementById('fo-assistant-feedback')) {
     return;
   }
 
   console.log('Inserting Assistant Information text...');
 
-  const $newDiv = $('<div><br/>' + text + '</div>');
-
+  const $newDiv = $(`<div id="fo-assistant-feedback">${text}</div>`);
   $newDiv.css({
     'width': '50%', // set a fixed width for the div
     'margin-left': 'auto', // center the div horizontally
@@ -263,7 +272,7 @@ function insertFeedbackTextBeforeElementIfNeeded($mainTable: JQuery, text: strin
 }
 
 function anyElementinTheDomContainsText(text: string){
-  return $(`*:contains(${CSS.escape(text)})`).length > 0;
+  return document.body.innerText.includes(text);
 }
 
 main();
