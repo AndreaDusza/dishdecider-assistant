@@ -1,9 +1,9 @@
 # Food Order Assistant
 
-A simple Food Order Assistant userscript that can run in a desktop browser extension.<br/>
-Based on your preferences, it marks certain foods on the menu as unwanted and highlights the ones that you will probably like.<br/>
-Built mainly for Teletal.hu but also supports a few other food delivery services.<br/>
-Supported browsers: Chrome. May or may not also work in Firefox, Safari etc...<br/>
+A simple Food Order Assistant userscript that can run in a desktop browser extension.  
+Based on your preferences, it marks certain foods on the menu as unwanted and highlights the ones that you will probably like.  
+Built mainly for Teletal.hu but also supports a few other food delivery services.  
+Supported browsers: Chrome. May or may not also work in Firefox, Safari etc...  
 Language: Hungarian/English mix.
 
 ## Setup & Run
@@ -54,11 +54,11 @@ const USER_CONFIGS = [
  * favList2: Secondary favorites, also highlighted but not as strong as the above.
  * testingList: Use for testing purposes.
 
-Regular expressions are supported in all of the above lists.<br/>
+Regular expressions are supported in all of the above lists.  
 Use https://regex101.com/ and https://chat.openai.com/ to understand and create regular expressions.
 
 ## Trying to learn to create a userscript?
-There is a simplified version of the Food Order Assistant, for learning purposes.<br/>
+There is a simplified version of the Food Order Assistant, for learning purposes.  
 In case of the "real" assistant script, you can only experiment with the user preferences, but you cannot change the program code. However, in case of the learning sample, you can experiment with the full code however you want.
 1. Go to Tampermonkey's Dashboard.
 2. Disable the "real" assistant script. Otherwise, it would interfere with the learning sample script.
@@ -67,3 +67,9 @@ In case of the "real" assistant script, you can only experiment with the user pr
 
 In the learning sample, scrolling does not trigger the Assistant: you have to press key '2'.
    
+## Notes
+If you get an error saying "$ is not defined" or "$$1 is not defined", try adding the below line to the Tampermonkey script header:  
+```
+// @require      https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js  
+```
+It might fix the issue for the given site but break another site.  
