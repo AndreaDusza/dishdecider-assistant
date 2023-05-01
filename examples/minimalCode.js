@@ -60,9 +60,9 @@ const USER_CONFIGS = [
     insertAssistantInformationTextBeforeElement(uc.userNamesToFind[0], determineMainTableElement(currentURL));
 
     // Setup event hander: every time when user presses key '2', insertAssistantInformationTextBeforeElement() and checkAllVisibleFoods() will run.
-    // It is enough to run the below lines only once inside the IIFE, and the event handler will be triggered at every key press, as long as the page is not refreshed. 
-    $(document).keydown(function(event) {
-        if (event.which == 50) {  // 50 is the keycode for the number 2
+    // It is enough to run the below lines only once inside the IIFE, and the event handler will be triggered at every key press, as long as the page is not refreshed.
+    $(document).on('keydown', event => {
+        if (event.key === '2') {
             insertAssistantInformationTextBeforeElement(uc.userNamesToFind[0], determineMainTableElement(currentURL));
             checkAllVisibleFoods();
         }
@@ -113,7 +113,7 @@ const USER_CONFIGS = [
         } else if (url.includes('https://pizzaforte.hu')) {
             return $('.container.content-top').first();
         } else {
-            throw new AssistantError('Assistant error: Unknown URL ' + url);
+            throw new Error('Assistant error: Unknown URL ' + url);
         }
     }
 
@@ -123,7 +123,7 @@ const USER_CONFIGS = [
         } else if (url.includes('https://pizzaforte.hu')) {
             return $('.product');
         } else {
-            throw new AssistantError('Assistant error: Unknown URL ' + url);
+            throw new Error('Assistant error: Unknown URL ' + url);
         }
     }
 
@@ -151,5 +151,4 @@ const USER_CONFIGS = [
     function anyElementinTheDomContainsText(text){
          return $(`*:contains(${CSS.escape(text)})`).length > 0;
     }
-
 })();
