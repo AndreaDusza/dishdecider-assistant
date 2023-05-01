@@ -1,7 +1,8 @@
-# Food Order Assistant
+# DishDecider Assistant
 
-A simple Food Order Assistant userscript that can run in a desktop browser extension.  
-Based on your preferences, it marks certain foods on the menu as unwanted and highlights the ones that you will probably like.  
+DishDecider Assistant is a userscript that can run in a desktop browser extension.  
+When you visit a supported food delivery website, the Assistant marks certain foods on the menu as unwanted and highlights the ones that you will probably like, based on your preferences.  
+If you have some programming skills, you can customize your dietary preferences to the extreme.  
 Built mainly for Teletal.hu but also supports a few other food delivery services.  
 Supported browsers: Chrome. May or may not also work in Firefox, Safari etc...  
 Language: Hungarian/English mix.
@@ -58,7 +59,7 @@ Regular expressions are supported in all of the above lists.
 Use https://regex101.com/ and https://chat.openai.com/ to understand and create regular expressions.
 
 ## Trying to learn to create a userscript?
-There is a simplified version of the Food Order Assistant, for learning purposes.  
+There is a simplified version of the Assistant, for learning purposes.  
 In case of the "real" assistant script, you can only experiment with the user preferences, but you cannot change the program code. However, in case of the learning sample, you can experiment with the full code however you want.
 1. Go to Tampermonkey's Dashboard.
 2. Disable the "real" assistant script. Otherwise, it would interfere with the learning sample script.
