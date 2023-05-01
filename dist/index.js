@@ -1334,12 +1334,10 @@
         }
         //testing
         if (containsLcMatch(userConfig.testingList, foodDescription) && !containsLcMatch(userConfig.blacklistExceptions, foodDescription)) {
-            console.log('Test result: ' + foodDescription);
             return LikeLevel.test;
         }
         //warning
         if (containsLcMatch(userConfig.warnList, foodDescription) && !containsLcMatch(userConfig.blacklistExceptions, foodDescription)) {
-            console.log('Warning: ' + foodDescription);
             return LikeLevel.warn;
         }
         //is meh?
@@ -1371,36 +1369,83 @@
         return false;
     }
 
-    function items(jq) {
+    class UnreachableCaseError extends Error {
+        constructor(value) {
+            super('Unreachable case: ' + value);
+        }
+    }
+
+    function applyHighlightToCellStyle($food, likeLevel) {
+        myApplyCss($food, getStyleForLevel(likeLevel));
+    }
+    function myApplyCss($elem, { children, ...rest }) {
+        $elem.css(rest);
+        if (children) {
+            myApplyCss($elem.children(), children);
+        }
+    }
+    function getStyleForLevel(level) {
+        switch (level) {
+            case LikeLevel.blacklist:
+                return { 'border-color': '#ff6060', children: { opacity: '0.3' } };
+            case LikeLevel.test:
+                return { 'border-color': 'yellow' };
+            case LikeLevel.warn:
+                return { 'border-color': 'orange' };
+            case LikeLevel.neutral:
+                return { 'border-color': '#e0e0e0' };
+            case LikeLevel.favorite1:
+                return { 'border-color': '#60d860' };
+            case LikeLevel.favorite2:
+                return { 'border-color': '#a0e0a0' };
+            default:
+                throw new UnreachableCaseError(level);
+        }
+    }
+
+    function jxItems(jq) {
         return jq.toArray().map(elem => $(elem));
     }
 
-    function ensureStylePatches() {
-        const $rows = $('.menu-slider-logged:not(.assistant-styled)');
-        for (const $row of items($rows)) {
-            $row.attr('x-original-height', $row.css('height'));
-            const originalHeight = $row.height();
-            if (originalHeight !== undefined) {
-                $row.height(originalHeight + 8);
-            }
-            $row.addClass('assistant-styled');
+    function patchTeletalStyles() {
+        const $newRows = $('.menu-slider-logged:not([x-original-height])');
+        for (const $row of jxItems($newRows)) {
+            $row.attr('x-original-height', $row.css('height') ?? '');
+            $row.css('height', '');
         }
-        if ($('#assistant-styles').empty()) {
+        const $newCells = $('.menu-card:not(.assistant-styled)');
+        for (const $cell of jxItems($newCells)) {
+            jxItems($cell.children('> .menu-cell-text')).forEach((text, i) => {
+                text.css('flex', i === 0 ? '1 1 auto' : '');
+            });
+            $cell.addClass('.assistant-styled');
+        }
+        if ($('#assistant-styles').length === 0) {
             $(document.body).append(`
-    <style id="assistant-styles">
-      .menu-slider-logged {
-        margin-bottom: 0;
-      }
-      .menu section > div .menu-cell-text.menu-cell-text {
-        border: none;
-      }
-      .menu-card {
-        border: 6px solid #eeeeee;
-        box-sizing: border-box;
-      }
-
-    </style>
-  `);
+      <style id="assistant-styles">
+        .menu-slider-logged, .menu-slider {
+          margin-bottom: 0;
+          height: unset;
+          display: flex;
+          flex-flow: row nowrap;
+        }
+        /* artificially increase specificity by duplicating the same class over enough times */
+        .menu .menu-card.menu-card.menu-card {
+          border: 6px solid #eeeeee;
+          box-sizing: border-box;
+          height: unset;
+          display: flex;
+          flex-flow: column nowrap;
+        }
+        .menu .menu-cell-text.menu-cell-text.menu-cell-text {
+          border: none;
+          height: unset;
+        }
+        .menu-card > .menu-cell-text.menu-cell-text-description {
+          flex: 1 1 auto;
+        }
+      </style>
+    `);
         }
     }
 
@@ -1483,17 +1528,10 @@
         return Array.from(new Set(items));
     }
 
-    class UnreachableCaseError extends Error {
-        constructor(value) {
-            super('Unreachable case: ' + value);
-        }
-    }
-
     function main() {
         try {
             //alert('Tampermonkey script started...');
             console.log('Tampermonkey script started...');
-            ensureStylePatches();
             const uc = getCurrentUserConfig();
             if (uc === null || uc === undefined) {
                 insertFeedbackText('Tampermonkey script will NOT run. Could not identify user.');
@@ -1548,7 +1586,7 @@
                 throw error;
             }
         });
-        const ingredientsString = items(ingredientLabelSpans).map(currIngredientLabelSpan => {
+        const ingredientsString = jxItems(ingredientLabelSpans).map(currIngredientLabelSpan => {
             const currIngredientsString = currIngredientLabelSpan.next().text();
             if (currIngredientsString.length < 20) {
                 throw new AssistantError('Tampermonkey script hiba: összetevők listája hiányzik / túl rövid! ');
@@ -1596,39 +1634,32 @@
             }
         });
         fromEvent(window, 'scroll').pipe(throttleTime(1000, undefined, { leading: false, trailing: true })).subscribe(() => {
-            checkAllVisibleFoods(2);
+            refreshColoring();
         });
+        $(document).on('loaded', () => {
+            refreshColoring();
+        });
+        function refreshColoring() {
+            patchTeletalStyles();
+            checkAllVisibleFoods(2);
+        }
         function checkAllVisibleFoods(acceptanceLevel) {
             console.log('Running checkAllVisibleFoods()');
             let $allVisibleFoods = $('.menu-card.uk-card-small');
             //console.log($allVisibleFoods);
-            $allVisibleFoods.each(function () {
-                const $food = $(this);
-                const likeLevel = evaluateCardText($food.text(), uc, acceptanceLevel);
-                switch (likeLevel) {
-                    case LikeLevel.blacklist:
-                        $food.css('opacity', '0.2');
-                        break;
+            for (const $food of jxItems($allVisibleFoods)) {
+                const foodText = $food.text();
+                const likeLevel = evaluateCardText(foodText, uc, acceptanceLevel);
+                switch (foodText) {
                     case LikeLevel.test:
-                        console.log('Test result: ' + $food.text());
-                        $food.css('color', 'yellow');
+                        console.log('Test result: ' + foodText);
                         break;
                     case LikeLevel.warn:
-                        $food.css('color', 'orange');
-                        console.log('Warning: ' + $food.text());
+                        console.log('Warning: ' + foodText);
                         break;
-                    case LikeLevel.neutral:
-                        break;
-                    case LikeLevel.favorite1:
-                        $food.css('color', 'blue');
-                        break;
-                    case LikeLevel.favorite2:
-                        $food.css('color', 'purple');
-                        break;
-                    default:
-                        throw new UnreachableCaseError(likeLevel);
                 }
-            });
+                applyHighlightToCellStyle($food, likeLevel);
+            }
         }
     }
     function insertFeedbackText(text) {

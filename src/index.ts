@@ -3,22 +3,21 @@ import $ from 'jquery';
 import { fromEvent, throttleTime } from 'rxjs';
 import UIkit from 'uikit';
 import { evaluateCardText } from './logic';
-import { ensureStylePatches } from './styles';
+import { applyHighlightToCellStyle } from './styles/common';
+import { patchTeletalStyles } from './styles/teletal';
 import { LikeLevel, UserConfig } from './userconfig';
 import { AndiConfig } from './userconfig.andi';
 import { HegeConfig } from './userconfig.hege';
 import { iife } from './utils/iife';
-import * as jqex from './utils/jquery-ex';
+import { jxItems } from './utils/jquery-ex';
 import { poll, PollTimeoutError } from './utils/poll';
 import { sleep } from './utils/sleep';
 import { unique } from './utils/unique';
-import { UnreachableCaseError } from './utils/unreachable';
 
 function main() {
   try {
     //alert('Tampermonkey script started...');
     console.log('Tampermonkey script started...');
-    ensureStylePatches();
     const uc = getCurrentUserConfig();
     if (uc === null || uc === undefined) {
       insertFeedbackText('Tampermonkey script will NOT run. Could not identify user.');
@@ -83,7 +82,7 @@ async function checkIngredients(
     }
   });
 
-  const ingredientsString = jqex.items(ingredientLabelSpans).map(currIngredientLabelSpan => {
+  const ingredientsString = jxItems(ingredientLabelSpans).map(currIngredientLabelSpan => {
     const currIngredientsString = currIngredientLabelSpan.next().text();
     if (currIngredientsString.length < 20) {
       throw new AssistantError('Tampermonkey script hiba: összetevők listája hiányzik / túl rövid! ');
@@ -138,44 +137,37 @@ function mainWithUserConfig(uc: UserConfig) {
   fromEvent(window, 'scroll').pipe(
     throttleTime(1000, undefined, { leading: false, trailing: true }),
   ).subscribe(() => {
-    checkAllVisibleFoods(2);
+    refreshColoring();
   });
+  $(document).on('loaded', () => {
+    refreshColoring();
+  })
+  function refreshColoring() {
+    patchTeletalStyles();
+    checkAllVisibleFoods(2);
+  }
 
   function checkAllVisibleFoods(acceptanceLevel) {
     console.log('Running checkAllVisibleFoods()');
     let $allVisibleFoods = $('.menu-card.uk-card-small');
     //console.log($allVisibleFoods);
-    $allVisibleFoods.each(function () {
-      const $food = $(this);
+    for (const $food of jxItems($allVisibleFoods)) {
+      const foodText = $food.text();
       const likeLevel = evaluateCardText(
-        $food.text(),
+        foodText,
         uc,
         acceptanceLevel,
       );
-      switch (likeLevel) {
-        case LikeLevel.blacklist:
-          $food.css('opacity', '0.2');
-          break;
+      switch (foodText) {
         case LikeLevel.test:
-          console.log('Test result: ' + $food.text());
-          $food.css('color', 'yellow');
+          console.log('Test result: ' + foodText);
           break;
         case LikeLevel.warn:
-          $food.css('color', 'orange');
-          console.log('Warning: ' + $food.text());
+          console.log('Warning: ' + foodText);
           break;
-        case LikeLevel.neutral:
-          break;
-        case LikeLevel.favorite1:
-          $food.css('color', 'blue');
-          break;
-        case LikeLevel.favorite2:
-          $food.css('color', 'purple');
-          break;
-        default:
-          throw new UnreachableCaseError(likeLevel);
       }
-    });
+      applyHighlightToCellStyle($food, likeLevel);
+    }
   }
 }
 

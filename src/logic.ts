@@ -14,13 +14,11 @@ export function evaluateCardText(
 
   //testing
   if (containsLcMatch(userConfig.testingList, foodDescription) && !containsLcMatch(userConfig.blacklistExceptions, foodDescription)) {
-    console.log('Test result: ' + foodDescription);
     return LikeLevel.test;
   }
 
   //warning
   if (containsLcMatch(userConfig.warnList, foodDescription) && !containsLcMatch(userConfig.blacklistExceptions, foodDescription)) {
-    console.log('Warning: ' + foodDescription);
     return LikeLevel.warn;
   }
 
