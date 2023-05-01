@@ -1,11 +1,3 @@
-/**
- * blacklist: instant NO
- * warnList: these expressions would match too many items on the main page and hide them unnecessarily
- * blacklistExceptions: to allow 'dhal' when 'hal' is blacklisted (but not 'kardhal'). When adding to item to basket, a warning will appear despite the exception, just to be sure.
- * mehList: when matched, prevents item from being highlighted as potential favorite
- * favList1: absolute best
- * favList2: also good
- */
 export type UserConfig = {
   readonly userNameToFind: string;
   readonly blacklist: readonly string[];

@@ -5,10 +5,10 @@ export const HegeConfig = {
   blacklist: [
     'halfilé', 'halszelet', 'halrud', 'rákragu', 'koktélrák',
     'tonhal', 'szardínia',
-    'garnéla', 'polip', 'kagyló', 'tenger gyümölcs', 'tengeri gyümölcs', 
-    'gomb(a|á)',
+    'garnél(a|á)', 'polip', 'kagyló', 'tenger gyümölcs', 'tengeri gyümölcs', 
+    'gomb(a|á)', 'csiperk(e|é)', 'vargány(a|á)',
     '(sertés|kacsa|liba|csirke|szárnyas).?máj',
-    'zúza',
+    'zúz(a|á)',
     'ceruzabab', 'héjas zöldborsó',
     'Budapest sertés', 'milánói',
   ].concat(FishSpeciesList),

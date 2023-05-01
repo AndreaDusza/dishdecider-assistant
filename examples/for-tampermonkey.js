@@ -2,13 +2,11 @@
 // @name         Teletal Assistant
 // @namespace    http://tampermonkey.net/
 // @version      0.1
-// @description  Indicate unwanted ingredients
-// @author       You
+// @description  Indicate unwanted and favorite foods or ingredients
+// @author       Andrea Dusza, Tamas Laszlo Hegedus
 // @match        https://www.teletal.hu/etlap*
 // @match        https://pizzaforte.hu/*
-// @match        https://wolt.com/*
 // @match        https://app.ordit.hu/*
-// @match        https://www.foodora.hu/*
 // @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
 // @grant        none
 // ==/UserScript==

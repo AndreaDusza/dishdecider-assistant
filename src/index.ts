@@ -9,6 +9,9 @@ import { UIkit } from './teletal';
 import { LikeLevel, UserConfig } from './userconfig';
 import { AndiConfig } from './userconfig.andi';
 import { HegeConfig } from './userconfig.hege';
+import { TestUserHungarianConfig } from './userconfig.testuser-hun';
+import { TestUserEnglishConfig } from './userconfig.testuser-eng';
+import { TestUserConfig } from './userconfig.testuser';
 import { avgTextLength } from './utils/debug';
 import { iife } from './utils/iife';
 import { jxItems, jxNthParent } from './utils/jquery-ex';
@@ -33,23 +36,31 @@ function main() {
     } else if (uc === undefined) {
         throw new AssistantError('Tampermonkey hiba: alapértelmezett felhasználó nincs definiálva');
     }
+    console.log('Food Order Assistant - user name: ' + uc.userNameToFind);
+    console.log('Food Order Assistant - user preferences: ' + uc);
     mainWithUserConfig(uc);
   } catch (error) {
     console.error('Initialization error', error);
   }
 }
 
-
 function getCurrentUserConfig(): UserConfig | undefined {
   const UserConfigs = [AndiConfig, HegeConfig];
-  return UserConfigs.find(uc => {
+  let detectedCurrentUserConfig;
+  UserConfigs.find(uc => {
     let userNameSpans = $('span:contains("' + uc.userNameToFind + '")');
-    return userNameSpans.length > 0;
+    if (userNameSpans.length > 0){
+       detectedCurrentUserConfig = uc;
+       return;
+    };
   });
+  if (detectedCurrentUserConfig) return detectedCurrentUserConfig;
+  return getDefaultUserConfig();
 }
 
+
 function getDefaultUserConfig(): UserConfig {
-    return HegeConfig;
+    return TestUserConfig;
 }
 
 class AssistantError extends Error {}
@@ -164,15 +175,15 @@ function mainWithUserConfig(uc: UserConfig) {
     let $allVisibleFoods;
 
     if (location.href.includes("https://www.teletal.hu")){
-      $allVisibleFoods = $('.menu-card.uk-card-small');
+      $allVisibleFoods = $('.menu-card.uk-card-small');  //looks great
     } else if (location.href.includes("https://pizzaforte.hu")){
-      $allVisibleFoods = $('.product');
+      $allVisibleFoods = $('.product');                  //looks great
     } else if (location.href.includes("https://wolt.com")){
-      $allVisibleFoods = $('.sc-8c9b94e6-2');
+      $allVisibleFoods = $('.sc-8c9b94e6-2');            //opacity change works, but no border
     } else if (location.href.includes("https://app.ordit.hu")){
-      $allVisibleFoods = $('.food-card');
+      $allVisibleFoods = $('.food-card');                //looks OK
     } else if (location.href.includes("https://www.foodora.hu")){
-      $allVisibleFoods = $('.product-button-overlay');
+      $allVisibleFoods = $('.product-button-overlay');   //NOT working at all
       //TODO: handle the fact that food name is in aria-label. The value of .text() is empty
     } else {
       throw new AssistantError('Tampermonkey script hiba: ismeretlen URL ' + location.href);

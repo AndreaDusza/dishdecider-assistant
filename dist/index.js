@@ -1487,10 +1487,10 @@
         blacklist: [
             'halfilé', 'halszelet', 'halrud', 'rákragu', 'koktélrák',
             'tonhal', 'szardínia',
-            'garnéla', 'polip', 'kagyló', 'tenger gyümölcs', 'tengeri gyümölcs',
-            'gomb(a|á)',
+            'garnél(a|á)', 'polip', 'kagyló', 'tenger gyümölcs', 'tengeri gyümölcs',
+            'gomb(a|á)', 'csiperk(e|é)', 'vargány(a|á)',
             '(sertés|kacsa|liba|csirke|szárnyas).?máj',
-            'zúza',
+            'zúz(a|á)',
             'ceruzabab', 'héjas zöldborsó',
             'Budapest sertés', 'milánói',
         ].concat(FishSpeciesList),
@@ -1522,6 +1522,17 @@
             'coleslaw', 'káposztasaláta',
         ],
         testingList: [],
+    };
+
+    const TestUserConfig = {
+        userNameToFind: 'Test User - Custom',
+        blacklist: ['mushroom', 'salmon', 'shell', '[^\p{L}]egg[^\p{L}]', 'gomb(a|á)', 'lazac', 'kagyló', '[^\p{L}]hal[^\p{L}]'],
+        warnList: ['fish', 'egg', 'hal'],
+        blacklistExceptions: ['shell pasta', 'fish sauce', 'eggplant', 'kagylótészt(a|á)', 'halszósz'],
+        mehList: ['shell pasta', 'fish sauce', 'eggplant', 'tarhonya', 'kelbimbó', 'csirkeszárny'],
+        favList1: ['chicken', 'csirk(e|é)'],
+        favList2: ['onion', 'hagym(a|á)'],
+        testingList: [ /*'a'*/],
     };
 
     function avgTextLength(elements) {
@@ -1585,6 +1596,8 @@
             else if (uc === undefined) {
                 throw new AssistantError('Tampermonkey hiba: alapértelmezett felhasználó nincs definiálva');
             }
+            console.log('Food Order Assistant - user name: ' + uc.userNameToFind);
+            console.log('Food Order Assistant - user preferences: ' + uc);
             mainWithUserConfig(uc);
         }
         catch (error) {
@@ -1593,13 +1606,20 @@
     }
     function getCurrentUserConfig() {
         const UserConfigs = [AndiConfig, HegeConfig];
-        return UserConfigs.find(uc => {
+        let detectedCurrentUserConfig;
+        UserConfigs.find(uc => {
             let userNameSpans = $$1('span:contains("' + uc.userNameToFind + '")');
-            return userNameSpans.length > 0;
+            if (userNameSpans.length > 0) {
+                detectedCurrentUserConfig = uc;
+                return;
+            }
         });
+        if (detectedCurrentUserConfig)
+            return detectedCurrentUserConfig;
+        return getDefaultUserConfig();
     }
     function getDefaultUserConfig() {
-        return HegeConfig;
+        return TestUserConfig;
     }
     class AssistantError extends Error {
     }
@@ -1694,19 +1714,19 @@
             console.log('Running checkAllVisibleFoods()');
             let $allVisibleFoods;
             if (location.href.includes("https://www.teletal.hu")) {
-                $allVisibleFoods = $$1('.menu-card.uk-card-small');
+                $allVisibleFoods = $$1('.menu-card.uk-card-small'); //looks great
             }
             else if (location.href.includes("https://pizzaforte.hu")) {
-                $allVisibleFoods = $$1('.product');
+                $allVisibleFoods = $$1('.product'); //looks great
             }
             else if (location.href.includes("https://wolt.com")) {
-                $allVisibleFoods = $$1('.sc-8c9b94e6-2');
+                $allVisibleFoods = $$1('.sc-8c9b94e6-2'); //opacity change works, but no border
             }
             else if (location.href.includes("https://app.ordit.hu")) {
-                $allVisibleFoods = $$1('.food-card');
+                $allVisibleFoods = $$1('.food-card'); //looks OK
             }
             else if (location.href.includes("https://www.foodora.hu")) {
-                $allVisibleFoods = $$1('.product-button-overlay');
+                $allVisibleFoods = $$1('.product-button-overlay'); //NOT working at all
                 //TODO: handle the fact that food name is in aria-label. The value of .text() is empty
             }
             else {
