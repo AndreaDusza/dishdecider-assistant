@@ -1431,7 +1431,8 @@
     }
 
     function patchTeletalStyles() {
-        const $newRows = $$1('.menu-slider-logged:not([x-original-height])');
+        const $newRows = $$1('.menu-slider:not([x-original-height]), ' +
+            '.menu-slider-logged:not([x-original-height])');
         for (const $row of jxItems($newRows)) {
             $row.attr('x-original-height', $row.css('height') ?? '');
             $row.css('height', '');
@@ -1455,13 +1456,14 @@
         /* artificially increase specificity by duplicating the same class over enough times */
         .menu .menu-card.menu-card.menu-card {
           border: 6px solid #eeeeee;
-          border-radius: 8px;
+          border-radius: 6px;
+          box-shadow: 1px 1px 4px 1px rgba(0, 0, 0, 0.4) inset;
           box-sizing: border-box;
           height: unset;
           display: flex;
           flex-flow: column nowrap;
         }
-        .menu .menu-cell-text.menu-cell-text.menu-cell-text {
+        .menu .menu-cell-text.menu-cell-text.menu-cell-text.menu-cell-text.menu-cell-text {
           border: none;
           height: unset;
         }
