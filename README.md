@@ -60,7 +60,7 @@ Use https://regex101.com/ and https://chat.openai.com/ to understand and create 
 
 ## Trying to learn to create a userscript?
 There is a simplified version of the Assistant, for learning purposes.  
-In case of the "real" assistant script, you can only experiment with the user preferences, but you cannot change the program code. However, in case of the learning sample, you can experiment with the full code however you want.  
+In case of the "real" assistant script, you can only experiment with the user preferences in Tampermonkey, but you cannot change the program code. However, in case of the learning sample, you can experiment with the full code however you want.  
 You can try changing the sample to support your favorite food delivery site: it might be very easy!
 1. Go to Tampermonkey's Dashboard.
 2. Disable the "real" assistant script. Otherwise, it would interfere with the learning sample script.
