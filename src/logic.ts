@@ -43,7 +43,7 @@ export function evaluateCardText(
 
 
 function lcMatch(e1: string, e2: string): boolean {
-  return e1.toLowerCase().match(e2.toLowerCase()) != null;
+  return (e1.toLowerCase().match(e2) != null) ||  (e1.toLowerCase().match(e2.toLowerCase()) != null);
 }
 
 export function containsLcMatch(list1: readonly string[], foodText: string): boolean {

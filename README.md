@@ -24,7 +24,7 @@ Language: Hungarian/English mix.
 const USER_CONFIGS = [
   {
     userNamesToFind: ['John Henry Doe', 'jdoe_1976@something.com'],
-    blacklist: ['mushroom', 'salmon', 'shell', '[^\p{L}]egg[^\p{L}]'],
+    blacklist: ['mushroom', 'salmon', 'shell', '[^a-z]egg[^a-z]'],
     warnList: ['fish', 'egg'],
     blacklistExceptions: ['shell pasta', 'fish sauce', 'eggplant'],
     mehList: ['brussels sprout', 'chicken wings'],

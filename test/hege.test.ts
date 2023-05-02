@@ -5,5 +5,6 @@ describe("Hege", () => {
     testsForUser(HegeConfig, {
         "Rántott libamáj": "blacklist",
         "Rántott sertéskaraj": "neutral",
+        "Quesadilla (zöldborsós töltelékkel), salsa szósz" : "favorite2",
     });
 });

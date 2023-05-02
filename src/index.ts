@@ -21,7 +21,9 @@ async function main() {
   try {
     console.log('DishDecider Assistant script started...');
     const currentSite = getCurrentSite();
-    const uc = getCurrentUserConfig();
+
+    await sleep(100); //sleep(100) seems to improve the success rate of finding the user in Ordit
+    const uc = getCurrentUserConfig();  //TODO pizzaforte had issues, even when preceded with sleep(3000). why?
 
     if ([FoodService.ordit].includes(currentSite)) {
       await waitForJquery();
@@ -117,7 +119,7 @@ async function checkIngredients(
 
   const totalBlacklist = uc.blacklist.concat(uc.warnList);
   const foundItems = unique(totalBlacklist.flatMap(item => {
-    const regex = new RegExp('\\b[a-záéíóóöőúüű \p{L}]*' + item.toLowerCase() + '[a-záéíóóöőúüű \p{L}]*\\b', 'g');
+    const regex = new RegExp('\\b[a-záéíóóöőúüű ]*' + item + '[a-záéíóóöőúüű ]*\\b', 'g');
     return ingredientsString.toLowerCase().match(regex) ?? [];
   }));
 
@@ -174,7 +176,7 @@ function mainWithUserConfig(uc: CurrentUserConfig) {
   function checkAllVisibleFoods(acceptanceLevel) {
     console.log('Running checkAllVisibleFoods()');
     insertFeedbackText(uc);
-    let $allVisibleFoodCardObjects = determineFoodCardsObject(location.href);
+    let $allVisibleFoodCardObjects = determineFoodCardsObject(getCurrentSite());
 
     console.log('Number of visible food items: ' + $allVisibleFoodCardObjects.length + ', avg text() length: ' + avgTextLength($allVisibleFoodCardObjects));
 
@@ -199,35 +201,29 @@ function mainWithUserConfig(uc: CurrentUserConfig) {
   }
 }
 
-function determineFoodCardsObject(url: string){
-  if (url.includes('https://www.teletal.hu')) {
-    return $('.menu-card.uk-card-small');  //looks great
-  } else if (url.includes('https://pizzaforte.hu')) {
-    return $('.product');                  //looks great
-  } else if (url.includes('https://wolt.com')) {
-    return $('.sc-8c9b94e6-2');            //opacity change works, but no border
-  } else if (url.includes('https://app.ordit.hu')) {
-    return $('.food-card');                //looks OK
-  } else if (url.includes('https://www.foodora.hu')) {
-    return $('.product-button-overlay');   //NOT working at all
-    //TODO: handle the fact that food name is in aria-label. The value of .text() is empty
-  } else {
-    throw new AssistantError('Assistant error: Unknown URL ' + url);
+function determineFoodCardsObject(currentSite: FoodService){
+  switch (currentSite) {
+    case FoodService.teletal: return $('.menu-card.uk-card-small');  //looks great
+    case FoodService.pizzaforte: return $('.product');                  //looks great
+    case FoodService.ordit: return $('.food-card');                //looks OK
+    case FoodService.wolt: return $('.sc-8c9b94e6-2');            //opacity change works, but no border
+    case FoodService.foodora: return $('.product-button-overlay');   //NOT working at all
+   //TODO: handle the fact that foodora has food name is in aria-label. The value of .text() is empty
+    default: throw new AssistantError('Assistant error: determineFoodCardsObject not implemented for ' + currentSite);
   }
 }
 
-function determineMainTableElement(url: string){
-  if (url.includes('https://www.teletal.hu')) {
-      return $('section:contains("Reggeli")').first();
-  } else if (url.includes('https://pizzaforte.hu')) {
-      return $('.container.content-top').first();
-  } else {
-      console.log('determineMainTableElement not implemented for URL ' + url);
+function determineMainTableElement(currentSite: FoodService){
+  switch (currentSite) {
+    case FoodService.teletal: return $('section:contains("Reggeli")').first();
+    case FoodService.pizzaforte: return $('.container.content-top').first();
+    default: console.warn('determineMainTableElement not implemented for site ' + currentSite);
   }
 }
 
 function insertFeedbackText(uc: CurrentUserConfig){
-  var $mainTable = determineMainTableElement(location.href);
+  const currentSite = getCurrentSite();
+  var $mainTable = determineMainTableElement(currentSite);
 
   if ($mainTable === undefined) return;
 
@@ -235,13 +231,13 @@ function insertFeedbackText(uc: CurrentUserConfig){
     `DishDecider Assistant Info: Tampermonkey script will NOT run. Could not identify user.` :
     `
       DishDecider Assistant Info: Tampermonkey script is running based on the preferences of ${uc.name}.<br/>
-      When pressing key 1/2, every visible item\'s title will be evaluated.
+      When pressing key 1/2, every visible item\'s title will be evaluated.<br/>
       Results will be indicated by color code / opacity.
     `;
 
   if (uc === undefined) return;
 
-  if (location.href.includes('https://www.teletal.hu')){
+  if ([FoodService.teletal].includes(currentSite)){
     feedbackText += 'Ingredients check only happens when an item is added to the basket.<br/>';
   }
 

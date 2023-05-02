@@ -1359,7 +1359,7 @@
         return LikeLevel.neutral;
     }
     function lcMatch(e1, e2) {
-        return e1.toLowerCase().match(e2.toLowerCase()) != null;
+        return (e1.toLowerCase().match(e2) != null) || (e1.toLowerCase().match(e2.toLowerCase()) != null);
     }
     function containsLcMatch(list1, foodText) {
         for (const listItem1 of list1) {
@@ -1555,9 +1555,9 @@
         warnList: [],
         blacklistExceptions: [],
         mehList: ['tarhonya'],
-        favList1: ['juhtúró', 'camembert', 'grill.{0,10}sajt', 'tápiókapuding', 'garnéla', 'lazac'],
+        favList1: ['juhtúró', 'camembert', 'grill.{0,10}sajt', 'tápiókapuding', 'rák', 'garnéla', 'lazac', 'miso leves'],
         favList2: ['aszalt paradicsom'],
-        testingList: [],
+        testingList: ['vega', 'vegán', 'vegetáriánus', 'akció', 'croissant'],
     };
 
     const HegeConfig = {
@@ -1570,28 +1570,29 @@
             '(sertés|kacsa|liba|csirke|szárnyas).?máj',
             'zúz(a|á)',
             'ceruzabab', 'héjas zöldborsó',
-            'Budapest sertés', 'milánói',
+            'budapest sertés', 'milánói',
         ].concat(FishSpeciesList),
         warnList: ['hal', 'rák', 'máj'],
-        blacklistExceptions: ['[^a-z]dhal', 'kagylótészta', 'kultúrák', 'lepkeszegmag'],
+        blacklistExceptions: ['[^a-z]dhal', 'kagylótészta', 'kultúrák', 'lepkeszegmag', 'shalott hagyma'],
         mehList: ['tarhonya', 'főzelék', 'zöldbab', 'csirkeszárny',
             'wok zöldség', 'fahéj', 'kávé',
             'mátrai saláta'],
         favList1: ['kijevi', 'brassói', 'lyoni', 'floridai', 'borzas',
             'szűz', 'chilis bab',
-            '^(?!.*leves).*(tepsis|házi|falusi|tejföl).*(burgonya|burgonyá|krumpli)(?!püré)',
-            'bors.*(mártás|szósz)',
+            '^(?!.*leves).*(tepsis|házi|falusi|tejföl).{0,5}(burgonya|burgonyá|krumpli)(?!püré)',
+            'bors.{0,5}(mártás|szósz)',
             '(' + FruitsRegex + '|mézes|édes).*leves',
             'paradicsomleves',
             'tápiókapuding', 'gyümölcsrizs',
             'édesburgony(a|á)',
             'cheddar',
             'padlizsánkrém',
+            '(mangó|ananász).{0,5}rétes',
         ],
         favList2: ['hidasi', 'dijoni', 'mátrai',
-            '^(?!.*leves).*(grillezett|bacon).*(burgonya|burgonyá|krumpli)(?!püré)',
+            '(grillezett|bacon).{0,10}(burgonya|burgonyá|krumpli)(?!püré)',
             'aszalt paradicsom',
-            'palak', 'tikka masala',
+            'palak', 'tikka masala', 'corma', 'korma',
             'tzatziki', 'tartár', 'majonéz',
             'hagym(a|á)',
             'rózsabors',
@@ -1604,7 +1605,7 @@
 
     const TestUserConfig = {
         userNamesToFind: ['Hardcoded Default Test User'],
-        blacklist: ['mushroom', 'salmon', 'shell', '[^\p{L}]egg[^\p{L}]', 'gomb(a|á)', 'lazac', 'kagyló', '[^\p{L}]hal[^\p{L}]'],
+        blacklist: ['mushroom', 'salmon', 'shell', 'gomb(a|á)', 'lazac', 'kagyló'],
         warnList: ['fish', 'egg', 'hal'],
         blacklistExceptions: ['shell pasta', 'fish sauce', 'eggplant', 'kagylótészt(a|á)', 'halszósz'],
         mehList: ['shell pasta', 'fish sauce', 'eggplant', 'tarhonya', 'kelbimbó', 'csirkeszárny'],
@@ -1635,7 +1636,8 @@
         try {
             console.log('DishDecider Assistant script started...');
             const currentSite = getCurrentSite();
-            const uc = getCurrentUserConfig();
+            await sleep(100); //sleep(100) seems to improve the success rate of finding the user in Ordit
+            const uc = getCurrentUserConfig(); //TODO pizzaforte had issues, even when preceded with sleep(3000). why?
             if ([FoodService.ordit].includes(currentSite)) {
                 await waitForJquery();
             }
@@ -1713,7 +1715,7 @@
         }).join('');
         const totalBlacklist = uc.blacklist.concat(uc.warnList);
         const foundItems = unique(totalBlacklist.flatMap(item => {
-            const regex = new RegExp('\\b[a-záéíóóöőúüű \p{L}]*' + item.toLowerCase() + '[a-záéíóóöőúüű \p{L}]*\\b', 'g');
+            const regex = new RegExp('\\b[a-záéíóóöőúüű ]*' + item + '[a-záéíóóöőúüű ]*\\b', 'g');
             return ingredientsString.toLowerCase().match(regex) ?? [];
         }));
         console.log('founditems: ' + foundItems);
@@ -1761,7 +1763,7 @@
         function checkAllVisibleFoods(acceptanceLevel) {
             console.log('Running checkAllVisibleFoods()');
             insertFeedbackText(uc);
-            let $allVisibleFoodCardObjects = determineFoodCardsObject(location.href);
+            let $allVisibleFoodCardObjects = determineFoodCardsObject(getCurrentSite());
             console.log('Number of visible food items: ' + $allVisibleFoodCardObjects.length + ', avg text() length: ' + avgTextLength($allVisibleFoodCardObjects));
             for (const $food of jxItems($allVisibleFoodCardObjects)) {
                 const foodText = $food.text();
@@ -1778,52 +1780,39 @@
             }
         }
     }
-    function determineFoodCardsObject(url) {
-        if (url.includes('https://www.teletal.hu')) {
-            return $$1('.menu-card.uk-card-small'); //looks great
-        }
-        else if (url.includes('https://pizzaforte.hu')) {
-            return $$1('.product'); //looks great
-        }
-        else if (url.includes('https://wolt.com')) {
-            return $$1('.sc-8c9b94e6-2'); //opacity change works, but no border
-        }
-        else if (url.includes('https://app.ordit.hu')) {
-            return $$1('.food-card'); //looks OK
-        }
-        else if (url.includes('https://www.foodora.hu')) {
-            return $$1('.product-button-overlay'); //NOT working at all
-            //TODO: handle the fact that food name is in aria-label. The value of .text() is empty
-        }
-        else {
-            throw new AssistantError('Assistant error: Unknown URL ' + url);
+    function determineFoodCardsObject(currentSite) {
+        switch (currentSite) {
+            case FoodService.teletal: return $$1('.menu-card.uk-card-small'); //looks great
+            case FoodService.pizzaforte: return $$1('.product'); //looks great
+            case FoodService.ordit: return $$1('.food-card'); //looks OK
+            case FoodService.wolt: return $$1('.sc-8c9b94e6-2'); //opacity change works, but no border
+            case FoodService.foodora: return $$1('.product-button-overlay'); //NOT working at all
+            //TODO: handle the fact that foodora has food name is in aria-label. The value of .text() is empty
+            default: throw new AssistantError('Assistant error: determineFoodCardsObject not implemented for ' + currentSite);
         }
     }
-    function determineMainTableElement(url) {
-        if (url.includes('https://www.teletal.hu')) {
-            return $$1('section:contains("Reggeli")').first();
-        }
-        else if (url.includes('https://pizzaforte.hu')) {
-            return $$1('.container.content-top').first();
-        }
-        else {
-            console.log('determineMainTableElement not implemented for URL ' + url);
+    function determineMainTableElement(currentSite) {
+        switch (currentSite) {
+            case FoodService.teletal: return $$1('section:contains("Reggeli")').first();
+            case FoodService.pizzaforte: return $$1('.container.content-top').first();
+            default: console.warn('determineMainTableElement not implemented for site ' + currentSite);
         }
     }
     function insertFeedbackText(uc) {
-        var $mainTable = determineMainTableElement(location.href);
+        const currentSite = getCurrentSite();
+        var $mainTable = determineMainTableElement(currentSite);
         if ($mainTable === undefined)
             return;
         let feedbackText = (uc === undefined) ?
             `DishDecider Assistant Info: Tampermonkey script will NOT run. Could not identify user.` :
             `
       DishDecider Assistant Info: Tampermonkey script is running based on the preferences of ${uc.name}.<br/>
-      When pressing key 1/2, every visible item\'s title will be evaluated.
+      When pressing key 1/2, every visible item\'s title will be evaluated.<br/>
       Results will be indicated by color code / opacity.
     `;
         if (uc === undefined)
             return;
-        if (location.href.includes('https://www.teletal.hu')) {
+        if ([FoodService.teletal].includes(currentSite)) {
             feedbackText += 'Ingredients check only happens when an item is added to the basket.<br/>';
         }
         insertFeedbackTextBeforeElementIfNeeded($mainTable, feedbackText);

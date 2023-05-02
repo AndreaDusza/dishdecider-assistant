@@ -13,7 +13,6 @@
 // ----------------------------------------------------------------
 
 // Constants
-
 const fruitsList = 'gyümölcs|alma|körte|barack|szilva|cseresznye|málna|eper|meggy|citrom|narancs|szőlő|'
 + 'dinnye|kivi|banán|ananász|datolya|mangó|szeder|ribizli|áfonya|'
 + 'barack|kaki|mandarin|karambola|kókusz|lime|pomelo|csipkebogyó|gránátalma|füge|'
@@ -33,7 +32,7 @@ const USER_CONFIGS = [
                 '(sertés|kacsa|liba|csirke|szárnyas).?máj',
                ].concat(FishSpeciesList),
     favList1: ['kijevi', 'brassói', 'lyoni', 'floridai', 'borzas',
-               'bors.*(mártás|szósz)',
+               'bors.{0,5}(mártás|szósz)',
                '(' + fruitsList + ').*leves',
                'cheddar',
                'padlizsánkrém',
@@ -54,16 +53,16 @@ const USER_CONFIGS = [
 
     console.log('Minimal DishDecider Assistant script started...');
 
-    let currentURL = location.href;
+    let currentUrlHostname = location.hostname;
     let uc = USER_CONFIGS[0];
 
-    insertAssistantInformationTextBeforeElement(uc.userNamesToFind[0], determineMainTableElement(currentURL));
+    insertAssistantInformationTextBeforeElement(uc.userNamesToFind[0], determineMainTableElement(currentUrlHostname));
 
     // Setup event hander: every time when user presses key '2', insertAssistantInformationTextBeforeElement() and checkAllVisibleFoods() will run.
     // It is enough to run the below lines only once inside the IIFE, and the event handler will be triggered at every key press, as long as the page is not refreshed.
     $(document).on('keydown', event => {
         if (event.key === '2') {
-            insertAssistantInformationTextBeforeElement(uc.userNamesToFind[0], determineMainTableElement(currentURL));
+            insertAssistantInformationTextBeforeElement(uc.userNamesToFind[0], determineMainTableElement(currentUrlHostname));
             checkAllVisibleFoods();
         }
     });
@@ -72,7 +71,7 @@ const USER_CONFIGS = [
         console.log("Running checkAllVisibleFoods()");
 
         //list of food card elements
-        let $allVisibleFoodCards = determineFoodCardElementsObject(currentURL);
+        let $allVisibleFoodCards = determineFoodCardElementsObject(currentUrlHostname);
 
         //console.log($allVisibleFoodCards);
         $allVisibleFoodCards.each(function() {
@@ -107,35 +106,34 @@ const USER_CONFIGS = [
         return false;
     }
 
-    function determineMainTableElement(url){
-        if (url.includes('https://www.teletal.hu')) {
-            return $('section:contains("Reggeli")').first();
-        } else if (url.includes('https://pizzaforte.hu')) {
-            return $('.container.content-top').first();
-        } else {
-            throw new Error('Assistant error: Unknown URL ' + url);
+    function determineMainTableElement(hostname){
+        switch (hostname) {
+            case 'www.teletal.hu': return $('section:contains("Reggeli")').first();
+            case 'pizzaforte.hu': return $('.container.content-top').first();
         }
+        throw new Error('Assistant error: Unknown hostname ' + hostname);
     }
 
-    function determineFoodCardElementsObject(url){
-        if (url.includes('https://www.teletal.hu')) {
-            return $('.menu-card.uk-card-small');
-        } else if (url.includes('https://pizzaforte.hu')) {
-            return $('.product');
-        } else {
-            throw new Error('Assistant error: Unknown URL ' + url);
+    function determineFoodCardElementsObject(hostname){
+        switch (hostname) {
+            case 'www.teletal.hu': return $('.menu-card.uk-card-small');
+            case 'pizzaforte.hu': return  $('.product');
         }
+        throw new Error('Assistant error: Unknown hostname ' + hostname);
     }
 
     function insertAssistantInformationTextBeforeElement(userName, targetElement){
+        let newDivId = 'fo-assistant-feedback';
+        
+        // If info text div is already on the page, do not insert again
+        if (document.getElementById(newDivId)) {
+            return;
+        }
+
         let newDivText = "Minimal DishDecider script is running based on the preferences of " + userName + ".<br/> "
             + "When pressing key 2, every visible item's title will be evaluated. Results will be indicated by color code / opacity.<br/> " ;
 
-        // If info text is already on the page, do not insert again
-        if (anyElementinTheDomContainsText(newDivText.substring(0,30)))
-            return;
-
-        let $newDiv = $('<div><br/>' + newDivText + '</div>');
+        let $newDiv = $('<div id=' + newDivId + '>' + newDivText + '</div>');
 
         $newDiv.css({
             'width': '50%', // set a fixed width for the div
@@ -149,6 +147,7 @@ const USER_CONFIGS = [
     }
 
     function anyElementinTheDomContainsText(text){
-         return $(`*:contains(${CSS.escape(text)})`).length > 0;
+         //return $(`*:contains(${CSS.escape(text)})`).length > 0;
+         return document.body.innerText.includes(text);
     }
 })();
