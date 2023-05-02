@@ -58,6 +58,11 @@ const USER_CONFIGS = [
 Regular expressions are supported in all of the above lists.  
 Use https://regex101.com/ and https://chat.openai.com/ to understand and create regular expressions.
 
+## Screenshots
+| Before             |  After |
+:-------------------------:|:-------------------------:
+![pizzaforte-before](https://user-images.githubusercontent.com/5956233/235608023-ff4bd404-32d4-4b56-a6d6-89e4afabc767.PNG) | ![pizzaforte-after](https://user-images.githubusercontent.com/5956233/235608035-9d7e88dd-e450-4897-a08c-a159190b7e01.PNG)
+
 ## Trying to learn to create a userscript?
 There is a simplified version of the Assistant, for learning purposes.  
 In case of the "real" assistant script, you can only experiment with the user preferences in Tampermonkey, but you cannot change the program code. However, in case of the learning sample, you can experiment with the full code however you want.  
