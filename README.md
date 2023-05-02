@@ -14,7 +14,7 @@ Language: Hungarian/English mix.
 3. Copy-paste the below file in the code editor.
    * https://github.com/AndreaDusza/dishdecider-assistant/blob/master/examples/for-tampermonkey.js
 3. In the userscript header, the '// @match' lines show which websites are supported.
-4. Save the project and make sure that both the project and the userscript manager is enabled. Then go to a supported food order website and check if the userscript is running, by opening Developer Tools and checking the console log. It should print 'Tampermonkey script started...'.
+4. Save the project and make sure that both the project and the userscript manager is enabled. Then go to a supported food order website and check if the userscript is running, by opening Developer Tools and checking the console log. It should print something like 'DishDecider Assistant script started...'.
 5. In the userscript, take a look at the USER_CONFIGS variable (a sample preference configuration) but do not modify it yet. 
 5. Keep scrolling on the website to trigger the Assistant (or press key '2'). You should see some items being highlighted as either good or bad - given that they match the sample preferences.
 6. If the above works, you can now start customizing USER_CONFIGS.

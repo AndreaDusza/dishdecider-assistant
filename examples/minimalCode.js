@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Minimal Food Order Assistant - Learning Sample
+// @name         Minimal DishDecider Assistant - Learning Sample
 // @namespace    http://tampermonkey.net/
 // @version      0.1
 // @description  Indicate unwanted ingredients
@@ -28,7 +28,7 @@ const FishSpeciesList = [
 
 const USER_CONFIGS = [
 {
-    userNamesToFind: ["Minimal Food Order Assistant Test User"],
+    userNamesToFind: ["Minimal DishDecider Assistant Test User"],
     blacklist: ['gomb(a|á)', 'milánói',
                 '(sertés|kacsa|liba|csirke|szárnyas).?máj',
                ].concat(FishSpeciesList),
@@ -52,7 +52,7 @@ const USER_CONFIGS = [
 (function() {
     'use strict';
 
-    console.log('Tampermonkey script started...');
+    console.log('Minimal DishDecider Assistant script started...');
 
     let currentURL = location.href;
     let uc = USER_CONFIGS[0];
@@ -128,7 +128,7 @@ const USER_CONFIGS = [
     }
 
     function insertAssistantInformationTextBeforeElement(userName, targetElement){
-        let newDivText = "Tampermonkey script is running based on the preferences of " + userName + ".<br/> "
+        let newDivText = "Minimal DishDecider script is running based on the preferences of " + userName + ".<br/> "
             + "When pressing key 2, every visible item's title will be evaluated. Results will be indicated by color code / opacity.<br/> " ;
 
         // If info text is already on the page, do not insert again

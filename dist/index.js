@@ -1633,16 +1633,15 @@
 
     async function main() {
         try {
-            console.log('Tampermonkey script started...');
+            console.log('DishDecider Assistant script started...');
             const currentSite = getCurrentSite();
-            //alert('Tampermonkey script started...');
             const uc = getCurrentUserConfig();
             if ([FoodService.ordit].includes(currentSite)) {
                 await waitForJquery();
             }
             insertFeedbackText(uc);
-            console.log(`Food Order Assistant - user name: ${uc.name}`);
-            console.log('Food Order Assistant - user preferences:', uc.config);
+            console.log(`DishDecider Assistant - user name: ${uc.name}`);
+            console.log('DishDecider Assistant - user preferences:', uc.config);
             mainWithUserConfig(uc);
         }
         catch (error) {
@@ -1670,7 +1669,7 @@
         return { name, config };
     }
     function loadUserConfigsFromStorage() {
-        const setting = localStorage.getItem('food-order-assistant-config');
+        const setting = localStorage.getItem('dishdecider-assistant-config');
         if (!setting) {
             return [];
         }
@@ -1816,9 +1815,9 @@
         if ($mainTable === undefined)
             return;
         let feedbackText = (uc === undefined) ?
-            `Food Order Assistant Info: Tampermonkey script will NOT run. Could not identify user.` :
+            `DishDecider Assistant Info: Tampermonkey script will NOT run. Could not identify user.` :
             `
-      Food Order Assistant Info: Tampermonkey script is running based on the preferences of ${uc.name}.<br/>
+      DishDecider Assistant Info: Tampermonkey script is running based on the preferences of ${uc.name}.<br/>
       When pressing key 1/2, every visible item\'s title will be evaluated.
       Results will be indicated by color code / opacity.
     `;

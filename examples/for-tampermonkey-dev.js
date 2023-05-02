@@ -1,6 +1,6 @@
 // ==UserScript==
-// @name         Food Order Assistant Dev
-// @namespace    https://github.com/AndreaDusza/teletal-assistant
+// @name         DishDecider Assistant Dev
+// @namespace    https://github.com/AndreaDusza/dishdecider-assistant
 // @version      0.1
 // @description  Indicate unwanted and favorite foods or ingredients
 // @author       Andrea Dusza, Tamas Laszlo Hegedus, ChatGPT
@@ -17,12 +17,12 @@ const USER_CONFIGS = [];
 
 (() => {
   'use strict';
-  localStorage.setItem('food-order-assistant-config', JSON.stringify(USER_CONFIGS));
+  localStorage.setItem('dishdecider-assistant-config', JSON.stringify(USER_CONFIGS));
   const URL_DEV = 'http://localhost:8078/index.js';
 
   main().catch(error => {
-    alert(`Failed to load Food Order Assistant`);
-    console.error(`Failed to load Food Order Assistant`, error);
+    alert(`Failed to load DishDecider Assistant`);
+    console.error(`Failed to load DishDecider Assistant`, error);
   });
 
   async function main() {
