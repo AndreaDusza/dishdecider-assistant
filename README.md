@@ -9,15 +9,16 @@ Language: Hungarian/English mix.
 
 ## Setup & Run
 
-1. Install the Tampermonkey extension (or any other userscript manager) in your browser.
+1. Install the Tampermonkey extension (or any other userscript manager) in your browser.   
+https://www.tampermonkey.net/  
+(This is a general utility, created by Jan Biniok.)
 2. Go to Tampermonkey's Dashboard. Create a new project.
-3. Copy-paste the below file in the code editor.
-   * https://github.com/AndreaDusza/dishdecider-assistant/blob/master/examples/for-tampermonkey.js
+3. Copy-paste the below userscript file in the code editor.  
+https://github.com/AndreaDusza/dishdecider-assistant/blob/master/examples/for-tampermonkey.js
 3. In the userscript header, the '// @match' lines show which websites are supported.
-4. Save the project and make sure that both the project and the userscript manager is enabled. Then go to a supported food order website and check if the userscript is running, by opening Developer Tools and checking the console log. It should print something like 'DishDecider Assistant script started...'.
-5. In the userscript, take a look at the USER_CONFIGS variable (a sample preference configuration) but do not modify it yet. 
-5. Keep scrolling on the website to trigger the Assistant (or press key '2'). You should see some items being highlighted as either good or bad - given that they match the sample preferences.
-6. If the above works, you can now start customizing USER_CONFIGS.
+4. In the userscript, take a look at the USER_CONFIGS variable (a sample preference configuration) but do not modify it yet. 
+5. Save the project and make sure that both the project and the userscript manager itself is enabled. Then go to a supported food order website, and refresh the page. Keep scrolling to trigger the Assistant (or press key '2'). You should see some items being highlighted as either good or bad - given that they match the sample preferences.
+6. If the above does not work, look at the 'Known bugs / Workarounds' section in this doc and try to fix. When there are no more issues, you can start customizing USER_CONFIGS.
 
 ## Example configs
 ```
@@ -69,14 +70,20 @@ In case of the "real" assistant script, you can only experiment with the user pr
 You can try changing the sample to support your favorite food delivery site: it might be very easy!
 1. Go to Tampermonkey's Dashboard.
 2. Disable the "real" assistant script. Otherwise, it would interfere with the learning sample script.
-3. Create another new project in Tampermonkey and copy-paste the below file in the code editor.
-   * https://raw.githubusercontent.com/AndreaDusza/dishdecider-assistant/master/examples/minimalCode.js
+3. Create another new project in Tampermonkey and copy-paste the below file in the code editor.  
+https://github.com/AndreaDusza/dishdecider-assistant/blob/master/examples/minimalCode.js
 
 In the learning sample, scrolling does not trigger the Assistant: you have to press key '2'.
    
-## Notes
-If you get an error saying "$ is not defined" or "$$1 is not defined", try adding the below line to the Tampermonkey script header:  
+## Known bugs / Workarounds
+
+ * As of 2023 May on Ordit.hu: If you get an error saying "$ is not defined" or "$$1 is not defined", try adding the below line to the Tampermonkey script header:  
 ```
 // @require      https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js  
 ```
-It might fix the issue for the given site but break another site.  
+It can fix the issue for the given site but might break another site.  
+
+ * If you get an error due to the the raw Github URL being not available (because of a proxy), try replacing with alternative URL:   
+https://tokeletesosszhang.hu/dishdecider/index.js
+
+ * Best way to confirm that the usercript did start running on the page: open Developer Tools and check the console log. It should print something like 'DishDecider Assistant script started...'.
