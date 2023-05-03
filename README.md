@@ -5,9 +5,10 @@ When you visit a supported food delivery website, the Assistant marks certain fo
 If you have some programming skills, you can customize your dietary preferences to the extreme.
 
 Supported food delivery services as of 2023 May:
+  * Wolt.com
   * Teletal.hu
   * Ordit.hu
-  * Pizzaforte.hu
+  * Pizzaforte.hu  
 
 Supported browsers: Chrome. May or may not also work in Firefox, Safari etc...  
 

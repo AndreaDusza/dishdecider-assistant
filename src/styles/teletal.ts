@@ -20,9 +20,9 @@ export function patchTeletalStyles() {
   }
 
 
-  if ($('#assistant-teletal-styles').length === 0) {
+  if ($('#fo-assistant-styles').length === 0) {
     $(document.body).append(`
-      <style id="assistant-teletal-styles">
+      <style id="fo-assistant-styles">
         .menu-slider-logged, .menu-slider {
           margin-bottom: 0;
           height: unset;

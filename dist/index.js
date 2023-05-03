@@ -1474,9 +1474,9 @@
     }
 
     function patchPizzaforteStyles() {
-        if ($$1('#assistant-pizzaforte-styles').length === 0) {
+        if ($$1('#fo-assistant-styles').length === 0) {
             $$1(document.body).append(`
-      <style id="assistant-pizzaforte-styles">
+      <style id="fo-assistant-styles">
         .product {
           border-left: 16px solid #eeeeee;
         }
@@ -1509,9 +1509,9 @@
             });
             $cell.addClass('.fo-assistant-styled');
         }
-        if ($$1('#assistant-teletal-styles').length === 0) {
+        if ($$1('#fo-assistant-styles').length === 0) {
             $$1(document.body).append(`
-      <style id="assistant-teletal-styles">
+      <style id="fo-assistant-styles">
         .menu-slider-logged, .menu-slider {
           margin-bottom: 0;
           height: unset;
@@ -1543,6 +1543,30 @@
         }
         .menu-card > .menu-cell-text.menu-cell-text-description {
           flex: 1 1 auto;
+        }
+      </style>
+    `);
+        }
+    }
+
+    function patchOrditStyles() {
+        if ($$1('#fo-assistant-styles').length === 0) {
+            $$1(document.body).append(`
+      <style id="fo-assistant-styles">
+        .food-card {
+          border: 5px solid #eeeeee;
+        }
+      </style>
+    `);
+        }
+    }
+
+    function patchWoltStyles() {
+        if ($$1('#fo-assistant-styles').length === 0) {
+            $$1(document.body).append(`
+      <style id="fo-assistant-styles">
+        [data-test-id="horizontal-item-card"] {
+          border: 5px solid #eeeeee;
         }
       </style>
     `);
@@ -1756,8 +1780,12 @@
             refreshColoring();
         });
         function refreshColoring() {
-            patchTeletalStyles();
-            patchPizzaforteStyles();
+            switch (getCurrentSite()) {
+                case FoodService.teletal: patchTeletalStyles();
+                case FoodService.pizzaforte: patchPizzaforteStyles();
+                case FoodService.ordit: patchOrditStyles();
+                case FoodService.wolt: patchWoltStyles();
+            }
             checkAllVisibleFoods(2);
         }
         function checkAllVisibleFoods(acceptanceLevel) {
@@ -1768,7 +1796,7 @@
             for (const $food of jxItems($allVisibleFoodCardObjects)) {
                 const foodText = $food.text();
                 const likeLevel = evaluateCardText(foodText, uc.config, acceptanceLevel);
-                switch (foodText) {
+                switch (likeLevel) {
                     case LikeLevel.test:
                         console.log('Test result: ' + foodText);
                         break;
@@ -1782,10 +1810,10 @@
     }
     function determineFoodCardsObject(currentSite) {
         switch (currentSite) {
-            case FoodService.teletal: return $$1('.menu-card.uk-card-small'); //looks great
-            case FoodService.pizzaforte: return $$1('.product'); //looks great
-            case FoodService.ordit: return $$1('.food-card'); //looks OK
-            case FoodService.wolt: return $$1('.sc-8c9b94e6-2'); //opacity change works, but no border
+            case FoodService.teletal: return $$1('.menu-card.uk-card-small');
+            case FoodService.pizzaforte: return $$1('.product');
+            case FoodService.ordit: return $$1('.food-card');
+            case FoodService.wolt: return $$1('[data-test-id=horizontal-item-card]');
             case FoodService.foodora: return $$1('.product-button-overlay'); //NOT working at all
             //TODO: handle the fact that foodora has food name is in aria-label. The value of .text() is empty
             default: throw new AssistantError('Assistant error: determineFoodCardsObject not implemented for ' + currentSite);

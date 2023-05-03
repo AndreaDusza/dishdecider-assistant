@@ -5,6 +5,8 @@ import { FoodService, getCurrentSite } from './services';
 import { applyHighlightToCellStyle } from './styles/common';
 import { patchPizzaforteStyles } from './styles/pizzaforte';
 import { patchTeletalStyles } from './styles/teletal';
+import { patchOrditStyles } from './styles/ordit';
+import { patchWoltStyles } from './styles/wolt';
 import { LikeLevel, UserConfig } from './userconfig';
 import { AndiConfig } from './userconfig.andi';
 import { HegeConfig } from './userconfig.hege';
@@ -168,8 +170,13 @@ function mainWithUserConfig(uc: CurrentUserConfig) {
   });
 
   function refreshColoring() {
-    patchTeletalStyles();
-    patchPizzaforteStyles();
+    switch (getCurrentSite()) {
+      case FoodService.teletal:  patchTeletalStyles();
+      case FoodService.pizzaforte: patchPizzaforteStyles();
+      case FoodService.ordit: patchOrditStyles();
+      case FoodService.wolt: patchWoltStyles();
+      default: ;
+    }
     checkAllVisibleFoods(2);
   }
 
@@ -188,7 +195,7 @@ function mainWithUserConfig(uc: CurrentUserConfig) {
         uc.config,
         acceptanceLevel,
       );
-      switch (foodText) {
+      switch (likeLevel) {
         case LikeLevel.test:
           console.log('Test result: ' + foodText);
           break;
@@ -203,10 +210,10 @@ function mainWithUserConfig(uc: CurrentUserConfig) {
 
 function determineFoodCardsObject(currentSite: FoodService){
   switch (currentSite) {
-    case FoodService.teletal: return $('.menu-card.uk-card-small');  //looks great
-    case FoodService.pizzaforte: return $('.product');                  //looks great
-    case FoodService.ordit: return $('.food-card');                //looks OK
-    case FoodService.wolt: return $('.sc-8c9b94e6-2');            //opacity change works, but no border
+    case FoodService.teletal: return $('.menu-card.uk-card-small');
+    case FoodService.pizzaforte: return $('.product');
+    case FoodService.ordit: return $('.food-card');
+    case FoodService.wolt: return $('[data-test-id=horizontal-item-card]');
     case FoodService.foodora: return $('.product-button-overlay');   //NOT working at all
    //TODO: handle the fact that foodora has food name is in aria-label. The value of .text() is empty
     default: throw new AssistantError('Assistant error: determineFoodCardsObject not implemented for ' + currentSite);

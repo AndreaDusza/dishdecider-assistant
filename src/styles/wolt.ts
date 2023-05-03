@@ -1,11 +1,11 @@
 import { $ } from '../provided';
 
-export function patchPizzaforteStyles() {
+export function patchWoltStyles() {
   if ($('#fo-assistant-styles').length === 0) {
     $(document.body).append(`
       <style id="fo-assistant-styles">
-        .product {
-          border-left: 16px solid #eeeeee;
+        [data-test-id="horizontal-item-card"] {
+          border: 5px solid #eeeeee;
         }
       </style>
     `);
