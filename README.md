@@ -2,9 +2,15 @@
 
 DishDecider Assistant is a userscript that can run in a desktop browser extension.  
 When you visit a supported food delivery website, the Assistant marks certain foods on the menu as unwanted and highlights the ones that you will probably like, based on your preferences.  
-If you have some programming skills, you can customize your dietary preferences to the extreme.  
-Built mainly for Teletal.hu but also supports a few other food delivery services.  
+If you have some programming skills, you can customize your dietary preferences to the extreme.
+
+Supported food delivery services as of 2023 May:
+  * Teletal.hu
+  * Ordit.hu
+  * Pizzaforte.hu
+
 Supported browsers: Chrome. May or may not also work in Firefox, Safari etc...  
+
 Language: Hungarian/English mix.
 
 ## Setup & Run
