@@ -110,8 +110,8 @@ const USER_CONFIGS = [
         switch (hostname) {
             case 'www.teletal.hu': return $('section:contains("Reggeli")').first();
             case 'pizzaforte.hu': return $('.container.content-top').first();
+            default: console.warn('DishDecider Assistant warning: determineMainTableElement not implemented for site ' + hostname);
         }
-        throw new Error('Assistant error: Unknown hostname ' + hostname);
     }
 
     function determineFoodCardElementsObject(hostname){
@@ -119,10 +119,12 @@ const USER_CONFIGS = [
             case 'www.teletal.hu': return $('.menu-card.uk-card-small');
             case 'pizzaforte.hu': return  $('.product');
         }
-        throw new Error('Assistant error: Unknown hostname ' + hostname);
+        throw new Error('DishDecider Assistant error: Unknown hostname ' + hostname);
     }
 
     function insertAssistantInformationTextBeforeElement(userName, targetElement){
+        if (typeof targetElement === 'undefined' || targetElement === null) return;
+        
         let newDivId = 'fo-assistant-feedback';
         
         // If info text div is already on the page, do not insert again

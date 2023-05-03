@@ -6,6 +6,7 @@ export enum FoodService {
   wolt = 'wolt',
   ordit = 'ordit',
   foodora = 'foodora',
+  interfood = 'interfood',
 }
 
 export function getCurrentSite(): FoodService {
@@ -17,6 +18,7 @@ export function getCurrentSite(): FoodService {
     case 'wolt.com': return FoodService.wolt;
     case 'app.ordit.hu': return FoodService.ordit;
     case 'www.foodora.hu': return FoodService.foodora;
+    case 'www.interfood.hu': return FoodService.interfood;
   }
   throw new AssistantError(`Assistant error: Unknown URL '${hostname}'`);
 }

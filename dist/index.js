@@ -1424,6 +1424,7 @@
         FoodService["wolt"] = "wolt";
         FoodService["ordit"] = "ordit";
         FoodService["foodora"] = "foodora";
+        FoodService["interfood"] = "interfood";
     })(FoodService || (FoodService = {}));
     function getCurrentSite() {
         const hostname = location.hostname;
@@ -1434,6 +1435,7 @@
             case 'wolt.com': return FoodService.wolt;
             case 'app.ordit.hu': return FoodService.ordit;
             case 'www.foodora.hu': return FoodService.foodora;
+            case 'www.interfood.hu': return FoodService.interfood;
         }
         throw new AssistantError(`Assistant error: Unknown URL '${hostname}'`);
     }
@@ -1444,8 +1446,8 @@
         }
     }
 
-    function applyHighlightToCellStyle($food, likeLevel) {
-        myApplyCss($food, getStyleForLevel(likeLevel));
+    function applyDefaultHighlightToCellStyle($food, likeLevel) {
+        myApplyCss($food, getDefaultStyleForLevel(likeLevel));
         $food.addClass('fo-assistant-styled');
     }
     function myApplyCss($elem, { children, ...rest }) {
@@ -1454,20 +1456,20 @@
             myApplyCss($elem.children(), children);
         }
     }
-    function getStyleForLevel(level) {
+    function getDefaultStyleForLevel(level) {
         switch (level) {
             case LikeLevel.blacklist:
                 return { 'border-color': '#ff6060', children: { opacity: '0.3' } };
-            case LikeLevel.test:
-                return { 'border-color': 'yellow' };
             case LikeLevel.warn:
                 return { 'border-color': 'orange' };
             case LikeLevel.neutral:
                 return { 'border-color': '#e0e0e0' };
-            case LikeLevel.favorite1:
-                return { 'border-color': '#60d860' };
             case LikeLevel.favorite2:
                 return { 'border-color': '#a0e0a0' };
+            case LikeLevel.favorite1:
+                return { 'border-color': '#60d860' };
+            case LikeLevel.test:
+                return { 'border-color': 'yellow' };
             default:
                 throw new UnreachableCaseError(level);
         }
@@ -1567,6 +1569,37 @@
       <style id="fo-assistant-styles">
         [data-test-id="horizontal-item-card"] {
           border: 5px solid #eeeeee;
+        }
+      </style>
+    `);
+        }
+    }
+
+    function patchInterfoodStyles() {
+        $$1(".food-etlapsor-style").each(function () {
+            $$1(this).removeAttr("style");
+        });
+        if ($$1('#fo-assistant-styles').length === 0) {
+            $$1(document.body).append(`
+      <style id="fo-assistant-styles">
+        .fo-assistant-likelevel-${LikeLevel.blacklist} {
+            background-color: #ff6060;
+            opacity: 0.3;
+        }
+        .fo-assistant-likelevel-${LikeLevel.warn} {
+            background-color: orange;
+        }
+        .fo-assistant-likelevel-${LikeLevel.neutral} {
+            background-color: #e0e0e0;
+        }
+        .fo-assistant-likelevel-${LikeLevel.favorite2} {
+            background-color: #a0e0a0;
+        }
+        .fo-assistant-likelevel-${LikeLevel.favorite1} {
+          background-color: #60d860;
+        }
+        .fo-assistant-likelevel-${LikeLevel.test} {
+            background-color: yellow;
         }
       </style>
     `);
@@ -1785,6 +1818,7 @@
                 case FoodService.pizzaforte: patchPizzaforteStyles();
                 case FoodService.ordit: patchOrditStyles();
                 case FoodService.wolt: patchWoltStyles();
+                case FoodService.interfood: patchInterfoodStyles();
             }
             checkAllVisibleFoods(2);
         }
@@ -1804,7 +1838,10 @@
                         console.log('Warning: ' + foodText);
                         break;
                 }
-                applyHighlightToCellStyle($food, likeLevel);
+                if (![FoodService.interfood].includes(getCurrentSite())) {
+                    applyDefaultHighlightToCellStyle($food, likeLevel);
+                }
+                $food.addClass('fo-assistant-likelevel-' + likeLevel);
             }
         }
     }
@@ -1816,6 +1853,7 @@
             case FoodService.wolt: return $$1('[data-test-id=horizontal-item-card]');
             case FoodService.foodora: return $$1('.product-button-overlay'); //NOT working at all
             //TODO: handle the fact that foodora has food name is in aria-label. The value of .text() is empty
+            case FoodService.interfood: return $$1('.cell');
             default: throw new AssistantError('Assistant error: determineFoodCardsObject not implemented for ' + currentSite);
         }
     }

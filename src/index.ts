@@ -2,11 +2,12 @@ import { fromEvent, throttleTime } from 'rxjs';
 import { evaluateCardText } from './logic';
 import { $, UIkit, waitForJquery } from './provided';
 import { FoodService, getCurrentSite } from './services';
-import { applyHighlightToCellStyle } from './styles/common';
+import { applyDefaultHighlightToCellStyle } from './styles/common';
 import { patchPizzaforteStyles } from './styles/pizzaforte';
 import { patchTeletalStyles } from './styles/teletal';
 import { patchOrditStyles } from './styles/ordit';
 import { patchWoltStyles } from './styles/wolt';
+import { patchInterfoodStyles } from './styles/interfood';
 import { LikeLevel, UserConfig } from './userconfig';
 import { AndiConfig } from './userconfig.andi';
 import { HegeConfig } from './userconfig.hege';
@@ -175,6 +176,7 @@ function mainWithUserConfig(uc: CurrentUserConfig) {
       case FoodService.pizzaforte: patchPizzaforteStyles();
       case FoodService.ordit: patchOrditStyles();
       case FoodService.wolt: patchWoltStyles();
+      case FoodService.interfood: patchInterfoodStyles();
       default: ;
     }
     checkAllVisibleFoods(2);
@@ -203,7 +205,10 @@ function mainWithUserConfig(uc: CurrentUserConfig) {
           console.log('Warning: ' + foodText);
           break;
       }
-      applyHighlightToCellStyle($food, likeLevel);
+      if (![FoodService.interfood].includes(getCurrentSite())){
+        applyDefaultHighlightToCellStyle($food, likeLevel);
+      }
+      $food.addClass('fo-assistant-likelevel-' + likeLevel);
     }
   }
 }
@@ -216,9 +221,11 @@ function determineFoodCardsObject(currentSite: FoodService){
     case FoodService.wolt: return $('[data-test-id=horizontal-item-card]');
     case FoodService.foodora: return $('.product-button-overlay');   //NOT working at all
    //TODO: handle the fact that foodora has food name is in aria-label. The value of .text() is empty
+    case FoodService.interfood: return $('.cell'); 
     default: throw new AssistantError('Assistant error: determineFoodCardsObject not implemented for ' + currentSite);
   }
 }
+
 
 function determineMainTableElement(currentSite: FoodService){
   switch (currentSite) {

@@ -7,6 +7,7 @@
 // @match        https://www.teletal.hu/etlap*
 // @match        https://pizzaforte.hu/*
 // @match        https://app.ordit.hu/*
+// @match        https://www.interfood.hu/etlap-es-rendeles/*
 // @match        https://wolt.com/*
 // @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
 // @grant        none
