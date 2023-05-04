@@ -1397,22 +1397,6 @@
 
     let UIkit = self.UIkit;
     let $$1 = self.$;
-    async function waitForJquery() {
-        return $$1 = await poll({
-            fn: i => {
-                //console.log({
-                //  i,
-                //  x1: !!(self as any).$,
-                //  x2: '$' in self,
-                //  x3: self === top,
-                //  x4: self === window,
-                //  self,
-                //});
-                return self.$;
-            },
-            timeout: 3000,
-        });
-    }
 
     class AssistantError extends Error {
     }
@@ -1695,9 +1679,6 @@
             const currentSite = getCurrentSite();
             await sleep(100); //sleep(100) seems to improve the success rate of finding the user in Ordit
             const uc = getCurrentUserConfig(); //TODO pizzaforte had issues, even when preceded with sleep(3000). why?
-            if ([FoodService.ordit].includes(currentSite)) {
-                await waitForJquery();
-            }
             insertFeedbackText(uc);
             console.log(`DishDecider Assistant - user name: ${uc.name}`);
             console.log('DishDecider Assistant - user preferences:', uc.config);

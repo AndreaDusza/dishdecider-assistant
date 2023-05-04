@@ -28,11 +28,7 @@ async function main() {
     await sleep(100); //sleep(100) seems to improve the success rate of finding the user in Ordit
     const uc = getCurrentUserConfig();  //TODO pizzaforte had issues, even when preceded with sleep(3000). why?
 
-    if ([FoodService.ordit].includes(currentSite)) {
-      await waitForJquery();
-    }
     insertFeedbackText(uc);
-
 
     console.log(`DishDecider Assistant - user name: ${uc.name}`);
     console.log('DishDecider Assistant - user preferences:', uc.config);
