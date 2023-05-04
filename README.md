@@ -7,6 +7,7 @@ If you have some programming skills, you can customize your dietary preferences 
 Supported food delivery services as of 2023 May:
   * Wolt.com
   * Teletal.hu
+  * Interfood.hu
   * Ordit.hu
   * Pizzaforte.hu  
 
@@ -84,7 +85,7 @@ In the learning sample, scrolling does not trigger the Assistant: you have to pr
    
 ## Known bugs / Workarounds
 
- * As of 2023 May on Ordit.hu: If you get an error saying "$ is not defined" or "$$1 is not defined", try adding the below line to the Tampermonkey script header:  
+ * As of 2023 May on Ordit.hu and Wolt.com: If you get an error saying "$ is not defined" or "$$1 is not defined", try adding the below line to the Tampermonkey script header:  
 ```
 // @require      https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js  
 ```
@@ -94,3 +95,4 @@ It can fix the issue for the given site but might break another site.
 https://tokeletesosszhang.hu/dishdecider/index.js
 
  * Best way to confirm that the usercript did start running on the page: open Developer Tools and check the console log. It should print something like 'DishDecider Assistant script started...'.
+ * If the food delivery page itself is slow, this will cause the Assistant to be slow as well. In case of Interfood.hu, it can take 30 seconds before the script can take effect. 
