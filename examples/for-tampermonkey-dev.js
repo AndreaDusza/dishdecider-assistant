@@ -20,6 +20,17 @@ const USER_CONFIGS = [];
   'use strict';
   localStorage.setItem('dishdecider-assistant-config', JSON.stringify(USER_CONFIGS));
   const URL_DEV = 'http://localhost:8078/index.js';
+  const URL = URL_DEV;
+
+  /* Troubleshooting:
+
+    Alternative URL:
+    const URL = 'https://tokeletesosszhang.hu/dishdecider/index.js';
+    
+    Require jQuery in the header:
+    // @require      https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js  
+
+  */
 
   main().catch(error => {
     alert(`Failed to load DishDecider Assistant`);
@@ -27,11 +38,11 @@ const USER_CONFIGS = [];
   });
 
   async function main() {
-    const devScript = await fetchGet(URL_DEV);
+    const devScript = await fetchGet(URL);
     eval(devScript);
     for (; ;) {
       await sleep(1000);
-      const newScript = await fetchGet(URL_DEV);
+      const newScript = await fetchGet(URL);
       if (newScript !== devScript) {
         location.reload();
         return;

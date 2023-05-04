@@ -1459,15 +1459,67 @@
         }
     }
 
-    function patchPizzaforteStyles() {
-        if ($$1('#fo-assistant-styles').length === 0) {
+    function applyBorder(selectorString, pxValue) {
+        const styleId = "fo-assistant-styles-border";
+        if ($$1('#' + styleId).length === 0) {
             $$1(document.body).append(`
-      <style id="fo-assistant-styles">
-        .product {
-          border-left: 16px solid #eeeeee;
+      <style id="${styleId}">
+        ${selectorString} {
+          border: ${pxValue}px solid #eeeeee;
         }
       </style>
     `);
+        }
+    }
+    function applyBorderInDirection(direction, selectorString, pxValue) {
+        const styleId = "fo-assistant-styles-border-left";
+        if ($$1('#' + styleId).length === 0) {
+            $$1(document.body).append(`
+        <style id="${styleId}">
+          ${selectorString} {
+            border-${direction}: ${pxValue}px solid #eeeeee;
+          }
+        </style>
+      `);
+        }
+    }
+    function applyOpacity(selectorString, likeLevel, opacityValue) {
+        const styleId = "fo-assistant-styles-opacity";
+        if ($$1('#' + styleId).length === 0) {
+            $$1(document.body).append(`
+        <style id="fo-assistant-styles">
+          .fo-assistant-likelevel-${likeLevel} {
+            opacity: ${opacityValue};
+          }
+        </style>
+      `);
+        }
+    }
+    function applyLikelevelBackgroundColors(selectorString) {
+        const styleId = "fo-assistant-styles-likelevel-background-colors";
+        if ($$1('#' + styleId).length === 0) {
+            $$1(document.body).append(`
+        <style id="fo-assistant-styles">
+            .fo-assistant-likelevel-${LikeLevel.blacklist} {
+                background-color: #ff6060;
+            }
+            .fo-assistant-likelevel-${LikeLevel.warn} {
+                background-color: orange;
+            }
+            .fo-assistant-likelevel-${LikeLevel.neutral} {
+                background-color: #e0e0e0;
+            }
+            .fo-assistant-likelevel-${LikeLevel.favorite2} {
+                background-color: #a0e0a0;
+            }
+            .fo-assistant-likelevel-${LikeLevel.favorite1} {
+                background-color: #60d860;
+            }
+            .fo-assistant-likelevel-${LikeLevel.test} {
+                background-color: yellow;
+            }
+        </style>
+      `);
         }
     }
 
@@ -1535,59 +1587,10 @@
         }
     }
 
-    function patchOrditStyles() {
-        if ($$1('#fo-assistant-styles').length === 0) {
-            $$1(document.body).append(`
-      <style id="fo-assistant-styles">
-        .food-card {
-          border: 5px solid #eeeeee;
-        }
-      </style>
-    `);
-        }
-    }
-
-    function patchWoltStyles() {
-        if ($$1('#fo-assistant-styles').length === 0) {
-            $$1(document.body).append(`
-      <style id="fo-assistant-styles">
-        [data-test-id="horizontal-item-card"] {
-          border: 5px solid #eeeeee;
-        }
-      </style>
-    `);
-        }
-    }
-
     function patchInterfoodStyles() {
         $$1(".food-etlapsor-style").each(function () {
             $$1(this).removeAttr("style");
         });
-        if ($$1('#fo-assistant-styles').length === 0) {
-            $$1(document.body).append(`
-      <style id="fo-assistant-styles">
-        .fo-assistant-likelevel-${LikeLevel.blacklist} {
-            background-color: #ff6060;
-            opacity: 0.3;
-        }
-        .fo-assistant-likelevel-${LikeLevel.warn} {
-            background-color: orange;
-        }
-        .fo-assistant-likelevel-${LikeLevel.neutral} {
-            background-color: #e0e0e0;
-        }
-        .fo-assistant-likelevel-${LikeLevel.favorite2} {
-            background-color: #a0e0a0;
-        }
-        .fo-assistant-likelevel-${LikeLevel.favorite1} {
-          background-color: #60d860;
-        }
-        .fo-assistant-likelevel-${LikeLevel.test} {
-            background-color: yellow;
-        }
-      </style>
-    `);
-        }
     }
 
     const AndiConfig = {
@@ -1686,6 +1689,52 @@
         }
         catch (error) {
             console.error('Initialization error', error);
+        }
+    }
+    function determineMainTableElement(currentSite) {
+        switch (currentSite) {
+            case FoodService.teletal: return $$1('section:contains("Reggeli")').first();
+            case FoodService.pizzaforte: return $$1('.container.content-top').first();
+            default: console.warn('determineMainTableElement not implemented for site ' + currentSite);
+        }
+    }
+    function determineFoodCardsObject(currentSite) {
+        switch (currentSite) {
+            case FoodService.teletal: return $$1('.menu-card.uk-card-small');
+            case FoodService.pizzaforte: return $$1('.product');
+            case FoodService.ordit: return $$1('.food-card');
+            case FoodService.wolt: return $$1('[data-test-id=horizontal-item-card]');
+            case FoodService.foodora: return $$1('.product-button-overlay'); //NOT working at all
+            //TODO: handle the fact that foodora has food name is in aria-label. The value of .text() is empty
+            case FoodService.interfood: return $$1('.cell');
+            default: throw new AssistantError('Assistant error: determineFoodCardsObject not implemented for ' + currentSite);
+        }
+    }
+    function applyStlyeTag(currentSite) {
+        switch (currentSite) {
+            case FoodService.teletal: {
+                patchTeletalStyles();
+                return;
+            }
+            case FoodService.pizzaforte: {
+                applyBorderInDirection('left', '.product', 16);
+                return;
+            }
+            case FoodService.ordit: {
+                applyBorder('.food-card', 5);
+                return;
+            }
+            case FoodService.wolt: {
+                applyBorder('[data-test-id=horizontal-item-card]', 5);
+                return;
+            }
+            case FoodService.interfood: {
+                patchInterfoodStyles();
+                applyOpacity('.cell', LikeLevel.blacklist, 0.3);
+                applyLikelevelBackgroundColors();
+                return;
+            }
+            default: console.warn('applyStlyeTag not implemented for site ' + currentSite);
         }
     }
     function getCurrentUserConfig() {
@@ -1794,13 +1843,7 @@
             refreshColoring();
         });
         function refreshColoring() {
-            switch (getCurrentSite()) {
-                case FoodService.teletal: patchTeletalStyles();
-                case FoodService.pizzaforte: patchPizzaforteStyles();
-                case FoodService.ordit: patchOrditStyles();
-                case FoodService.wolt: patchWoltStyles();
-                case FoodService.interfood: patchInterfoodStyles();
-            }
+            applyStlyeTag(getCurrentSite());
             checkAllVisibleFoods(2);
         }
         function checkAllVisibleFoods(acceptanceLevel) {
@@ -1824,25 +1867,6 @@
                 }
                 $food.addClass('fo-assistant-likelevel-' + likeLevel);
             }
-        }
-    }
-    function determineFoodCardsObject(currentSite) {
-        switch (currentSite) {
-            case FoodService.teletal: return $$1('.menu-card.uk-card-small');
-            case FoodService.pizzaforte: return $$1('.product');
-            case FoodService.ordit: return $$1('.food-card');
-            case FoodService.wolt: return $$1('[data-test-id=horizontal-item-card]');
-            case FoodService.foodora: return $$1('.product-button-overlay'); //NOT working at all
-            //TODO: handle the fact that foodora has food name is in aria-label. The value of .text() is empty
-            case FoodService.interfood: return $$1('.cell');
-            default: throw new AssistantError('Assistant error: determineFoodCardsObject not implemented for ' + currentSite);
-        }
-    }
-    function determineMainTableElement(currentSite) {
-        switch (currentSite) {
-            case FoodService.teletal: return $$1('section:contains("Reggeli")').first();
-            case FoodService.pizzaforte: return $$1('.container.content-top').first();
-            default: console.warn('determineMainTableElement not implemented for site ' + currentSite);
         }
     }
     function insertFeedbackText(uc) {

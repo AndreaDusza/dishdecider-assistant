@@ -30,6 +30,18 @@ const USER_CONFIGS = [
   'use strict';
   localStorage.setItem('dishdecider-assistant-config', JSON.stringify(USER_CONFIGS));
   const URL_PROD = 'https://raw.githubusercontent.com/AndreaDusza/dishdecider-assistant/master/dist/index.js';
+  const URL = URL_PROD;
+
+  /* Troubleshooting:
+
+    Alternative URL:
+    const URL = 'https://tokeletesosszhang.hu/dishdecider/index.js';
+
+    Require jQuery in the header:
+    // @require      https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js  
+
+  */
+
 
   main().catch(error => {
     alert(`Failed to load DishDecider Assistant`);
@@ -37,7 +49,7 @@ const USER_CONFIGS = [
   });
 
   async function main() {
-    eval(await fetchGet(URL_PROD));
+    eval(await fetchGet(URL));
   }
 
   async function fetchGet(url) {

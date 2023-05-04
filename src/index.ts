@@ -3,10 +3,11 @@ import { evaluateCardText } from './logic';
 import { $, UIkit, waitForJquery } from './provided';
 import { FoodService, getCurrentSite } from './services';
 import { applyDefaultHighlightToCellStyle } from './styles/common';
-import { patchPizzaforteStyles } from './styles/pizzaforte';
+import { applyBorder } from './styles/general-styles';
+import { applyBorderInDirection } from './styles/general-styles';
+import { applyOpacity } from './styles/general-styles';
+import { applyLikelevelBackgroundColors } from './styles/general-styles';
 import { patchTeletalStyles } from './styles/teletal';
-import { patchOrditStyles } from './styles/ordit';
-import { patchWoltStyles } from './styles/wolt';
 import { patchInterfoodStyles } from './styles/interfood';
 import { LikeLevel, UserConfig } from './userconfig';
 import { AndiConfig } from './userconfig.andi';
@@ -39,6 +40,55 @@ async function main() {
 }
 
 type CurrentUserConfig = { name: string, config: UserConfig };
+
+function determineMainTableElement(currentSite: FoodService){
+  switch (currentSite) {
+    case FoodService.teletal: return $('section:contains("Reggeli")').first();
+    case FoodService.pizzaforte: return $('.container.content-top').first();
+    default: console.warn('determineMainTableElement not implemented for site ' + currentSite);
+  }
+}
+
+function determineFoodCardsObject(currentSite: FoodService){
+  switch (currentSite) {
+    case FoodService.teletal: return $('.menu-card.uk-card-small');
+    case FoodService.pizzaforte: return $('.product');
+    case FoodService.ordit: return $('.food-card');
+    case FoodService.wolt: return $('[data-test-id=horizontal-item-card]');
+    case FoodService.foodora: return $('.product-button-overlay');   //NOT working at all
+    //TODO: handle the fact that foodora has food name is in aria-label. The value of .text() is empty
+    case FoodService.interfood: return $('.cell'); 
+    default: throw new AssistantError('Assistant error: determineFoodCardsObject not implemented for ' + currentSite);
+  }
+}
+
+function applyStlyeTag(currentSite: FoodService) {
+  switch (currentSite) {
+    case FoodService.teletal: {
+      patchTeletalStyles(); 
+      return;
+    }
+    case FoodService.pizzaforte: {
+      applyBorderInDirection('left','.product', 16); 
+      return;
+    }
+    case FoodService.ordit: {
+      applyBorder('.food-card', 5); 
+      return;
+    }
+    case FoodService.wolt:  {
+      applyBorder('[data-test-id=horizontal-item-card]', 5); 
+      return;
+    }
+    case FoodService.interfood: {
+      patchInterfoodStyles();
+      applyOpacity('.cell', LikeLevel.blacklist, 0.3); 
+      applyLikelevelBackgroundColors('.cell');
+      return;
+    }
+    default: console.warn('applyStlyeTag not implemented for site ' + currentSite);
+  }
+}
 
 function getCurrentUserConfig(): CurrentUserConfig {
   const storedUserConfigs = loadUserConfigsFromStorage();
@@ -167,14 +217,7 @@ function mainWithUserConfig(uc: CurrentUserConfig) {
   });
 
   function refreshColoring() {
-    switch (getCurrentSite()) {
-      case FoodService.teletal:  patchTeletalStyles();
-      case FoodService.pizzaforte: patchPizzaforteStyles();
-      case FoodService.ordit: patchOrditStyles();
-      case FoodService.wolt: patchWoltStyles();
-      case FoodService.interfood: patchInterfoodStyles();
-      default: ;
-    }
+    applyStlyeTag(getCurrentSite());
     checkAllVisibleFoods(2);
   }
 
@@ -206,28 +249,6 @@ function mainWithUserConfig(uc: CurrentUserConfig) {
       }
       $food.addClass('fo-assistant-likelevel-' + likeLevel);
     }
-  }
-}
-
-function determineFoodCardsObject(currentSite: FoodService){
-  switch (currentSite) {
-    case FoodService.teletal: return $('.menu-card.uk-card-small');
-    case FoodService.pizzaforte: return $('.product');
-    case FoodService.ordit: return $('.food-card');
-    case FoodService.wolt: return $('[data-test-id=horizontal-item-card]');
-    case FoodService.foodora: return $('.product-button-overlay');   //NOT working at all
-   //TODO: handle the fact that foodora has food name is in aria-label. The value of .text() is empty
-    case FoodService.interfood: return $('.cell'); 
-    default: throw new AssistantError('Assistant error: determineFoodCardsObject not implemented for ' + currentSite);
-  }
-}
-
-
-function determineMainTableElement(currentSite: FoodService){
-  switch (currentSite) {
-    case FoodService.teletal: return $('section:contains("Reggeli")').first();
-    case FoodService.pizzaforte: return $('.container.content-top').first();
-    default: console.warn('determineMainTableElement not implemented for site ' + currentSite);
   }
 }
 
