@@ -1,6 +1,6 @@
 # DishDecider Assistant
 
-DishDecider Assistant is a userscript that can run in a desktop browser extension.  
+DishDecider Assistant is a browser extension userscript that helps you decide what food to order.  
 When you visit a supported food delivery website, the Assistant marks certain foods on the menu as unwanted and highlights the ones that you will probably like, based on your preferences.  
 If you have some programming skills, you can customize your dietary preferences to the extreme.
 
@@ -11,9 +11,15 @@ Supported food delivery services as of 2023 May:
   * Ordit.hu
   * Pizzaforte.hu  
 
-Supported browsers: Chrome. May or may not also work in Firefox, Safari etc...  
+Supported browsers: Chrome. May or may not also work in Firefox, Safari etc...  Desktop browsers only.
 
-Language: Hungarian/English mix.
+Language: English / Hungarian.
+
+## Screenshots
+__Before:__
+![image](https://github.com/AndreaDusza/dishdecider-assistant/assets/5956233/00debb29-51ed-4b59-bb88-ecbdfed8c772)
+__After:__
+![image](https://github.com/AndreaDusza/dishdecider-assistant/assets/5956233/baf5d6df-add3-4b44-9767-06dadfb65b01)
 
 ## Setup & Run
 
@@ -67,11 +73,6 @@ const USER_CONFIGS = [
 Regular expressions are supported in all of the above lists.  
 Use https://regex101.com/ and https://chat.openai.com/ to understand and create regular expressions.
 
-## Screenshots
-| Before             |  After |
-:-------------------------:|:-------------------------:
-![pizzaforte-before](https://user-images.githubusercontent.com/5956233/235608023-ff4bd404-32d4-4b56-a6d6-89e4afabc767.PNG) | ![pizzaforte-after](https://user-images.githubusercontent.com/5956233/235608035-9d7e88dd-e450-4897-a08c-a159190b7e01.PNG)
-
 ## Trying to learn to create a userscript?
 There is a simplified version of the Assistant, for learning purposes.  
 In case of the "real" assistant script, you can only experiment with the user preferences in Tampermonkey, but you cannot change the program code. However, in case of the learning sample, you can experiment with the full code however you want.  
@@ -96,3 +97,10 @@ https://tokeletesosszhang.hu/dishdecider/index.js
 
  * Best way to confirm that the usercript did start running on the page: open Developer Tools and check the console log. It should print something like 'DishDecider Assistant script started...'.
  * If the food delivery page itself is slow, this will cause the Assistant to be slow as well. In case of Interfood.hu, it can take 30 seconds before the script can take effect. 
+
+## More Screenshots
+| Before             |  After |
+:-------------------------:|:-------------------------:
+![pizzaforte-before](https://user-images.githubusercontent.com/5956233/235608023-ff4bd404-32d4-4b56-a6d6-89e4afabc767.PNG) | ![pizzaforte-after](https://user-images.githubusercontent.com/5956233/235608035-9d7e88dd-e450-4897-a08c-a159190b7e01.PNG)
+![image](https://github.com/AndreaDusza/dishdecider-assistant/assets/5956233/4e549964-3656-4341-be0b-efb7d1f28547) | ![image](https://github.com/AndreaDusza/dishdecider-assistant/assets/5956233/22c95fa7-529d-42bc-9015-77f76eb08f93)
+![image](https://github.com/AndreaDusza/dishdecider-assistant/assets/5956233/00debb29-51ed-4b59-bb88-ecbdfed8c772) | ![image](https://github.com/AndreaDusza/dishdecider-assistant/assets/5956233/baf5d6df-add3-4b44-9767-06dadfb65b01)
