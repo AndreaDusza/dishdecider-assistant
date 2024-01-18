@@ -22,7 +22,7 @@ const USER_CONFIGS = [
     mehList: [],
     favList1: ['chicken', 'csirk(e|é)'],
     favList2: ['onion', 'hagym(a|á)'],
-    testingList: [],
+    favListExceptions: [],
   }
 ];
 

@@ -6,7 +6,7 @@ export const TestUserEnglishConfig = {
     mehList: ['brussels sprout', 'chicken wings'],
     favList1: ['chicken'],
     favList2: ['onion'],
-    testingList: [],
+    favListExceptions: [],
 };
 
 export const TestUserEnglish2Config = {
@@ -17,5 +17,5 @@ export const TestUserEnglish2Config = {
     mehList: [],
     favList1: ['vegan'],
     favList2: ['vegetarian'],
-    testingList: [],
+    favListExceptions: [],
 };

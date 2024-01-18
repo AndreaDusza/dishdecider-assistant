@@ -6,7 +6,7 @@ export default {
   input: 'src/index.ts',
   external: 'jquery',
   output: {
-    dir: 'dist',
+    dir: 'dishdecider-extension',
     format: 'iife',
     name: 'FoAssistant',
     globals: {

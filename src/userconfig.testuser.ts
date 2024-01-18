@@ -8,5 +8,5 @@ export const TestUserConfig = {
     mehList: ['shell pasta', 'fish sauce', 'eggplant', 'tarhonya', 'kelbimbó', 'csirkeszárny'],
     favList1: ['chicken', 'csirk(e|é)'],
     favList2: ['onion', 'hagym(a|á)'],
-    testingList: [/*'a'*/],
+    favListExceptions: [],
 } as const satisfies UserConfig;

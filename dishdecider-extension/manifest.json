@@ -1,0 +1,36 @@
+{
+"manifest_version": 3,
+"name": "DishDecider",
+"description": "Indicate unwanted and favorite foods or ingredients",
+"version": "1.0",
+"icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  },
+"content_scripts":[
+    {
+      "matches":[
+        "https://www.teletal.hu/etlap*",
+        "https://pizzaforte.hu/*",
+        "https://app.ordit.hu/*",
+        "https://www.interfood.hu/etlap-es-rendeles/*",
+        "https://wolt.com/*",
+        "https://pest.pizzamonkey.hu/*",
+        "https://buda.pizzamonkey.hu/*",
+        "https://pecs.pizzamonkey.hu/*",
+        "https://szeged.pizzamonkey.hu/*"
+      ],
+      "js": ["lib/jquery.min.js", "index.js"]
+    }
+  ],
+"options_page": "settings/options.html",
+"permissions": [
+    "storage"
+  ],
+"action": {
+  "default_title": "DishDecider",
+  "default_popup": "popup/popup.html",
+  "default_icon":"icon.png"
+  } 
+}

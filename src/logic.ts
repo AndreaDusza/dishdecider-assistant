@@ -12,11 +12,6 @@ export function evaluateCardText(
     return LikeLevel.blacklist;
   }
 
-  //testing
-  if (containsLcMatch(userConfig.testingList, foodDescription) && !containsLcMatch(userConfig.blacklistExceptions, foodDescription)) {
-    return LikeLevel.test;
-  }
-
   //warning
   if (containsLcMatch(userConfig.warnList, foodDescription) && !containsLcMatch(userConfig.blacklistExceptions, foodDescription)) {
     return LikeLevel.warn;
@@ -24,7 +19,7 @@ export function evaluateCardText(
 
   //is meh?
   if (containsLcMatch(userConfig.mehList, foodDescription)) {
-    return LikeLevel.neutral;
+    return LikeLevel.meh;
   }
 
   //is fav 1 ?
@@ -55,3 +50,25 @@ export function containsLcMatch(list1: readonly string[], foodText: string): boo
   }
   return false;
 }
+/*
+export function containsExactMatch(list1: readonly string[], foodText: string): boolean{
+  for (const listItem1 of list1) {
+    if (lcMatch(foodText, listItem1)) {
+      //console.log("Found match in containsLcMatch: " + foodObj.text() + " " + listItem1);
+      return true;
+    }
+  }
+  return false;
+}*/
+
+export function getMatchingIngredientsWholeName(longText:string, item: string): string[]{
+  const regex = new RegExp('\\b[a-záéíóóöőúüű ]*' + item + '[a-záéíóóöőúüű ]*\\b', 'g');
+  return longText.toLowerCase().match(regex) ?? [];
+}
+
+/*
+export function hasExactMatchInText(longText:string, item: string): boolean{
+  const regex = new RegExp('\\b' + item + '\\b', 'g');
+  return regex.test(longText.toLowerCase());
+}
+*/

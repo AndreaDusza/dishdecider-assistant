@@ -40,5 +40,5 @@ export const HegeConfig = {
     'coleslaw', 'káposztasaláta',
     'padlizsán',
   ],
-  testingList: [],
+  favListExceptions: [],
 } as const satisfies UserConfig;

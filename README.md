@@ -47,7 +47,7 @@ const USER_CONFIGS = [
     mehList: ['brussels sprout', 'chicken wings'],
     favList1: ['chicken'],
     favList2: ['onion'],
-    testingList: [],
+    favListExceptions: [],
   },
   {
     userNamesToFind: ['Mrs. Jane Ursula Doe', 'janeursuladoe@example.com'],
@@ -57,7 +57,7 @@ const USER_CONFIGS = [
     mehList: [],
     favList1: ['vegan'],
     favList2: ['vegetarian'],
-    testingList: [],
+    favListExceptions: [],
   }
 ];
 ```
@@ -70,7 +70,7 @@ const USER_CONFIGS = [
  * mehList: When matched, prevents item from being highlighted as favorite.
  * favList1: Number one favorites, highlighted with the strongest indication.
  * favList2: Secondary favorites, also highlighted but not as strong as the above.
- * testingList: Use for testing purposes.
+ * favListExceptions: For example, to prevent highlighting 'shell pasta' on the main page as a favorite when 'shell' is a favorite.
 
 Regular expressions are supported in all of the above lists.  
 Use https://regex101.com/ and https://chat.openai.com/ to understand and create regular expressions.

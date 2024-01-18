@@ -28,8 +28,8 @@ function getDefaultStyleForLevel(level: LikeLevel): CssObject {
       return { 'border-color': '#a0e0a0' };  
     case LikeLevel.favorite1:
       return { 'border-color': '#60d860' };
-    case LikeLevel.test:
-      return { 'border-color': 'yellow' };  
+    case LikeLevel.meh:
+      return { 'border-color': '#9A7B4F' };  
     default:
       throw new UnreachableCaseError(level);
   }

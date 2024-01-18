@@ -26,6 +26,7 @@
     "uikit": "^3.3.0"
   },
   "dependencies": {
+    "@types/chrome": "^0.0.258",
     "ts-node": "^10.9.1"
   }
 }

@@ -6,5 +6,5 @@ export const TestUserHungarianConfig = {
     mehList: ['tarhonya', 'kelbimbó', 'csirkeszárny'],
     favList1: ['csirk(e|é)'],
     favList2: ['hagym(a|á)'],
-    testingList: [],
+    favListExceptions: [],
 };

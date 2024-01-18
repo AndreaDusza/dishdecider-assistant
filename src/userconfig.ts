@@ -2,7 +2,7 @@ export type UserConfig = {
   readonly userNamesToFind: readonly string[];
   readonly blacklist: readonly string[];
   readonly blacklistExceptions: readonly string[];
-  readonly testingList: readonly string[];
+  readonly favListExceptions: readonly string[];
   readonly warnList: readonly string[];
   readonly mehList: readonly string[];
   readonly favList1: readonly string[];
@@ -26,7 +26,7 @@ export const LikeLevel = {
   favorite1: 'favorite1',
   favorite2: 'favorite2',
   neutral: 'neutral',
-  test: 'test',
+  meh: 'meh',
   warn: 'warn',
   blacklist: 'blacklist',
 } as const;
