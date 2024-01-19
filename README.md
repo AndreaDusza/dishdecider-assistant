@@ -20,6 +20,8 @@ __Before:__
 ![image](https://github.com/AndreaDusza/dishdecider-assistant/assets/5956233/00debb29-51ed-4b59-bb88-ecbdfed8c772)
 __After:__
 ![image](https://github.com/AndreaDusza/dishdecider-assistant/assets/5956233/baf5d6df-add3-4b44-9767-06dadfb65b01)
+__Dashboard:__
+![Food Prefs](https://github.com/AndreaDusza/dishdecider-assistant/assets/5956233/70252e8a-0d10-4b85-be15-06bc49df5d4c)
 
 ## Setup & Run
 
