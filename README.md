@@ -24,7 +24,9 @@ __Dashboard:__
 ![Food Prefs](https://github.com/AndreaDusza/dishdecider-assistant/assets/5956233/70252e8a-0d10-4b85-be15-06bc49df5d4c)
 
 ## Setup & Run
-
+__As of 2024 February, the program does not work (at least in Chrome), becasuse Chrome now apparently blocks 3rd party cookies:  
+"Third-party cookie will be blocked. Learn more in the Issues tab."  
+The program is being reworked into a standalone extension, to be published in Chrome Web Store.__  
 1. Install the Tampermonkey extension (or any other userscript manager) in your browser.   
 https://www.tampermonkey.net/  
 (This is a general utility, created by Jan Biniok.)
