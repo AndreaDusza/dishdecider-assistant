@@ -38,11 +38,10 @@ https://chromewebstore.google.com/detail/dishdecider/cjecdgchklcnnpkkceeepnlemch
 5. Now that the setup is ready: Go to a supported food order website, and refresh the page. Keep scrolling to trigger the Assistant. You should see items being highlighted / color coded - given that they match the  keywords that you entered in the previous step. The color coding on the menu matches the colors on the Dashboard.
 
 ## Dashboard
-Example (English):
-![image](https://github.com/AndreaDusza/dishdecider-assistant/assets/5956233/a2d508f3-414f-43c2-9776-e2662a8c21b2)
+### Example preferences (English):
+![image](https://github.com/AndreaDusza/dishdecider-assistant/assets/5956233/f21d3b86-b98a-4bbb-b99a-5b3d9c7b5b4e)
 
-
-## How to fill the 'Food preferences' form?
+###  How to fill the 'Food preferences' form?
 In general:
  * All lines are a comma separated lists of keywords. A "keyword" means a term that can be multiple words. For example, _chicken wings_ is one keyword.
  * A keyword can be an ingredient (_chicken_), the name of a dish (_tikka masala_), or an adjective (_spicy_). Anything that is in the title, the description or the ingredient list of a menu item.
