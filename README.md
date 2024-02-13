@@ -43,8 +43,10 @@ https://chromewebstore.google.com/detail/dishdecider/cjecdgchklcnnpkkceeepnlemch
 
 ###  How to fill the 'Food preferences' form?
 In general:
- * All lines are a comma separated lists of keywords. A "keyword" means a term that can be multiple words. For example, _chicken wings_ is one keyword.
+ * Each line is a comma separated list of keywords. A "keyword" means a term that can be multiple words. For example, _chicken wings_ is one keyword.
  * A keyword can be an ingredient (_chicken_), the name of a dish (_tikka masala_), or an adjective (_spicy_). Anything that is in the title, the description or the ingredient list of a menu item.
+ * Write keywords in __the language of the food service site__ that you want to order from.   
+   (e.g. Use Hungarian for Hungarian sites.)
  
 Line-by-line hints:
  * __Absolute favorites__: do not put too many keywords here. Reserve it for your few top favorites. 
