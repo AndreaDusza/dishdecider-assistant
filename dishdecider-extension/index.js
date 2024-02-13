@@ -1469,7 +1469,7 @@
             case LikeLevel.neutral:
                 return { 'border-color': '#e0e0e0' };
             case LikeLevel.favorite2:
-                return { 'border-color': '#a0e0a0' };
+                return { 'border-color': '#cae880' };
             case LikeLevel.favorite1:
                 return { 'border-color': '#60d860' };
             case LikeLevel.meh:
@@ -1530,7 +1530,7 @@
                 background-color: #e0e0e0;
             }
             .fo-assistant-likelevel-${LikeLevel.favorite2} {
-                background-color: #a0e0a0;
+                background-color: #cae880;
             }
             .fo-assistant-likelevel-${LikeLevel.favorite1} {
                 background-color: #60d860;

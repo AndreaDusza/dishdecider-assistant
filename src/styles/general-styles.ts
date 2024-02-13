@@ -55,7 +55,7 @@ export function applyLikelevelBackgroundColors(selectorString: string) {
                 background-color: #e0e0e0;
             }
             .fo-assistant-likelevel-${LikeLevel.favorite2} {
-                background-color: #a0e0a0;
+                background-color: #cae880;
             }
             .fo-assistant-likelevel-${LikeLevel.favorite1} {
                 background-color: #60d860;
