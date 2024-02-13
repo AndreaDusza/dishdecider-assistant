@@ -1,19 +1,23 @@
 # DishDecider Assistant
 
-DishDecider Assistant is a browser extension userscript that helps you decide what food to order.  
+DishDecider Assistant is a browser extension that helps you decide what food to order.  
 When you visit a supported food delivery website, the Assistant marks certain foods on the menu as unwanted and highlights the ones that you will probably like, based on your preferences.  
 If you have some programming skills, you can customize your dietary preferences to the extreme.
 
-Supported food delivery services as of 2023 May:
+Supported food delivery services as of 2024 Feb:
   * Wolt.com
   * Teletal.hu
   * Interfood.hu
   * Ordit.hu
-  * Pizzaforte.hu  
+  * Pizzaforte.hu
+  * Pizzamonkey.hu  
 
-Supported browsers: Chrome. May or may not also work in Firefox, Safari etc...  Desktop browsers only.
+Supported browsers: 
+  * Chrome. 
 
-Language: English / Hungarian.
+Language:
+  * The user interface language is English.
+  * The food / ingredient keywords can be in any language. Tested with English and Hungarian.
 
 ## Screenshots
 __Before:__
@@ -21,86 +25,45 @@ __Before:__
 __After:__
 ![image](https://github.com/AndreaDusza/dishdecider-assistant/assets/5956233/baf5d6df-add3-4b44-9767-06dadfb65b01)
 __Dashboard:__
-![Food Prefs](https://github.com/AndreaDusza/dishdecider-assistant/assets/5956233/70252e8a-0d10-4b85-be15-06bc49df5d4c)
+![image](https://github.com/AndreaDusza/dishdecider-assistant/assets/5956233/a2d508f3-414f-43c2-9776-e2662a8c21b2)
 
 ## Setup & Run
-__As of 2024 February, the program does not work (at least in Chrome), becasuse Chrome now apparently blocks 3rd party cookies:  
-"Third-party cookie will be blocked. Learn more in the Issues tab."  
-The program is being reworked into a standalone extension, to be published in Chrome Web Store.__  
-1. Install the Tampermonkey extension (or any other userscript manager) in your browser.   
-https://www.tampermonkey.net/  
-(This is a general utility, created by Jan Biniok.)
-2. Go to Tampermonkey's Dashboard. Create a new project.
-3. Copy-paste the below userscript file in the code editor.  
-https://github.com/AndreaDusza/dishdecider-assistant/blob/master/examples/for-tampermonkey.js
-3. In the userscript header, the '// @match' lines show which websites are supported.
-4. In the userscript, take a look at the USER_CONFIGS variable (a sample preference configuration) but do not modify it yet. 
-5. Save the project and make sure that both the project and the userscript manager itself is enabled. Then go to a supported food order website, and refresh the page. Keep scrolling to trigger the Assistant (or press key '2'). You should see some items being highlighted as either good or bad - given that they match the sample preferences.
-6. If the above does not work, look at the 'Known bugs / Workarounds' section in this doc and try to fix. When there are no more issues, you can start customizing USER_CONFIGS.
+1. Click the below link to find the DishDecider extension in the Chrome Web Store, and install it:   
+https://chromewebstore.google.com/detail/dishdecider/cjecdgchklcnnpkkceeepnlemchglfdd
+2. Click 'Manage Extensions' and pin the extension to the toolbar.
+3. Click the DishDecider icon on the toolbar and then click 'Dashboard'.  
+![image](https://github.com/AndreaDusza/dishdecider-assistant/assets/5956233/af9c8ba4-91b8-42f5-b663-58435127b8a7)
+4. On the Dashboard, enter a few keywords: your most or least favorite foods, ingredients, etc., all in the appropriate section, and save.
+5. Now that the setup is ready: Go to a supported food order website, and refresh the page. Keep scrolling to trigger the Assistant. You should see items being highlighted / color coded - given that they match the  keywords that you entered in the previous step. The color coding on the menu matches the colors on the Dashboard. 
 
-## Example configs
-```
-const USER_CONFIGS = [
-  {
-    userNamesToFind: ['John Henry Doe', 'jdoe_1976@something.com'],
-    blacklist: ['mushroom', 'salmon', 'shell', '[^a-z]egg[^a-z]'],
-    warnList: ['fish', 'egg'],
-    blacklistExceptions: ['shell pasta', 'fish sauce', 'eggplant'],
-    mehList: ['brussels sprout', 'chicken wings'],
-    favList1: ['chicken'],
-    favList2: ['onion'],
-    favListExceptions: [],
-  },
-  {
-    userNamesToFind: ['Mrs. Jane Ursula Doe', 'janeursuladoe@example.com'],
-    blacklist: ['chicken', 'pork', 'beef', 'meat'],
-    warnList: ['ham'],
-    blacklistExceptions: ['hamburger', 'without', 'vegan', 'vegetarian'],
-    mehList: [],
-    favList1: ['vegan'],
-    favList2: ['vegetarian'],
-    favListExceptions: [],
-  }
-];
-```
+## How are the food preferences evaluated?
+Each food item on the menu is made up of many words: title, ingredients, description, etc. A food item's text might contain positive and negative keywords as well. The program searches for all the food preference keywords in the food item's text, and determines an overall rating for each food item.
+The negative keywords are always stronger than the positive keywords. A food will never be highlighted as a potential favorite if it matches any negative keyword (minding the exceptions).  
+Here are a few hints on filling out the 'Food preferences' form:
+ * All lines are comma separated lists. Everything between two commas will count as one keyword, even if it is multiple words. Do NOT expect semicolons, spaces, tabs or anything else to work as keyword separators.
+ * Try to avoid special characters (UNLESS you are familiar with regular expressions and you want to use them).
+ * In general, try to use specific keywords instead of very short, generic keywords.  
 
-## Description of the config properties
- * userNamesToFind: Optional: A list of your usernames that are visible when you are logged in to a food delivery site. Only needed if you use multiple profiles on the same machine with different taste preferences - to differentiate between users. You can have multiple entries in the USER_CONFIGS array. If none of the usernames match, the first entry will be used as the default. If array USER_CONFIGS is missing entirely, then hardcoded test user configs will be used. 
- * blacklist: A food that matches these keyword is an instant NO and will be marked as unwanted on the main page.
- * warnList: Similar to blacklist, but the indication is not as strong as above. Recommended to use with short keywords like 'egg' that could cause too many false positive warnings.
- * blacklistExceptions: For example, to allow 'eggplant' on the main page when 'egg' is blacklisted or warnlisted.
- * mehList: When matched, prevents item from being highlighted as favorite.
- * favList1: Number one favorites, highlighted with the strongest indication.
- * favList2: Secondary favorites, also highlighted but not as strong as the above.
- * favListExceptions: For example, to prevent highlighting 'shell pasta' on the main page as a favorite when 'shell' is a favorite.
+Line-by-line hints:
+ * Absolute favorites: do not put too many keywords here. Reserve it for your few top favorites. 
+ * Also liked: lowered standards go here. 
+ * Exceptions from favorites: For example, you may want to prevent highlighting 'shell pasta' on the main page as a favorite when 'shell' is a favorite. This does NOT mean that shell pasta is in any way disliked - it is just not a favorite because it is not shell. The food item might still be highlighted as a favorite if there is another legit reason that makes it a favorite.
+ * "Meh" list: When matched, prevents item from being highlighted as favorite. 
+ * Warn list: use this line for short keywords like 'egg' that you dislike, but do not want to blacklist, because it would result in too many false results (too many foods marked as bad, for no good reason).
+ * Blacklist: specific, long keywords go here, if you are confident that these are unwanted. 
+ * Exceptions from warn list and blacklist: For example, you may want to allow 'eggplant' on the main page when 'egg' is blacklisted or warnlisted. 
+Also, if you blacklist the term "spicy", make sure to add "not spicy" to the exceptions list!
 
-Regular expressions are supported in all of the above lists.  
-Use https://regex101.com/ and https://chat.openai.com/ to understand and create regular expressions.
+As mentioned above, regular expressions are supported in all of the above lists.  
+Use https://regex101.com/ and https://chat.openai.com/ to understand and create regular expressions. Do not use any commas in the regular expressions.
 
-## Trying to learn to create a userscript?
-There is a simplified version of the Assistant, for learning purposes.  
-In case of the "real" assistant script, you can only experiment with the user preferences in Tampermonkey, but you cannot change the program code. However, in case of the learning sample, you can experiment with the full code however you want.  
-You can try changing the sample to support your favorite food delivery site: it might be very easy!
-1. Go to Tampermonkey's Dashboard.
-2. Disable the "real" assistant script. Otherwise, it would interfere with the learning sample script.
-3. Create another new project in Tampermonkey and copy-paste the below file in the code editor.  
-https://github.com/AndreaDusza/dishdecider-assistant/blob/master/examples/minimalCode.js
-
-In the learning sample, scrolling does not trigger the Assistant: you have to press key '2'.
+For Hungarian users:
+ * If you enter keywords ending with 'a' or 'e' ("gomba", "csirke"), they will match the accented version as well ("gombás", "csirkés"). This makes the algorithm look smart, but it is NOT. The algorithm does not reflect any other peculiarity of the Hungarian language. For example, the program does NOT recognize that "halrúd" - "halrudak" should be the same.
    
 ## Known bugs / Workarounds
-
- * As of 2023 May on Ordit.hu and Wolt.com: If you get an error saying "$ is not defined" or "$$1 is not defined", try adding the below line to the Tampermonkey script header:  
-```
-// @require      https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js  
-```
-It can fix the issue for the given site but might break another site.  
-
- * If you get an error due to the the raw Github URL being not available (because of a proxy), try replacing with alternative URL:   
-https://tokeletesosszhang.hu/dishdecider/index.js
-
- * Best way to confirm that the usercript did start running on the page: open Developer Tools and check the console log. It should print something like 'DishDecider Assistant script started...'.
- * If the food delivery page itself is slow, this will cause the Assistant to be slow as well. In case of Interfood.hu, it can take 30 seconds before the script can take effect. 
+ * If you are not sure that the usercript did start running on a page: open Developer Tools and check the console log. It should print something like 'DishDecider Assistant script started...'.
+ * If the food delivery page itself is slow, this will cause the Assistant to be slow as well. In case of Interfood.hu, it can take 30 seconds before the script can take effect.
+ * If you cannot scroll on the page: press the numeric key '2' to force the evaluation of the food cards.
 
 ## More Screenshots
 | Before             |  After |
