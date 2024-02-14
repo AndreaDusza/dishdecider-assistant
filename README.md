@@ -39,7 +39,8 @@ https://chromewebstore.google.com/detail/dishdecider/cjecdgchklcnnpkkceeepnlemch
 
 ## Dashboard
 ### Example preferences (English):
-![image](https://github.com/AndreaDusza/dishdecider-assistant/assets/5956233/f21d3b86-b98a-4bbb-b99a-5b3d9c7b5b4e)
+![image](https://github.com/AndreaDusza/dishdecider-assistant/assets/5956233/7086039a-2272-4225-86ba-5417ce666f9a)
+
 
 ###  How to fill the 'Food preferences' form?
 In general:
