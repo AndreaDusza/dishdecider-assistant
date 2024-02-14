@@ -51,10 +51,12 @@ In general:
 Line-by-line hints:
  * __Absolute favorites__: do not put too many keywords here. Reserve it for your few top favorites. 
  * __Also liked__: lowered standards go here. 
- * __Exceptions from favorites__: For example, you may want to prevent highlighting _shell pasta_ on the main page as a favorite when _shell_ is a favorite. This does NOT mean that shell pasta is in any way disliked - it is just not a favorite because it is not shell. The food item might still be highlighted as a favorite if there is another legit reason that makes it a favorite.
  * __"Meh" list__: When matched, prevents item from being highlighted as favorite. 
  * __Warn list__: use this line for short keywords like _egg_ that you dislike, but do not want to blacklist, because it would result in too many falsely blacklisted results (like _eggplant_).
- * __Blacklist__: specific, long keywords go here, if you are confident that these are unwanted. 
+ * __Blacklist__: specific, long keywords go here, if you are confident that these are unwanted.
+
+Advanced options:
+ * __Exceptions from favorites__: For example, you may want to prevent highlighting _shell pasta_ on the main page as a favorite when _shell_ is a favorite. This does NOT mean that shell pasta is in any way disliked - it is just not a favorite because it is not shell. The food item might still be highlighted as a favorite if there is another legit reason that makes it a favorite.
  * __Exceptions from warn list and blacklist__: If _egg_ is blacklisted or warnlisted, add _eggplant_ here to indicate that it has nothing to do with eggs.
 Also, if you blacklist the term _spicy_, make sure to add _not spicy_ to the exceptions list!
 
