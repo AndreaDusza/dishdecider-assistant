@@ -54,6 +54,7 @@ function determineFoodCardsObject(currentSite: FoodService){
     //TODO: handle the fact that foodora has food name is in aria-label. The value of .text() is empty
     case FoodService.interfood: return $('.cell'); 
     case FoodService.pizzamonkey: return $('.pm-products__product'); 
+    case FoodService.egeszsegkonyha: return $('.etlapcella'); 
     default: throw new AssistantError('Assistant error: determineFoodCardsObject not implemented for ' + currentSite);
   }
 }
@@ -84,6 +85,11 @@ function applyStlyeTag(currentSite: FoodService) {
     }
     case FoodService.pizzamonkey: {
       applyBorder('.pm-products__product', 5); 
+      return;
+    }
+    case FoodService.egeszsegkonyha: {
+      applyOpacity('.etlapcella', LikeLevel.blacklist, 0.3); 
+      applyLikelevelBackgroundColors('.etlapcella');
       return;
     }
     default: console.warn('applyStlyeTag not implemented for site ' + currentSite);

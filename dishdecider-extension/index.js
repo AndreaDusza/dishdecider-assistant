@@ -1425,6 +1425,7 @@
         FoodService["foodora"] = "foodora";
         FoodService["interfood"] = "interfood";
         FoodService["pizzamonkey"] = "pizzamonkey";
+        FoodService["egeszsegkonyha"] = "egeszsegkonyha";
     })(FoodService || (FoodService = {}));
     function getCurrentSite() {
         const hostname = location.hostname;
@@ -1440,6 +1441,7 @@
             case 'buda.pizzamonkey.hu':
             case 'pecs.pizzamonkey.hu':
             case 'szeged.pizzamonkey.hu': return FoodService.pizzamonkey;
+            case 'egeszsegkonyha.hu': return FoodService.egeszsegkonyha;
         }
         throw new AssistantError(`Assistant error: Unknown URL '${hostname}'`);
     }
@@ -1712,6 +1714,7 @@
             //TODO: handle the fact that foodora has food name is in aria-label. The value of .text() is empty
             case FoodService.interfood: return $('.cell');
             case FoodService.pizzamonkey: return $('.pm-products__product');
+            case FoodService.egeszsegkonyha: return $('.etlapcella');
             default: throw new AssistantError('Assistant error: determineFoodCardsObject not implemented for ' + currentSite);
         }
     }
@@ -1741,6 +1744,11 @@
             }
             case FoodService.pizzamonkey: {
                 applyBorder('.pm-products__product', 5);
+                return;
+            }
+            case FoodService.egeszsegkonyha: {
+                applyOpacity('.etlapcella', LikeLevel.blacklist, 0.3);
+                applyLikelevelBackgroundColors();
                 return;
             }
             default: console.warn('applyStlyeTag not implemented for site ' + currentSite);

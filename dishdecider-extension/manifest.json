@@ -2,7 +2,7 @@
 "manifest_version": 3,
 "name": "DishDecider",
 "description": "Indicate unwanted and favorite foods or ingredients",
-"version": "1.1",
+"version": "1.2",
 "icons": {
     "16": "icon.png",
     "48": "icon.png",
@@ -19,7 +19,8 @@
         "https://pest.pizzamonkey.hu/*",
         "https://buda.pizzamonkey.hu/*",
         "https://pecs.pizzamonkey.hu/*",
-        "https://szeged.pizzamonkey.hu/*"
+        "https://szeged.pizzamonkey.hu/*",
+        "https://egeszsegkonyha.hu/index.php/etlapunk?*"
       ],
       "js": ["lib/jquery.min.js", "index.js"]
     }
