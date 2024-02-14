@@ -18,18 +18,18 @@ export function evaluateCardText(
   }
 
   //is meh?
-  if (containsLcMatch(userConfig.mehList, foodDescription)) {
+  if (containsLcMatch(userConfig.mehList, foodDescription) && !containsLcMatch(userConfig.blacklistExceptions, foodDescription) ) {
     return LikeLevel.meh;
   }
 
   //is fav 1 ?
-  if (containsLcMatch(userConfig.favList1, foodDescription)) {
+  if (containsLcMatch(userConfig.favList1, foodDescription) && !containsLcMatch(userConfig.favListExceptions, foodDescription)) {
     return LikeLevel.favorite1;
   }
 
   //is fav2 ?
   if (acceptanceLevel >= 2) {
-    if (containsLcMatch(userConfig.favList2, foodDescription)) {
+    if (containsLcMatch(userConfig.favList2, foodDescription)  && !containsLcMatch(userConfig.favListExceptions, foodDescription)) {
       return LikeLevel.favorite2;
     }
   }

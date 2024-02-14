@@ -22,7 +22,7 @@
     <form class="well form-horizontal" action=" " method="post"  id="options_form">
       <fieldset>
       <legend>Food preferences</legend>
-      Enter <b>comma separated</b> lists of keywords (ingredients / dish names / adjectives) in each line.<br>
+      Enter <b>comma separated</b> lists of keywords (ingredients / dish names / adjectives) in each line, in <b>any language</b>.<br>
       Read the <b><a href="https://github.com/AndreaDusza/dishdecider-assistant/blob/master/README.md#dashboard">MANUAL</a></b>.<br><br>
 
     
@@ -46,24 +46,6 @@
           <div class="input-group">
               <span class="input-group-addon"><i class="glyphicon glyphicon-pencil"></i></span>
                 <textarea spellcheck="false" class="form-control" id="favList2" name="favList2" placeholder="..."></textarea>
-          </div>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label class="col-md-2 control-label">Exceptions from favorites</label>
-        <div class="col-md-1 fa-stack fa-1x">
-          <i class="fa-solid fa-circle fa-stack-2x" style="color: #60d860"></i>
-          <i class="fa-solid fa-ban fa-stack-2x" style="color:black"></i>
-        </div>
-        <div class="col-md-1 fa-stack fa-1x">
-          <i class="fa-solid fa-circle fa-stack-2x" style="color: #cae880"></i>
-          <i class="fa-solid fa-ban  fa-stack-2x" style="color:black"></i>
-        </div>
-        <div class="col-md-8 inputGroupContainer">
-          <div class="input-group">
-              <span class="input-group-addon"><i class="glyphicon glyphicon-pencil"></i></span>
-                <textarea spellcheck="false" class="form-control" id="favListExceptions" name="favListExceptions" placeholder="..."></textarea>
           </div>
         </div>
       </div>
@@ -104,20 +86,46 @@
         </div>
       </div>
 
-      <div class="form-group">
-        <label class="col-md-2 control-label">Exceptions from warn list and blacklist</label>
-        <div class="col-md-1 fa-stack fa-1x">
-          <i class="fa-solid fa-circle fa-stack-2x" style="color: orange"></i>
-          <i class="fa-solid fa-ban fa-stack-2x" style="color:black"></i>
+      <legend>Advanced options (for experienced users only)</legend>
+      <div id="advanced-options-div"></div>
+        <div class="form-group">
+          <label class="col-md-2 control-label">Exceptions from positive keywords</label>
+          <div class="col-md-1 fa-stack fa-1x">
+            <i class="fa-solid fa-circle fa-stack-2x" style="color: #60d860"></i>
+            <i class="fa-solid fa-ban fa-stack-2x" style="color:black"></i>
+          </div>
+          <div class="col-md-1 fa-stack fa-1x">
+            <i class="fa-solid fa-circle fa-stack-2x" style="color: #cae880"></i>
+            <i class="fa-solid fa-ban  fa-stack-2x" style="color:black"></i>
+          </div>
+          <div class="col-md-1 fa-stack fa-1x"></div>
+          <div class="col-md-8 inputGroupContainer">
+            <div class="input-group">
+                <span class="input-group-addon"><i class="glyphicon glyphicon-pencil"></i></span>
+                  <textarea spellcheck="false" class="form-control" id="favListExceptions" name="favListExceptions" placeholder="..."></textarea>
+            </div>
+          </div>
         </div>
-        <div class="col-md-1 fa-stack fa-1x">
-          <i class="fa-solid fa-circle fa-stack-2x" style="color: #ff6060"></i>
-          <i class="fa-solid fa-ban  fa-stack-2x" style="color:black"></i>
-        </div>
-        <div class="col-md-8 inputGroupContainer">
-          <div class="input-group">
-              <span class="input-group-addon"><i class="glyphicon glyphicon-pencil"></i></span>
-                <textarea spellcheck="false" class="form-control" id="blacklistExceptions" name="blacklistExceptions" placeholder="..."></textarea>
+
+        <div class="form-group">
+          <label class="col-md-2 control-label">Exceptions from negative keywords</label>
+          <div class="col-md-1 fa-stack fa-1x">
+            <i class="fa-solid fa-circle fa-stack-2x" style="color: #9A7B4F"></i>
+            <i class="fa-solid fa-ban fa-stack-2x" style="color:black"></i>
+          </div>
+          <div class="col-md-1 fa-stack fa-1x">
+            <i class="fa-solid fa-circle fa-stack-2x" style="color: orange"></i>
+            <i class="fa-solid fa-ban fa-stack-2x" style="color:black"></i>
+          </div>
+          <div class="col-md-1 fa-stack fa-1x">
+            <i class="fa-solid fa-circle fa-stack-2x" style="color: #ff6060"></i>
+            <i class="fa-solid fa-ban  fa-stack-2x" style="color:black"></i>
+          </div>
+          <div class="col-md-8 inputGroupContainer">
+            <div class="input-group">
+                <span class="input-group-addon"><i class="glyphicon glyphicon-pencil"></i></span>
+                  <textarea spellcheck="false" class="form-control" id="blacklistExceptions" name="blacklistExceptions" placeholder="..."></textarea>
+            </div>
           </div>
         </div>
       </div>
