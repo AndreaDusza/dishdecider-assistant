@@ -1,5 +1,5 @@
 export const TestUserEnglishConfig = {
-    userNamesToFind: ['Mr. John Henry Doe', 'jdoe_1976@something.com'],
+    profileName: 'Mr. John Henry Doe',
     blacklist: ['mushroom', 'salmon', 'shell', '[^a-z]egg[^a-z]'],
     warnList: ['fish', 'egg'],
     blacklistExceptions: ['shell pasta', 'fish sauce', 'eggplant'],
@@ -10,7 +10,7 @@ export const TestUserEnglishConfig = {
 };
 
 export const TestUserEnglish2Config = {
-    userNamesToFind: ['Mrs. Jane Ursula Doe', 'janeursuladoe@example.com'],
+    profileName: 'Mrs. Jane Ursula Doe',
     blacklist: ['chicken', 'pork', 'beef', 'meat'],
     warnList: ['ham'],
     blacklistExceptions: ['hamburger', 'without', 'vegan', 'vegetarian'],

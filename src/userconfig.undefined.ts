@@ -1,7 +1,7 @@
 import { UserConfig } from './userconfig';
 
 export const UndefinedUserConfig = {
-    userNamesToFind: [""],
+    profileName: "",
     blacklist: [],
     warnList: [],
     blacklistExceptions: [],

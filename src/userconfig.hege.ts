@@ -1,7 +1,7 @@
 import { FruitsRegex, FishSpeciesList, UserConfig } from './userconfig';
 
 export const HegeConfig = {
-  userNamesToFind: ['Hegedűs Tamás László'],
+  profileName: 'Hege - Teletal',
   blacklist: [
     'halfilé', 'halszelet', 'halászlé', 'halr(u|ú)d', 'rákragu', 'koktélrák',
     'garnél(a|á)', 'polip', 'kagyló', 'tenger gyümölcs', 'tengeri gyümölcs',

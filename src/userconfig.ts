@@ -1,5 +1,10 @@
+export type GlobalSettings = {
+  readonly selectedProfileId: number;
+  readonly profiles: readonly UserConfig[];
+};
+
 export type UserConfig = {
-  readonly userNamesToFind: readonly string[];
+  readonly profileName: string;
   readonly blacklist: readonly string[];
   readonly blacklistExceptions: readonly string[];
   readonly favListExceptions: readonly string[];

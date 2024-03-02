@@ -1,5 +1,5 @@
 export const TestUserHungarianConfig = {
-    userNamesToFind: ['Magyar Tesztelő János', 'janika1987'],
+    profileName: 'Magyar Tesztelő János',
     blacklist: ['gomb(a|á)','lazac','kagyló', '[^a-záéíóóöőúüű]hal[^a-záéíóóöőúüű]'],
     warnList: ['hal'],
     blacklistExceptions: ['kagylótészt(a|á)', 'halszósz'],

@@ -10,7 +10,7 @@ import { applyOpacity } from './styles/general-styles';
 import { applyLikelevelBackgroundColors } from './styles/general-styles';
 import { patchTeletalStyles } from './styles/teletal';
 import { patchInterfoodStyles } from './styles/interfood';
-import { LikeLevel, UserConfig } from './userconfig';
+import { LikeLevel, UserConfig, GlobalSettings } from './userconfig';
 import { AndiConfig } from './userconfig.andi';
 import { HegeConfig } from './userconfig.hege';
 import { UndefinedUserConfig } from './userconfig.undefined';
@@ -28,6 +28,8 @@ async function main() {
     const currentSite = getCurrentSite();
 
     const uc = await getCurrentUserConfig();
+    console.log("loaded user config:");
+    console.log(uc);
     sanitizeUserConfig(uc); 
 
     // TODO option to set language to Hungarian / English ?
@@ -98,29 +100,47 @@ function applyStlyeTag(currentSite: FoodService) {
 
 async function getCurrentUserConfig(): Promise<CurrentUserConfig> {
   const storedUserConfigs = await loadUserConfigsFromChromeStorage();
-  const UserConfigs = [...storedUserConfigs, HegeConfig, AndiConfig];
-  for (const config of UserConfigs) {
-    for (const name of config.userNamesToFind) {
-      if (anyElementinTheDomContainsText(name)){
-        return { name, config };
+
+  if (!storedUserConfigs){
+    return getDefaultUserConfig();
+  } else {
+    let selectedProfileId = storedUserConfigs.selectedProfileId;
+    const name = storedUserConfigs.profiles[selectedProfileId].profileName;
+    const config = storedUserConfigs.profiles[selectedProfileId];
+    return {name, config};
+  }
+}
+
+function getDefaultUserConfig(): CurrentUserConfig {
+  return { name: UndefinedUserConfig.profileName, config: UndefinedUserConfig };
+}
+
+async function loadUserConfigsFromChromeStorage(): Promise<GlobalSettings> {
+  let getting = await chrome.storage.sync.get("dishdeciderAssistantConfig");
+
+  getting = transformOptionsObjectToNewFormatIfNeeded(getting);
+
+  return getting.dishdeciderAssistantConfig;
+}
+
+function transformOptionsObjectToNewFormatIfNeeded(result: any){
+  if (result && result.dishdeciderAssistantConfig && !result.dishdeciderAssistantConfig.profiles){
+    let profs = new Array(100);
+    let selProfId = 0
+
+    profs[selProfId] = result.dishdeciderAssistantConfig[0];
+    profs[selProfId].profileName="Untitled";
+
+    let result2 = {
+      dishdeciderAssistantConfig: {
+        selectedProfileId: selProfId,
+        profiles: profs
       }
     }
+    result = result2;
   }
-  return getDefaultUserConfig(storedUserConfigs);
-}
-
-function getDefaultUserConfig(storedUserConfigs: UserConfig[]): CurrentUserConfig {
-  if (storedUserConfigs.length <= 0) {
-    return { name: UndefinedUserConfig.userNamesToFind[0], config: UndefinedUserConfig };
-  }
-  const config = storedUserConfigs[0];
-  const name = config.userNamesToFind[0] ?? 'Unnamed User';
-  return { name, config };
-}
-
-async function loadUserConfigsFromChromeStorage(): Promise<UserConfig[]> {
-  let getting = await chrome.storage.sync.get("dishdeciderAssistantConfig");
-  return getting.dishdeciderAssistantConfig;
+   
+  return result;
 }
 
 async function checkIngredients(

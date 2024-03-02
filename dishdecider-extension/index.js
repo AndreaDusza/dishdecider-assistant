@@ -1309,17 +1309,6 @@
         return throttle(function () { return duration$; }, config);
     }
 
-    const FruitsRegex = 'gyümölcs|alma|körte|barack|szilva|cseresznye|málna|eper|szamóca|meggy|citrom|narancs|szőlő|'
-        + 'dinnye|kivi|banán|ananász|datolya|mangó|szeder|ribizli|áfonya|'
-        + 'barack|kaki|mandarin|karambola|kókusz|lime|pomelo|csipkebogyó|gránátalma|füge|'
-        + 'galagonya|hurma|kajszi|kumkvat|licsi|mangosztán|maracuja|nektarin|papaya|passiógyümölcs|'
-        + 'pitahaya|pitaja|egres';
-    const FishSpeciesList = [
-        'ponty', 'süllő', 'harcsa', 'tokhal', 'lazac', 'pisztráng', 'tonhal',
-        'pangasius', 'tőkehal', 'keszeg', 'szardínia', 'makréla', 'hering', 'hekk', 'sügér',
-        'tilápia',
-        //'csuka'
-    ];
     const LikeLevel = {
         favorite1: 'favorite1',
         favorite2: 'favorite2',
@@ -1330,25 +1319,20 @@
     };
 
     function evaluateCardText(foodDescription, userConfig, acceptanceLevel) {
-        //is blacklisted?
-        if (containsLcMatch(userConfig.blacklist, foodDescription) && !containsLcMatch(userConfig.blacklistExceptions, foodDescription)) {
+        if (containsLcMatchThatDoesNotMatchAnException(userConfig.blacklist, foodDescription, userConfig.blacklistExceptions)) {
             return LikeLevel.blacklist;
         }
-        //warning
-        if (containsLcMatch(userConfig.warnList, foodDescription) && !containsLcMatch(userConfig.blacklistExceptions, foodDescription)) {
+        if (containsLcMatchThatDoesNotMatchAnException(userConfig.warnList, foodDescription, userConfig.blacklistExceptions)) {
             return LikeLevel.warn;
         }
-        //is meh?
-        if (containsLcMatch(userConfig.mehList, foodDescription) && !containsLcMatch(userConfig.blacklistExceptions, foodDescription)) {
+        if (containsLcMatchThatDoesNotMatchAnException(userConfig.mehList, foodDescription, userConfig.blacklistExceptions)) {
             return LikeLevel.meh;
         }
-        //is fav 1 ?
-        if (containsLcMatch(userConfig.favList1, foodDescription) && !containsLcMatch(userConfig.favListExceptions, foodDescription)) {
+        if (containsLcMatchThatDoesNotMatchAnException(userConfig.favList1, foodDescription, userConfig.favListExceptions)) {
             return LikeLevel.favorite1;
         }
-        //is fav2 ?
         if (acceptanceLevel >= 2) {
-            if (containsLcMatch(userConfig.favList2, foodDescription) && !containsLcMatch(userConfig.favListExceptions, foodDescription)) {
+            if (containsLcMatchThatDoesNotMatchAnException(userConfig.favList2, foodDescription, userConfig.favListExceptions)) {
                 return LikeLevel.favorite2;
             }
         }
@@ -1360,22 +1344,21 @@
     function containsLcMatch(list1, foodText) {
         for (const listItem1 of list1) {
             if (lcMatch(foodText, listItem1)) {
-                //console.log("Found match in containsLcMatch: " + foodObj.text() + " " + listItem1);
+                //console.log("Found match: " + foodObj.text() + " " + listItem1);
                 return true;
             }
         }
         return false;
     }
-    /*
-    export function containsExactMatch(list1: readonly string[], foodText: string): boolean{
-      for (const listItem1 of list1) {
-        if (lcMatch(foodText, listItem1)) {
-          //console.log("Found match in containsLcMatch: " + foodObj.text() + " " + listItem1);
-          return true;
+    function containsLcMatchThatDoesNotMatchAnException(list1, foodText, listExceptions) {
+        for (const listItem1 of list1) {
+            if (lcMatch(foodText, listItem1) && !(containsLcMatch(listExceptions, foodText) && containsLcMatch(listExceptions, listItem1))) {
+                //console.log("Found match: " + foodObj.text() + " " + listItem1);
+                return true;
+            }
         }
-      }
-      return false;
-    }*/
+        return false;
+    }
     function getMatchingIngredientsWholeName(longText, item) {
         const regex = new RegExp('\\b[a-záéíóóöőúüű ]*' + item + '[a-záéíóóöőúüű ]*\\b', 'g');
         return longText.toLowerCase().match(regex) ?? [];
@@ -1615,62 +1598,8 @@
         });
     }
 
-    const AndiConfig = {
-        userNamesToFind: ['Dusza Andrea'],
-        blacklist: [],
-        warnList: [],
-        blacklistExceptions: [],
-        mehList: ['tarhonya'],
-        favList1: ['juhtúró', 'gombafej', 'tápiókapuding', 'rák', 'garnéla', 'lazac', 'miso leves'],
-        favList2: ['aszalt paradicsom', 'camembert', 'négysajt', 'grill.{0,10}sajt', 'sajt.{0,5}töltött', 'sajtkrém', 'avokádó', 'kukoric(a|á)'],
-        favListExceptions: [],
-    };
-
-    const HegeConfig = {
-        userNamesToFind: ['Hegedűs Tamás László'],
-        blacklist: [
-            'halfilé', 'halszelet', 'halászlé', 'halr(u|ú)d', 'rákragu', 'koktélrák',
-            'garnél(a|á)', 'polip', 'kagyló', 'tenger gyümölcs', 'tengeri gyümölcs',
-            'gomb(a|á)', 'csiperk(e|é)', 'vargány(a|á)',
-            '(sertés|kacsa|liba|csirke|pulyka|szárnyas).?máj', '(resztelt|pirított).?máj', 'májgalusk(a|á)',
-            'csülök', 'csülkös', 'marhanyelv',
-            'ceruzabab', 'héjas zöldborsó',
-            'budapest sertés', 'milánói',
-        ].concat(FishSpeciesList),
-        warnList: ['hal', 'rák', 'máj', 'gom.?b(a|á)', 'pacal', 'tüdő', 'zúz(a|á)', 'vese', 'kakashere', 'velő'],
-        blacklistExceptions: ['[^a-z]dhal', 'kagyló.?tészta', 'kultúrák', 'lepkeszegmag', 'shalott hagyma'],
-        mehList: ['tarhonya', 'főzelék', 'zöldbab', 'csirkeszárny',
-            'wok zöldség', 'kávé',
-            'mátrai saláta', 'szejtán', 'búzahús'],
-        favList1: ['kijevi', 'brassói', 'lyoni', 'floridai', 'borzas',
-            'szűz', 'chilis bab',
-            '^(?!.*leves).*(tepsis|házi|falusi|tejföl).{0,10}(burgonya|burgonyá|krumpli)(?!püré)',
-            'bors.{0,5}(mártás|szósz)',
-            '(' + FruitsRegex + '|mézes|édes).*leves',
-            'paradicsomleves',
-            'tápiókapuding', 'gyümölcsrizs',
-            'édesburgony(a|á)',
-            'cheddar',
-            'padlizsánkrém', 'padlizsánsaláta',
-            '(mangó|ananász).{0,5}rétes',
-        ],
-        favList2: ['hidasi', 'dijoni', 'mátrai',
-            '(grillezett|bacon).{0,10}(burgonya|burgonyá|krumpli)(?!püré)',
-            'aszalt paradicsom',
-            'palak', 'tikka masala', 'corma', 'korma',
-            'tzatziki', 'tartár', 'majonéz',
-            'hagym(a|á)',
-            'rózsabors',
-            'rétes',
-            'burrito', 'quesadilla',
-            'coleslaw', 'káposztasaláta',
-            'padlizsán',
-        ],
-        favListExceptions: [],
-    };
-
     const UndefinedUserConfig = {
-        userNamesToFind: [""],
+        profileName: "",
         blacklist: [],
         warnList: [],
         blacklistExceptions: [],
@@ -1693,6 +1622,8 @@
             console.log('DishDecider Assistant script started...');
             const currentSite = getCurrentSite();
             const uc = await getCurrentUserConfig();
+            console.log("loaded user config:");
+            console.log(uc);
             sanitizeUserConfig(uc);
             // TODO option to set language to Hungarian / English ?
             insertFeedbackText(uc);
@@ -1756,27 +1687,39 @@
     }
     async function getCurrentUserConfig() {
         const storedUserConfigs = await loadUserConfigsFromChromeStorage();
-        const UserConfigs = [...storedUserConfigs, HegeConfig, AndiConfig];
-        for (const config of UserConfigs) {
-            for (const name of config.userNamesToFind) {
-                if (anyElementinTheDomContainsText(name)) {
-                    return { name, config };
-                }
-            }
+        if (!storedUserConfigs) {
+            return getDefaultUserConfig();
         }
-        return getDefaultUserConfig(storedUserConfigs);
+        else {
+            let selectedProfileId = storedUserConfigs.selectedProfileId;
+            const name = storedUserConfigs.profiles[selectedProfileId].profileName;
+            const config = storedUserConfigs.profiles[selectedProfileId];
+            return { name, config };
+        }
     }
-    function getDefaultUserConfig(storedUserConfigs) {
-        if (storedUserConfigs.length <= 0) {
-            return { name: UndefinedUserConfig.userNamesToFind[0], config: UndefinedUserConfig };
-        }
-        const config = storedUserConfigs[0];
-        const name = config.userNamesToFind[0] ?? 'Unnamed User';
-        return { name, config };
+    function getDefaultUserConfig() {
+        return { name: UndefinedUserConfig.profileName, config: UndefinedUserConfig };
     }
     async function loadUserConfigsFromChromeStorage() {
         let getting = await chrome.storage.sync.get("dishdeciderAssistantConfig");
+        getting = transformOptionsObjectToNewFormatIfNeeded(getting);
         return getting.dishdeciderAssistantConfig;
+    }
+    function transformOptionsObjectToNewFormatIfNeeded(result) {
+        if (result && result.dishdeciderAssistantConfig && !result.dishdeciderAssistantConfig.profiles) {
+            let profs = new Array(100);
+            let selProfId = 0;
+            profs[selProfId] = result.dishdeciderAssistantConfig[0];
+            profs[selProfId].profileName = "Untitled";
+            let result2 = {
+                dishdeciderAssistantConfig: {
+                    selectedProfileId: selProfId,
+                    profiles: profs
+                }
+            };
+            result = result2;
+        }
+        return result;
     }
     async function checkIngredients($elem, uc) {
         //console.log('Menu element tagName:', $elem.prop('tagName') + '; class: ' + $elem.attr('class'));
@@ -1925,10 +1868,6 @@
         }
         // TODO this does not work!
         $("#dishdecider-popup-div").html(feedbackText);
-    }
-    // TODO: probably not needed. It is more intuitive if the user selects the profile in the popup or on the dashboard.
-    function anyElementinTheDomContainsText(text) {
-        return document.body.innerText.includes(text);
     }
     main();
 

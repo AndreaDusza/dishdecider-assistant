@@ -7,29 +7,25 @@ export function evaluateCardText(
   userConfig: UserConfig,
   acceptanceLevel: AcceptanceLevel,
 ): LikeLevel {
-  //is blacklisted?
-  if (containsLcMatch(userConfig.blacklist, foodDescription) && !containsLcMatch(userConfig.blacklistExceptions, foodDescription)) {
+
+  if (containsLcMatchThatDoesNotMatchAnException(userConfig.blacklist, foodDescription, userConfig.blacklistExceptions)) {
     return LikeLevel.blacklist;
   }
 
-  //warning
-  if (containsLcMatch(userConfig.warnList, foodDescription) && !containsLcMatch(userConfig.blacklistExceptions, foodDescription)) {
+  if (containsLcMatchThatDoesNotMatchAnException(userConfig.warnList, foodDescription, userConfig.blacklistExceptions)) {
     return LikeLevel.warn;
   }
 
-  //is meh?
-  if (containsLcMatch(userConfig.mehList, foodDescription) && !containsLcMatch(userConfig.blacklistExceptions, foodDescription) ) {
+  if (containsLcMatchThatDoesNotMatchAnException(userConfig.mehList, foodDescription, userConfig.blacklistExceptions)) {
     return LikeLevel.meh;
   }
 
-  //is fav 1 ?
-  if (containsLcMatch(userConfig.favList1, foodDescription) && !containsLcMatch(userConfig.favListExceptions, foodDescription)) {
+  if (containsLcMatchThatDoesNotMatchAnException(userConfig.favList1, foodDescription, userConfig.favListExceptions)) {
     return LikeLevel.favorite1;
   }
 
-  //is fav2 ?
   if (acceptanceLevel >= 2) {
-    if (containsLcMatch(userConfig.favList2, foodDescription)  && !containsLcMatch(userConfig.favListExceptions, foodDescription)) {
+    if (containsLcMatchThatDoesNotMatchAnException(userConfig.favList2, foodDescription, userConfig.favListExceptions)) {
       return LikeLevel.favorite2;
     }
   }
@@ -44,22 +40,22 @@ function lcMatch(e1: string, e2: string): boolean {
 export function containsLcMatch(list1: readonly string[], foodText: string): boolean {
   for (const listItem1 of list1) {
     if (lcMatch(foodText, listItem1)) {
-      //console.log("Found match in containsLcMatch: " + foodObj.text() + " " + listItem1);
+      //console.log("Found match: " + foodObj.text() + " " + listItem1);
       return true;
     }
   }
   return false;
 }
-/*
-export function containsExactMatch(list1: readonly string[], foodText: string): boolean{
+
+export function containsLcMatchThatDoesNotMatchAnException(list1: readonly string[], foodText: string, listExceptions: readonly string[]): boolean {
   for (const listItem1 of list1) {
-    if (lcMatch(foodText, listItem1)) {
-      //console.log("Found match in containsLcMatch: " + foodObj.text() + " " + listItem1);
+    if (lcMatch(foodText, listItem1) && !(containsLcMatch(listExceptions, foodText) && containsLcMatch(listExceptions, listItem1))) {
+      //console.log("Found match: " + foodObj.text() + " " + listItem1);
       return true;
     }
   }
   return false;
-}*/
+}
 
 export function getMatchingIngredientsWholeName(longText:string, item: string): string[]{
   const regex = new RegExp('\\b[a-záéíóóöőúüű ]*' + item + '[a-záéíóóöőúüű ]*\\b', 'g');
