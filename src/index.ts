@@ -1,6 +1,6 @@
 import { fromEvent, throttleTime } from 'rxjs';
 import { evaluateCardText } from './logic';
-import { getMatchingIngredientsWholeName } from './logic';
+import { getMatchingIngredientsWholeName, getLcMatchesThatDoNotMatchAnException } from './logic';
 import { $, UIkit, waitForJquery } from './provided';
 import { FoodService, getCurrentSite } from './services';
 import { applyDefaultHighlightToCellStyle } from './styles/common';
@@ -31,12 +31,8 @@ async function main() {
     console.log("loaded user config:");
     console.log(uc);
     sanitizeUserConfig(uc); 
-
-    // TODO option to set language to Hungarian / English ?
-
     insertFeedbackText(uc);
 
-    // console.log(`DishDecider Assistant - user name: ${uc.name}`);
     console.log('DishDecider Assistant - user preferences:', uc.config);
     mainWithUserConfig(uc);
   } catch (error) {
@@ -147,9 +143,8 @@ async function checkIngredients(
   $elem: JQuery,
   uc: UserConfig,
 ) {
-  //console.log('Menu element tagName:', $elem.prop('tagName') + '; class: ' + $elem.attr('class'));
 
-  const ingredientLabelSpans = await iife(async () => {
+  const popupInfo = await iife(async () => {
     try {
       return await poll({
         fn: i => {
@@ -157,9 +152,21 @@ async function checkIngredients(
           //There can be multiple spans if I order a multi course menu. That's why I need a loop
           const ingredientLabelSpans = $('span:contains("Összetevők")');
 
-          //console.log(ingredientLabelSpans.length);
           if (ingredientLabelSpans.length >= 1) {
-            return ingredientLabelSpans;
+
+            const foodTitle = jxItems($('.uk-article-title')).map( i=> {
+                return i.text() + '\n\n';
+            }).join('');
+
+            const ingredientsString = jxItems(ingredientLabelSpans).map(currIngredientLabelSpan => {
+              const currIngredientsString = currIngredientLabelSpan.next().text();
+              if (currIngredientsString.length < 3) {
+                throw new AssistantError('Assistant error: Ingredients label missing or too short!');
+              }
+              return currIngredientsString + '\n\n';
+            }).join('');
+
+            return {ingredientsString: ingredientsString, foodTitle: foodTitle};
           }
         },
         timeout: 5000,
@@ -172,38 +179,36 @@ async function checkIngredients(
     }
   });
 
-  const ingredientsString = jxItems(ingredientLabelSpans).map(currIngredientLabelSpan => {
-    const currIngredientsString = currIngredientLabelSpan.next().text();
-    if (currIngredientsString.length < 20) {
-      throw new AssistantError('Assistant error: Ingredients label missing or too short!');
-    }
-    return currIngredientsString + '\n\n';
-  }).join('');
-
   const totalBlacklist = uc.blacklist.concat(uc.warnList);
-  const foundItems = unique(totalBlacklist.flatMap(item => {
-    return getMatchingIngredientsWholeName(ingredientsString, item);
-  }));
 
-  //console.log('founditems: ' + foundItems);
+  console.log("sus ingredients:");
+  console.log(getLcMatchesThatDoNotMatchAnException(totalBlacklist, popupInfo.ingredientsString, uc.blacklistExceptions));
 
-  const filteredFoundItems = foundItems.filter(item => {
-    return !uc.blacklistExceptions.includes(item);
-  });
+  const filteredFoundIngredientsItems = 
+   getLcMatchesThatDoNotMatchAnException(totalBlacklist, popupInfo.ingredientsString, uc.blacklistExceptions)
+   .flatMap(item => 
+    getMatchingIngredientsWholeName(popupInfo.ingredientsString, item, true)
+  );
 
-  /*
-  for (const badItem of filteredFoundItems){
-    jxItems(ingredientLabelSpans).map(currIngredientLabelSpan => {
-      currIngredientLabelSpan.next().html(currIngredientLabelSpan.next().text().replaceAll(badItem, "<u>!!" + badItem + "!!</u>"));
-    });
-  }*/
+  console.log(filteredFoundIngredientsItems);
+
+  const filteredFoundTitleItems = 
+    getLcMatchesThatDoNotMatchAnException(totalBlacklist, popupInfo.foodTitle, uc.blacklistExceptions)
+    .flatMap(item => 
+      getMatchingIngredientsWholeName(popupInfo.foodTitle, item, false)
+  );
+  
+  console.log('filteredFoundTitleItems:');
+  console.log(filteredFoundTitleItems);
+
+  const allSusItems = unique(filteredFoundTitleItems.concat(filteredFoundIngredientsItems));
 
   let feedbackText = "";
-  if (filteredFoundItems.length > 0) {
+  if (allSusItems.length > 0) {
     $elem.css('color', 'red');
-    feedbackText = "DishDecider ingredient check: ❌ <p style=\"color:red; font-weight:bold\">" + filteredFoundItems.join(', ') + "<\p>";
+    feedbackText = "DishDecider title & ingredient check: ❌ <p style=\"color:red; font-weight:bold\">" + allSusItems.join(', ') + "<\p>";
   } else {
-    feedbackText = "DishDecider ingredient check: ✔️"
+    feedbackText = "DishDecider title & ingredient check: ✔️"
     $elem.css('color', 'green');
   }
 
@@ -270,11 +275,7 @@ function mainWithUserConfig(uc: CurrentUserConfig) {
         uc.config,
         acceptanceLevel,
       );
-      /*switch (likeLevel) {
-        case LikeLevel.warn:
-          console.log('Warning: ' + foodText);
-          break;
-      }*/
+
       if (![FoodService.interfood].includes(getCurrentSite())){
         applyDefaultHighlightToCellStyle($food, likeLevel);
       }

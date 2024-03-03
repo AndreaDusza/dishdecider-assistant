@@ -73,6 +73,9 @@ If a food does not match the _Absolute favorites_ list, it will NOT be marked as
  * If the food delivery page itself is slow, this will cause the Assistant to be slow as well. In case of Interfood.hu, it can take 30 seconds before the script can take effect.
  * If you cannot scroll on the page: press the numeric key '2' to force the evaluation of the food cards.
 
+## Website-specific extra features
+ * __Only on Teletal.hu__: If you click on the information button of a menu card, a full list of ingredients and allergens opens. There is also an alternative title for the food item. When you open the popup, the Assistant will perform another check and diplay all the warnlisted and blacklisted items found in the ingredients list and in the alternative title, and display the result at the top of the popup. Just keep in mind that all of this does not happen automatically: you have to open the popup. 
+
 ## Want to contribute / add support for a new site?
 Steps to be documented.
 

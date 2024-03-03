@@ -1341,34 +1341,38 @@
     function lcMatch(e1, e2) {
         return (e1.toLowerCase().match(e2) != null) || (e1.toLowerCase().match(e2.toLowerCase()) != null);
     }
-    function containsLcMatch(list1, foodText) {
-        for (const listItem1 of list1) {
-            if (lcMatch(foodText, listItem1)) {
-                //console.log("Found match: " + foodObj.text() + " " + listItem1);
-                return true;
-            }
+    function containsLcMatch(list, foodText) {
+        return getLcMatches(list, foodText).length > 0;
+    }
+    function getLcMatches(list, foodText) {
+        return list.filter(listItem1 => lcMatch(foodText, listItem1));
+    }
+    function getRelevantExceptionKeywords(exceptionsList, otherKeywordText) {
+        return exceptionsList.filter(listItem1 => lcMatch(listItem1, otherKeywordText));
+    }
+    function getLcMatchesThatDoNotMatchAnException(list, foodText, listExceptions) {
+        return list.filter(oneKeyword => {
+            const relevantExceptions = getRelevantExceptionKeywords(listExceptions, oneKeyword);
+            return lcMatch(foodText, oneKeyword) && !containsLcMatch(relevantExceptions, foodText);
+        });
+    }
+    function containsLcMatchThatDoesNotMatchAnException(list, foodText, listExceptions) {
+        return getLcMatchesThatDoNotMatchAnException(list, foodText, listExceptions).length > 0;
+    }
+    function getMatchingIngredientsWholeName(longText, item, includeSpaces) {
+        const lettersSpaces = '[a-záéíóóöőúüű -]*';
+        const letters = '[a-záéíóóöőúüű-]*';
+        const r = includeSpaces ? lettersSpaces : letters;
+        //const regex = new RegExp('\\b' + r + item + r + '\\b', 'g');
+        const regex = new RegExp('([\\s.,()!?]|^)' + r + item + r + '([\\s.,())!?]|$)', 'g');
+        const result = longText.toLowerCase().match(regex);
+        if (result) {
+            return result.map(i => i.replace(/(^[,\s()]+)|([,\s()]+$)/g, ''));
         }
-        return false;
-    }
-    function containsLcMatchThatDoesNotMatchAnException(list1, foodText, listExceptions) {
-        for (const listItem1 of list1) {
-            if (lcMatch(foodText, listItem1) && !(containsLcMatch(listExceptions, foodText) && containsLcMatch(listExceptions, listItem1))) {
-                //console.log("Found match: " + foodObj.text() + " " + listItem1);
-                return true;
-            }
+        else {
+            return [item];
         }
-        return false;
     }
-    function getMatchingIngredientsWholeName(longText, item) {
-        const regex = new RegExp('\\b[a-záéíóóöőúüű ]*' + item + '[a-záéíóóöőúüű ]*\\b', 'g');
-        return longText.toLowerCase().match(regex) ?? [];
-    }
-    /*
-    export function hasExactMatchInText(longText:string, item: string): boolean{
-      const regex = new RegExp('\\b' + item + '\\b', 'g');
-      return regex.test(longText.toLowerCase());
-    }
-    */
 
     function sleep(delayMs) {
         return new Promise(resolve => {
@@ -1625,9 +1629,7 @@
             console.log("loaded user config:");
             console.log(uc);
             sanitizeUserConfig(uc);
-            // TODO option to set language to Hungarian / English ?
             insertFeedbackText(uc);
-            // console.log(`DishDecider Assistant - user name: ${uc.name}`);
             console.log('DishDecider Assistant - user preferences:', uc.config);
             mainWithUserConfig(uc);
         }
@@ -1722,17 +1724,25 @@
         return result;
     }
     async function checkIngredients($elem, uc) {
-        //console.log('Menu element tagName:', $elem.prop('tagName') + '; class: ' + $elem.attr('class'));
-        const ingredientLabelSpans = await iife(async () => {
+        const popupInfo = await iife(async () => {
             try {
                 return await poll({
                     fn: i => {
                         console.log(`Polling ${i}`);
                         //There can be multiple spans if I order a multi course menu. That's why I need a loop
                         const ingredientLabelSpans = $('span:contains("Összetevők")');
-                        //console.log(ingredientLabelSpans.length);
                         if (ingredientLabelSpans.length >= 1) {
-                            return ingredientLabelSpans;
+                            const foodTitle = jxItems($('.uk-article-title')).map(i => {
+                                return i.text() + '\n\n';
+                            }).join('');
+                            const ingredientsString = jxItems(ingredientLabelSpans).map(currIngredientLabelSpan => {
+                                const currIngredientsString = currIngredientLabelSpan.next().text();
+                                if (currIngredientsString.length < 3) {
+                                    throw new AssistantError('Assistant error: Ingredients label missing or too short!');
+                                }
+                                return currIngredientsString + '\n\n';
+                            }).join('');
+                            return { ingredientsString: ingredientsString, foodTitle: foodTitle };
                         }
                     },
                     timeout: 5000,
@@ -1745,34 +1755,24 @@
                 throw error;
             }
         });
-        const ingredientsString = jxItems(ingredientLabelSpans).map(currIngredientLabelSpan => {
-            const currIngredientsString = currIngredientLabelSpan.next().text();
-            if (currIngredientsString.length < 20) {
-                throw new AssistantError('Assistant error: Ingredients label missing or too short!');
-            }
-            return currIngredientsString + '\n\n';
-        }).join('');
         const totalBlacklist = uc.blacklist.concat(uc.warnList);
-        const foundItems = unique(totalBlacklist.flatMap(item => {
-            return getMatchingIngredientsWholeName(ingredientsString, item);
-        }));
-        //console.log('founditems: ' + foundItems);
-        const filteredFoundItems = foundItems.filter(item => {
-            return !uc.blacklistExceptions.includes(item);
-        });
-        /*
-        for (const badItem of filteredFoundItems){
-          jxItems(ingredientLabelSpans).map(currIngredientLabelSpan => {
-            currIngredientLabelSpan.next().html(currIngredientLabelSpan.next().text().replaceAll(badItem, "<u>!!" + badItem + "!!</u>"));
-          });
-        }*/
+        console.log("sus ingredients:");
+        console.log(getLcMatchesThatDoNotMatchAnException(totalBlacklist, popupInfo.ingredientsString, uc.blacklistExceptions));
+        const filteredFoundIngredientsItems = getLcMatchesThatDoNotMatchAnException(totalBlacklist, popupInfo.ingredientsString, uc.blacklistExceptions)
+            .flatMap(item => getMatchingIngredientsWholeName(popupInfo.ingredientsString, item, true));
+        console.log(filteredFoundIngredientsItems);
+        const filteredFoundTitleItems = getLcMatchesThatDoNotMatchAnException(totalBlacklist, popupInfo.foodTitle, uc.blacklistExceptions)
+            .flatMap(item => getMatchingIngredientsWholeName(popupInfo.foodTitle, item, false));
+        console.log('filteredFoundTitleItems:');
+        console.log(filteredFoundTitleItems);
+        const allSusItems = unique(filteredFoundTitleItems.concat(filteredFoundIngredientsItems));
         let feedbackText = "";
-        if (filteredFoundItems.length > 0) {
+        if (allSusItems.length > 0) {
             $elem.css('color', 'red');
-            feedbackText = "DishDecider ingredient check: ❌ <p style=\"color:red; font-weight:bold\">" + filteredFoundItems.join(', ') + "<\p>";
+            feedbackText = "DishDecider title & ingredient check: ❌ <p style=\"color:red; font-weight:bold\">" + allSusItems.join(', ') + "<\p>";
         }
         else {
-            feedbackText = "DishDecider ingredient check: ✔️";
+            feedbackText = "DishDecider title & ingredient check: ✔️";
             $elem.css('color', 'green');
         }
         const $newDiv = $(`<div id="fo-assistant-feedback-ingredient-check">${feedbackText}</div>`);
@@ -1822,11 +1822,6 @@
             for (const $food of jxItems($allVisibleFoodCardObjects)) {
                 const foodText = $food.text();
                 const likeLevel = evaluateCardText(foodText, uc.config, acceptanceLevel);
-                /*switch (likeLevel) {
-                  case LikeLevel.warn:
-                    console.log('Warning: ' + foodText);
-                    break;
-                }*/
                 if (![FoodService.interfood].includes(getCurrentSite())) {
                     applyDefaultHighlightToCellStyle($food, likeLevel);
                 }
