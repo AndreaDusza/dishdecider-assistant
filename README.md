@@ -45,6 +45,7 @@ Also, if you blacklist the term _spicy_, make sure to add _not spicy_ to the exc
 __Be careful__ to only add very specific exceptions. You don't want to suppress a legit warning of a blacklisted keyword by adding an exception keyword that is too broad.
  * Both of the Exceptions lists work in a convoluted way: 
    Each positive/negative keyword from the regular lists is matched against the exception keywords, one by one. The regular keywords and the exception keywords are paired together. This is how the program achieves the correct handling of the above special cases. If you make a mistake and your regular keyword does not match the exception keyword, then the exception will not take effect.
+ * __Regular expressions:__ If you are familiar with regular expressions, you can enable them in the advanced options section. This will make special characters gain special behaviour. Commas will always be treated as keyword separators and there is no way to escape them, so you cannot use regular expressions that include commas, such as _{1,20}_. The regular expressions in your input are not syntax checked, and it is possible that you will entirely break the logic with a bad character. Tip: Use https://regex101.com/ and https://chat.openai.com/ to construct regular expressions. 
 
 ### Potential pitfalls:
  * __Spelling:__ Your spelling has to be 100% correct. If the food service website has typos, you have to spot them and add the misspelled words to your preferences form to match the typos.
@@ -52,12 +53,8 @@ __Be careful__ to only add very specific exceptions. You don't want to suppress 
  * __Synonyms:__ The program does NOT know synonyms and does not read your mind. If you write _fish_, that will only mean _fish_. It will NOT mean _trout_, _salmon_, etc.
  * __False matches:__ Try to use specific keywords instead of very short, generic keywords, to avoid the _egg_/_eggplant_ pitfall.  
  * __Optional choices on the menu card:__ Most food service websites offer optional customization choices only when you are adding an item to the basket. In these cases, the program usually works correctly. However, if the website shows the optional choices on the menu card right away, then the program will assume that the food contains all the optional ingredients, even though it doesn't. __Workaround:__ Remove the ingredient from the form, or add it to the exceptions list. If the foods are customizable, then filtering for this ingredient should not be necessary anyway.
- * Do NOT use semicolons (;), quotation marks ("), apostrophes (').
- * It is OK to use dashes (-) and spaces ( ).
- * Try to avoid any other special characters (UNLESS you are familiar with regular expressions and you want to use them).
+ * __Special characters:__ Certain special characters / character combinations are forbidden and they will be removed if you try to use them. 
 
-As mentioned above, regular expressions are supported in all of the above lists.  
-Use https://regex101.com/ and https://chat.openai.com/ to understand and create regular expressions. Just do not use any commas in the regular expressions - commas are keyword separators.
 
 For Hungarian users:
  * If you enter keywords ending with 'a' or 'e' ("gomba", "csirke"), they will match the accented version as well ("gombás", "csirkés"). This makes the algorithm look smart, but it is NOT. The algorithm does not reflect any other peculiarity of the Hungarian language. For example, the program does NOT recognize that "halrúd" - "halrudak" should be the same.

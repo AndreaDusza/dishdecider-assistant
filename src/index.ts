@@ -11,8 +11,6 @@ import { applyLikelevelBackgroundColors } from './styles/general-styles';
 import { patchTeletalStyles } from './styles/teletal';
 import { patchInterfoodStyles } from './styles/interfood';
 import { LikeLevel, UserConfig, GlobalSettings } from './userconfig';
-import { AndiConfig } from './userconfig.andi';
-import { HegeConfig } from './userconfig.hege';
 import { UndefinedUserConfig } from './userconfig.undefined';
 import { AssistantError } from './utils/assistant-error';
 import { avgTextLength } from './utils/debug';
@@ -101,8 +99,8 @@ async function getCurrentUserConfig(): Promise<CurrentUserConfig> {
     return getDefaultUserConfig();
   } else {
     let selectedProfileId = storedUserConfigs.selectedProfileId;
-    const name = storedUserConfigs.profiles[selectedProfileId].profileName;
-    const config = storedUserConfigs.profiles[selectedProfileId];
+    const config = storedUserConfigs.profiles.find(i => i.profileId === selectedProfileId) ?? UndefinedUserConfig;
+    const name = config.profileName;
     return {name, config};
   }
 }
@@ -119,25 +117,33 @@ async function loadUserConfigsFromChromeStorage(): Promise<GlobalSettings> {
   return getting.dishdeciderAssistantConfig;
 }
 
+//TODO: this code is duplicated unfortunately
 function transformOptionsObjectToNewFormatIfNeeded(result: any){
-  if (result && result.dishdeciderAssistantConfig && !result.dishdeciderAssistantConfig.profiles){
-    let profs = new Array(100);
-    let selProfId = 0
+  if (result && result.dishdeciderAssistantConfig){
 
-    profs[selProfId] = result.dishdeciderAssistantConfig[0];
-    profs[selProfId].profileName="Untitled";
+    //convert version 1.1 to version 1.3
+    if (!result.dishdeciderAssistantConfig.version){
+      let selProfId = '0';
 
-    let result2 = {
-      dishdeciderAssistantConfig: {
-        selectedProfileId: selProfId,
-        profiles: profs
+      let oneProfile = result.dishdeciderAssistantConfig[0];
+      oneProfile.profileName="Untitled";
+      oneProfile.profileId = selProfId;
+      oneProfile.isRegexEnabled = false;
+
+      let result2 = {
+        dishdeciderAssistantConfig: {
+          version: '1.3',
+          selectedProfileId: selProfId,
+          profiles: [oneProfile]
+        }
       }
-    }
-    result = result2;
+      result = result2;
+   }
   }
    
   return result;
 }
+
 
 async function checkIngredients(
   $elem: JQuery,
@@ -181,21 +187,18 @@ async function checkIngredients(
 
   const totalBlacklist = uc.blacklist.concat(uc.warnList);
 
-  console.log("sus ingredients:");
-  console.log(getLcMatchesThatDoNotMatchAnException(totalBlacklist, popupInfo.ingredientsString, uc.blacklistExceptions));
-
   const filteredFoundIngredientsItems = 
-   getLcMatchesThatDoNotMatchAnException(totalBlacklist, popupInfo.ingredientsString, uc.blacklistExceptions)
+   getLcMatchesThatDoNotMatchAnException(totalBlacklist, popupInfo.ingredientsString, uc.blacklistExceptions, uc.isRegexEnabled)
    .flatMap(item => 
-    getMatchingIngredientsWholeName(popupInfo.ingredientsString, item, true)
+    uc.isRegexEnabled ? getMatchingIngredientsWholeName(popupInfo.ingredientsString, item, true) : item
   );
 
   console.log(filteredFoundIngredientsItems);
 
   const filteredFoundTitleItems = 
-    getLcMatchesThatDoNotMatchAnException(totalBlacklist, popupInfo.foodTitle, uc.blacklistExceptions)
+    getLcMatchesThatDoNotMatchAnException(totalBlacklist, popupInfo.foodTitle, uc.blacklistExceptions, uc.isRegexEnabled)
     .flatMap(item => 
-      getMatchingIngredientsWholeName(popupInfo.foodTitle, item, false)
+      uc.isRegexEnabled ? getMatchingIngredientsWholeName(popupInfo.foodTitle, item, false) : item
   );
   
   console.log('filteredFoundTitleItems:');
@@ -301,12 +304,13 @@ function sanitizeUserConfig(uc: CurrentUserConfig) {
   (uc.config as any).blacklistExceptions = uc.config.blacklistExceptions.concat(uc.config.blacklistExceptions.filter(i => i.match(regex1)).map(i => i.replace(/a$/,'á').replace(/e$/,'é')));
   (uc.config as any).favListExceptions = uc.config.favListExceptions.concat(uc.config.favListExceptions.filter(i => i.match(regex1)).map(i => i.replace(/a$/,'á').replace(/e$/,'é')));
   (uc.config as any).mehList = uc.config.mehList.concat(uc.config.mehList.filter(i => i.match(regex1)).map(i => i.replace(/a$/,'á').replace(/e$/,'é')));
+
 }
 
 function insertFeedbackText(uc: CurrentUserConfig){
   const currentSite = getCurrentSite();
 
-  let feedbackText = (uc === undefined || uc.config == UndefinedUserConfig) ?
+  let feedbackText = (uc === undefined || uc.config === UndefinedUserConfig) ?
     `DishDecider Assistant Info: Assistant will NOT run. Could not identify user.` :
     `
       DishDecider Assistant Info: Assistant is running.<br/>
@@ -315,7 +319,7 @@ function insertFeedbackText(uc: CurrentUserConfig){
       Hotkeys: 1 / 2: to be documented.  
     `;
 
-  if (uc === undefined || uc.config == UndefinedUserConfig) return;
+  if (uc === undefined || uc.config === UndefinedUserConfig) return;
 
   if ([FoodService.teletal].includes(currentSite)){
     feedbackText += 'Ingredients check only happens when the ingredients popup is opened.<br/>';

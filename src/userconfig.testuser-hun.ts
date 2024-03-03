@@ -1,4 +1,5 @@
 export const TestUserHungarianConfig = {
+    profileId: '0',
     profileName: 'Magyar Tesztelő János',
     blacklist: ['gomb(a|á)','lazac','kagyló', '[^a-záéíóóöőúüű]hal[^a-záéíóóöőúüű]'],
     warnList: ['hal'],
@@ -7,4 +8,5 @@ export const TestUserHungarianConfig = {
     favList1: ['csirk(e|é)'],
     favList2: ['hagym(a|á)'],
     favListExceptions: [],
+    isRegexEnabled: true,
 };

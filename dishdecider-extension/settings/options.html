@@ -4,16 +4,20 @@
   <head>
     <meta charset="utf-8" />
     <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" />
+
 
      <!-- jQuery library -->
     <script src="../lib/jquery.min.js"></script>
+    <script src="../lib/bootstrap-toggle.min.js"></script>
 
   </head>
 
   <style>
     #success_message{ display: none;} 
+    #error_message{ display: none;} 
   </style>
 
   
@@ -133,7 +137,7 @@
       </div>
 
       <legend>Advanced options (requires reading the <b><a href="https://github.com/AndreaDusza/dishdecider-assistant/blob/master/README.md#dashboard">MANUAL</a></b>)</legend>
-      <div id="advanced-options-div"></div>
+      <div id="advanced-options-div">
         <div class="form-group">
           <label class="col-md-2 control-label">Exceptions from positive keywords</label>
           <div class="col-md-1 fa-stack fa-1x">
@@ -174,6 +178,18 @@
             </div>
           </div>
         </div>
+
+        <div class="form-group">
+          <label class="col-md-2 control-label">Interpret keywords as regular expressions</label>
+          <div class="col-md-1 fa-stack fa-1x"></div>
+          <div class="col-md-1 fa-stack fa-1x"></div>
+          <div class="col-md-1 fa-stack fa-1x"></div>
+          <div class="col-md-8 inputGroupContainer">
+            <div class="input-group">
+              <input id="isRegexEnabled" name="isRegexEnabled" type="checkbox" data-toggle="toggle"/>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Button -->
@@ -184,6 +200,7 @@
       </div>
 
       <div class="alert alert-success" role="alert" id="success_message"></div>
+      <div class="alert alert-danger" role="alert" id="error_message"></div>
 
       </fieldset>
     </form>

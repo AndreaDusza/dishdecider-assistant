@@ -1319,45 +1319,50 @@
     };
 
     function evaluateCardText(foodDescription, userConfig, acceptanceLevel) {
-        if (containsLcMatchThatDoesNotMatchAnException(userConfig.blacklist, foodDescription, userConfig.blacklistExceptions)) {
+        if (containsLcMatchThatDoesNotMatchAnException(userConfig.blacklist, foodDescription, userConfig.blacklistExceptions, userConfig.isRegexEnabled)) {
             return LikeLevel.blacklist;
         }
-        if (containsLcMatchThatDoesNotMatchAnException(userConfig.warnList, foodDescription, userConfig.blacklistExceptions)) {
+        if (containsLcMatchThatDoesNotMatchAnException(userConfig.warnList, foodDescription, userConfig.blacklistExceptions, userConfig.isRegexEnabled)) {
             return LikeLevel.warn;
         }
-        if (containsLcMatchThatDoesNotMatchAnException(userConfig.mehList, foodDescription, userConfig.blacklistExceptions)) {
+        if (containsLcMatchThatDoesNotMatchAnException(userConfig.mehList, foodDescription, userConfig.blacklistExceptions, userConfig.isRegexEnabled)) {
             return LikeLevel.meh;
         }
-        if (containsLcMatchThatDoesNotMatchAnException(userConfig.favList1, foodDescription, userConfig.favListExceptions)) {
+        if (containsLcMatchThatDoesNotMatchAnException(userConfig.favList1, foodDescription, userConfig.favListExceptions, userConfig.isRegexEnabled)) {
             return LikeLevel.favorite1;
         }
         if (acceptanceLevel >= 2) {
-            if (containsLcMatchThatDoesNotMatchAnException(userConfig.favList2, foodDescription, userConfig.favListExceptions)) {
+            if (containsLcMatchThatDoesNotMatchAnException(userConfig.favList2, foodDescription, userConfig.favListExceptions, userConfig.isRegexEnabled)) {
                 return LikeLevel.favorite2;
             }
         }
         return LikeLevel.neutral;
     }
-    function lcMatch(e1, e2) {
-        return (e1.toLowerCase().match(e2) != null) || (e1.toLowerCase().match(e2.toLowerCase()) != null);
+    function lcMatch(e1, e2, isRegexEnabled) {
+        if (isRegexEnabled) {
+            return (e1.match(e2) != null) || (e1.toLowerCase().match(e2) != null) || (e1.toLowerCase().match(e2.toLowerCase()) != null);
+        }
+        else {
+            return e1.includes(e2) || e1.toLowerCase().includes(e2) || e1.toLowerCase().includes(e2.toLowerCase());
+        }
     }
-    function containsLcMatch(list, foodText) {
-        return getLcMatches(list, foodText).length > 0;
+    function containsLcMatch(list, foodText, isRegexEnabled) {
+        return getLcMatches(list, foodText, isRegexEnabled).length > 0;
     }
-    function getLcMatches(list, foodText) {
-        return list.filter(listItem1 => lcMatch(foodText, listItem1));
+    function getLcMatches(list, foodText, isRegexEnabled) {
+        return list.filter(listItem1 => lcMatch(foodText, listItem1, isRegexEnabled));
     }
-    function getRelevantExceptionKeywords(exceptionsList, otherKeywordText) {
-        return exceptionsList.filter(listItem1 => lcMatch(listItem1, otherKeywordText));
+    function getRelevantExceptionKeywords(exceptionsList, otherKeywordText, isRegexEnabled) {
+        return exceptionsList.filter(listItem1 => lcMatch(listItem1, otherKeywordText, isRegexEnabled));
     }
-    function getLcMatchesThatDoNotMatchAnException(list, foodText, listExceptions) {
+    function getLcMatchesThatDoNotMatchAnException(list, foodText, listExceptions, isRegexEnabled) {
         return list.filter(oneKeyword => {
-            const relevantExceptions = getRelevantExceptionKeywords(listExceptions, oneKeyword);
-            return lcMatch(foodText, oneKeyword) && !containsLcMatch(relevantExceptions, foodText);
+            const relevantExceptions = getRelevantExceptionKeywords(listExceptions, oneKeyword, isRegexEnabled);
+            return lcMatch(foodText, oneKeyword, isRegexEnabled) && !containsLcMatch(relevantExceptions, foodText, isRegexEnabled);
         });
     }
-    function containsLcMatchThatDoesNotMatchAnException(list, foodText, listExceptions) {
-        return getLcMatchesThatDoNotMatchAnException(list, foodText, listExceptions).length > 0;
+    function containsLcMatchThatDoesNotMatchAnException(list, foodText, listExceptions, isRegexEnabled) {
+        return getLcMatchesThatDoNotMatchAnException(list, foodText, listExceptions, isRegexEnabled).length > 0;
     }
     function getMatchingIngredientsWholeName(longText, item, includeSpaces) {
         const lettersSpaces = '[a-záéíóóöőúüű -]*';
@@ -1603,6 +1608,7 @@
     }
 
     const UndefinedUserConfig = {
+        profileId: '0',
         profileName: "",
         blacklist: [],
         warnList: [],
@@ -1611,6 +1617,7 @@
         favList1: [],
         favList2: [],
         favListExceptions: [],
+        isRegexEnabled: false,
     };
 
     function iife(fn) {
@@ -1694,8 +1701,8 @@
         }
         else {
             let selectedProfileId = storedUserConfigs.selectedProfileId;
-            const name = storedUserConfigs.profiles[selectedProfileId].profileName;
-            const config = storedUserConfigs.profiles[selectedProfileId];
+            const config = storedUserConfigs.profiles.find(i => i.profileId === selectedProfileId) ?? UndefinedUserConfig;
+            const name = config.profileName;
             return { name, config };
         }
     }
@@ -1707,19 +1714,25 @@
         getting = transformOptionsObjectToNewFormatIfNeeded(getting);
         return getting.dishdeciderAssistantConfig;
     }
+    //TODO: this code is duplicated unfortunately
     function transformOptionsObjectToNewFormatIfNeeded(result) {
-        if (result && result.dishdeciderAssistantConfig && !result.dishdeciderAssistantConfig.profiles) {
-            let profs = new Array(100);
-            let selProfId = 0;
-            profs[selProfId] = result.dishdeciderAssistantConfig[0];
-            profs[selProfId].profileName = "Untitled";
-            let result2 = {
-                dishdeciderAssistantConfig: {
-                    selectedProfileId: selProfId,
-                    profiles: profs
-                }
-            };
-            result = result2;
+        if (result && result.dishdeciderAssistantConfig) {
+            //convert version 1.1 to version 1.3
+            if (!result.dishdeciderAssistantConfig.version) {
+                let selProfId = '0';
+                let oneProfile = result.dishdeciderAssistantConfig[0];
+                oneProfile.profileName = "Untitled";
+                oneProfile.profileId = selProfId;
+                oneProfile.isRegexEnabled = false;
+                let result2 = {
+                    dishdeciderAssistantConfig: {
+                        version: '1.3',
+                        selectedProfileId: selProfId,
+                        profiles: [oneProfile]
+                    }
+                };
+                result = result2;
+            }
         }
         return result;
     }
@@ -1756,13 +1769,11 @@
             }
         });
         const totalBlacklist = uc.blacklist.concat(uc.warnList);
-        console.log("sus ingredients:");
-        console.log(getLcMatchesThatDoNotMatchAnException(totalBlacklist, popupInfo.ingredientsString, uc.blacklistExceptions));
-        const filteredFoundIngredientsItems = getLcMatchesThatDoNotMatchAnException(totalBlacklist, popupInfo.ingredientsString, uc.blacklistExceptions)
-            .flatMap(item => getMatchingIngredientsWholeName(popupInfo.ingredientsString, item, true));
+        const filteredFoundIngredientsItems = getLcMatchesThatDoNotMatchAnException(totalBlacklist, popupInfo.ingredientsString, uc.blacklistExceptions, uc.isRegexEnabled)
+            .flatMap(item => uc.isRegexEnabled ? getMatchingIngredientsWholeName(popupInfo.ingredientsString, item, true) : item);
         console.log(filteredFoundIngredientsItems);
-        const filteredFoundTitleItems = getLcMatchesThatDoNotMatchAnException(totalBlacklist, popupInfo.foodTitle, uc.blacklistExceptions)
-            .flatMap(item => getMatchingIngredientsWholeName(popupInfo.foodTitle, item, false));
+        const filteredFoundTitleItems = getLcMatchesThatDoNotMatchAnException(totalBlacklist, popupInfo.foodTitle, uc.blacklistExceptions, uc.isRegexEnabled)
+            .flatMap(item => uc.isRegexEnabled ? getMatchingIngredientsWholeName(popupInfo.foodTitle, item, false) : item);
         console.log('filteredFoundTitleItems:');
         console.log(filteredFoundTitleItems);
         const allSusItems = unique(filteredFoundTitleItems.concat(filteredFoundIngredientsItems));
@@ -1848,7 +1859,7 @@
     }
     function insertFeedbackText(uc) {
         const currentSite = getCurrentSite();
-        let feedbackText = (uc === undefined || uc.config == UndefinedUserConfig) ?
+        let feedbackText = (uc === undefined || uc.config === UndefinedUserConfig) ?
             `DishDecider Assistant Info: Assistant will NOT run. Could not identify user.` :
             `
       DishDecider Assistant Info: Assistant is running.<br/>
@@ -1856,7 +1867,7 @@
       Results will be indicated by color code / opacity.
       Hotkeys: 1 / 2: to be documented.  
     `;
-        if (uc === undefined || uc.config == UndefinedUserConfig)
+        if (uc === undefined || uc.config === UndefinedUserConfig)
             return;
         if ([FoodService.teletal].includes(currentSite)) {
             feedbackText += 'Ingredients check only happens when the ingredients popup is opened.<br/>';

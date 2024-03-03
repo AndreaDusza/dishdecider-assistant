@@ -1,9 +1,11 @@
 export type GlobalSettings = {
-  readonly selectedProfileId: number;
+  readonly version: string;
+  readonly selectedProfileId: string;
   readonly profiles: readonly UserConfig[];
 };
 
 export type UserConfig = {
+  readonly profileId: string;
   readonly profileName: string;
   readonly blacklist: readonly string[];
   readonly blacklistExceptions: readonly string[];
@@ -12,6 +14,7 @@ export type UserConfig = {
   readonly mehList: readonly string[];
   readonly favList1: readonly string[];
   readonly favList2: readonly string[];
+  readonly isRegexEnabled: boolean;
 };
 
 export const FruitsRegex = 'gyümölcs|alma|körte|barack|szilva|cseresznye|málna|eper|szamóca|meggy|citrom|narancs|szőlő|'

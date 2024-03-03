@@ -3,34 +3,55 @@ async function saveOptions(e) {
     console.log(`Error: ${error}`);
   }
 
-  e.preventDefault();
+  function createKeywordList(input){
 
-  let options = await chrome.storage.sync.get("dishdeciderAssistantConfig");
-  options = transformOptionsObjectToNewFormatIfNeeded(options);
-  let selProfileId = parseInt(document.querySelector("#selectedProfileId").value);
+    //.replaceAll(";", ",").replaceAll("\"","").replaceAll("\'","")
+    //TODO disable some characters in the textarea? List:  ; " '
 
-  if (!(options && options.dishdeciderAssistantConfig && options.dishdeciderAssistantConfig.profiles)){
-    options = {
-      dishdeciderAssistantConfig: {
-        profiles: new Array(100)
-      }
-    }
+    return input.trim().replaceAll("\n", ",\n").split(",").filter(i => i).filter(i => !i.match('^[?.*\\s -]+$'));
   }
 
-  options.dishdeciderAssistantConfig.selectedProfileId = selProfileId;
-  options.dishdeciderAssistantConfig.profiles[selProfileId] = {
-    profileName:  document.querySelector("#profileName").value,
-    favList1: document.querySelector("#favList1").value.trim().split(",").filter(i => i),
-    favList2: document.querySelector("#favList2").value.trim().split(",").filter(i => i),
-    blacklist: document.querySelector("#blacklist").value.trim().split(",").filter(i => i),
-    warnList: document.querySelector("#warnList").value.trim().split(",").filter(i => i),
-    blacklistExceptions: document.querySelector("#blacklistExceptions").value.trim().split(",").filter(i => i),
-    mehList: document.querySelector("#mehList").value.trim().split(",").filter(i => i),
-    favListExceptions: document.querySelector("#favListExceptions").value.trim().split(",").filter(i => i)
-  };
+  async function createOptionsObject(){
+    let options = await chrome.storage.sync.get("dishdeciderAssistantConfig");
+    options = transformOptionsObjectToNewFormatIfNeeded(options);
+    let selProfileId = document.querySelector("#selectedProfileId").value;
+  
+    if (!(options && options.dishdeciderAssistantConfig && options.dishdeciderAssistantConfig.profiles)){
+      options = {
+        dishdeciderAssistantConfig: {
+          profiles: []
+        }
+      }
+    }
+
+    options.dishdeciderAssistantConfig.version = '1.3';
+    options.dishdeciderAssistantConfig.selectedProfileId = selProfileId;
+    let profile =  options.dishdeciderAssistantConfig.profiles.find(i => i.profileId === selProfileId);
+
+    if (!profile){
+      profile={};
+      options.dishdeciderAssistantConfig.profiles.push(profile);
+    }
+
+    profile.profileId = selProfileId;
+    profile.profileName = document.querySelector("#profileName").value;
+    profile.favList1 = createKeywordList(document.querySelector("#favList1").value);
+    profile.favList2 = createKeywordList(document.querySelector("#favList2").value);
+    profile.blacklist = createKeywordList(document.querySelector("#blacklist").value);
+    profile.warnList = createKeywordList(document.querySelector("#warnList").value);
+    profile.blacklistExceptions = createKeywordList(document.querySelector("#blacklistExceptions").value);
+    profile.mehList = createKeywordList(document.querySelector("#mehList").value);
+    profile.favListExceptions = createKeywordList(document.querySelector("#favListExceptions").value);
+    profile.isRegexEnabled = $("#isRegexEnabled").prop('checked');
+
+    return options;
+  }
+
+  e.preventDefault();
 
   (async () => {
     try {
+      options = await createOptionsObject();
       await chrome.storage.sync.set(options);
       console.log("Saved options:");
       console.log(options);
@@ -41,7 +62,7 @@ async function saveOptions(e) {
 
       let time =  new Date();
      
-      
+      $('#error_message').hide();
       $('#success_message').html("Changes saved at: " + time.toDateString() + " " + time.toLocaleTimeString());
 
       if (e instanceof SubmitEvent){
@@ -51,7 +72,12 @@ async function saveOptions(e) {
         $('#success_message').show({ opacity: "show" }, "slow");
       }
 
+      //restoreOptions(e);
+
     } catch (ex) {
+      $('#success_message').hide();
+      $('#error_message').html("An error occurred while saving! ");
+      $('#error_message').slideDown({ opacity: "show" }, "slow");
       console.error("Error while saving options:", ex);
     }
   })();
@@ -70,35 +96,22 @@ function restoreOptions(event, tempSelectedProfileId) {
       console.log("Loaded options:")
       console.log(result);
 
-      let selId = tempSelectedProfileId ?? result.dishdeciderAssistantConfig.selectedProfileId ?? 0;
-      
-      //TODO check if selId is a valid integer and not undefined or NaN and log error
-
-      /*
-      console.log("tempSelectedProfileId:")
-      console.log(tempSelectedProfileId);
-
-      console.log(" parseInt(result.dishdeciderAssistantConfig.selectedProfileId):")
-      console.log( parseInt(result.dishdeciderAssistantConfig.selectedProfileId));
-
-      console.log("selId:")
-      console.log(selId);
-
-      console.log("result.dishdeciderAssistantConfig.profiles:")
-      console.log(result.dishdeciderAssistantConfig.profiles);
-
-      console.log("result.dishdeciderAssistantConfig.profiles[selId]:")
-      console.log(result.dishdeciderAssistantConfig.profiles[selId]);
-      */
+      let selId = tempSelectedProfileId ?? result.dishdeciderAssistantConfig.selectedProfileId ?? '0';
 
       document.querySelector("#selectedProfileId").value = selId;
-      if (result.dishdeciderAssistantConfig.profiles[selId]){
-        setRealData(result.dishdeciderAssistantConfig.profiles[selId]);
+      console.log("selId");
+      console.log(selId);
+      console.log("result.dishdeciderAssistantConfig.profiles.find(i => i.profileId === selId)");
+      console.log(result.dishdeciderAssistantConfig.profiles.find(i => i.profileId === selId));
+      console.log("result.dishdeciderAssistantConfig.profiles");
+      console.log(result.dishdeciderAssistantConfig.profiles);
+      if (result.dishdeciderAssistantConfig.profiles && result.dishdeciderAssistantConfig.profiles.find(i => i.profileId === selId)){
+        setRealData(result.dishdeciderAssistantConfig.profiles.find(i => i.profileId === selId));
       } else {
         setEmptyData();
       }
     } else {
-      let selId = tempSelectedProfileId ?? 0;
+      let selId = tempSelectedProfileId ?? '0';
 
       document.querySelector("#selectedProfileId").value = selId;
       setSampleData();
@@ -116,6 +129,7 @@ function restoreOptions(event, tempSelectedProfileId) {
     document.querySelector("#blacklistExceptions").value = obj.blacklistExceptions.join(",");
     document.querySelector("#favListExceptions").value = obj.favListExceptions.join(",");
     document.querySelector("#mehList").value = obj.mehList.join(",");
+    $("#isRegexEnabled").prop('checked', obj.isRegexEnabled).change();
   }
 
   function setSampleData(){
@@ -128,6 +142,7 @@ function restoreOptions(event, tempSelectedProfileId) {
     document.querySelector("#blacklistExceptions").value = "";
     document.querySelector("#favListExceptions").value = "";
     document.querySelector("#mehList").value = "";
+    $("#isRegexEnabled").prop('checked', false).change();
   }
 
   function setEmptyData(){
@@ -140,6 +155,7 @@ function restoreOptions(event, tempSelectedProfileId) {
     document.querySelector("#blacklistExceptions").value = "";
     document.querySelector("#favListExceptions").value = "";
     document.querySelector("#mehList").value = "";
+    $("#isRegexEnabled").prop('checked', false).change();
   }
 
 
@@ -156,35 +172,66 @@ function changeProfile(event){
 
 //TODO: this code is duplicated unfortunately
 function transformOptionsObjectToNewFormatIfNeeded(result){
-  if (result && result.dishdeciderAssistantConfig && !result.dishdeciderAssistantConfig.profiles){
-    let profs = new Array(100);
-    let selProfId = 0
+  if (result && result.dishdeciderAssistantConfig){
 
-    profs[selProfId] = result.dishdeciderAssistantConfig[0];
-    profs[selProfId].profileName="Untitled";
+    //convert version 1.1 to version 1.3
+    if (!result.dishdeciderAssistantConfig.version){
+      let selProfId = '0';
 
-    let result2 = {
-      dishdeciderAssistantConfig: {
-        selectedProfileId: selProfId,
-        profiles: profs
+      let oneProfile = result.dishdeciderAssistantConfig[0];
+      oneProfile.profileName="Untitled";
+      oneProfile.profileId = selProfId;
+      oneProfile.isRegexEnabled = false;
+
+      let result2 = {
+        dishdeciderAssistantConfig: {
+          version: '1.3',
+          selectedProfileId: selProfId,
+          profiles: [oneProfile]
+        }
       }
-    }
-    result = result2;
+      result = result2;
+   }
   }
    
   return result;
 }
 
+// Keep the below limitations in mind when choosing the throttle/debounce interval:
+// MAX_WRITE_OPERATIONS_PER_MINUTE = 120 (every 500 milliseconds)
+// MAX_WRITE_OPERATIONS_PER_HOUR = 1800 (every 2000 milliseconds)
+function debounce(func, timeout = 600){
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => { func.apply(this, args); }, timeout);
+  };
+}
+
+const autoSaveOptions = debounce((e) => saveOptions(e));
+
 document.addEventListener("DOMContentLoaded", restoreOptions);
-document.querySelector("form").addEventListener("submit", saveOptions);
+
 document.getElementById("selectedProfileId").addEventListener("change", changeProfile);
 
-document.getElementById("profileName").addEventListener("blur", saveOptions);
-document.getElementById("favList1").addEventListener("blur", saveOptions);
-document.getElementById("favList2").addEventListener("blur", saveOptions);
-document.getElementById("mehList").addEventListener("blur", saveOptions);
-document.getElementById("warnList").addEventListener("blur", saveOptions);
-document.getElementById("blacklist").addEventListener("blur", saveOptions);
-document.getElementById("favListExceptions").addEventListener("blur", saveOptions);
-document.getElementById("blacklistExceptions").addEventListener("blur", saveOptions);
+document.querySelector("form").addEventListener("submit", saveOptions);
 
+document.getElementById("profileName").addEventListener("change", saveOptions);
+document.getElementById("favList1").addEventListener("change", saveOptions);
+document.getElementById("favList2").addEventListener("change", saveOptions);
+document.getElementById("mehList").addEventListener("change", saveOptions);
+document.getElementById("warnList").addEventListener("change", saveOptions);
+document.getElementById("blacklist").addEventListener("change", saveOptions);
+document.getElementById("favListExceptions").addEventListener("change", saveOptions);
+document.getElementById("blacklistExceptions").addEventListener("change", saveOptions);
+
+document.getElementById("profileName").addEventListener("input", autoSaveOptions);
+document.getElementById("favList1").addEventListener("input", autoSaveOptions);
+document.getElementById("favList2").addEventListener("input", autoSaveOptions);
+document.getElementById("mehList").addEventListener("input", autoSaveOptions);
+document.getElementById("warnList").addEventListener("input", autoSaveOptions);
+document.getElementById("blacklist").addEventListener("input", autoSaveOptions);
+document.getElementById("favListExceptions").addEventListener("input", autoSaveOptions);
+document.getElementById("blacklistExceptions").addEventListener("input", autoSaveOptions);
+
+$('#isRegexEnabled').on('change', saveOptions);

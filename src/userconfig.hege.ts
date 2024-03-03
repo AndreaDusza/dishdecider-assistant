@@ -1,6 +1,7 @@
 import { FruitsRegex, FishSpeciesList, UserConfig } from './userconfig';
 
 export const HegeConfig = {
+  profileId: '0',
   profileName: 'Hege - Teletal',
   blacklist: [
     'halfilé', 'halszelet', 'halászlé', 'halr(u|ú)d', 'rákragu', 'koktélrák',
@@ -41,4 +42,5 @@ export const HegeConfig = {
     'padlizsán',
   ],
   favListExceptions: [],
+  isRegexEnabled: true,
 } as const satisfies UserConfig;

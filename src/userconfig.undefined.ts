@@ -1,6 +1,7 @@
 import { UserConfig } from './userconfig';
 
 export const UndefinedUserConfig = {
+    profileId: '0',
     profileName: "",
     blacklist: [],
     warnList: [],
@@ -9,4 +10,5 @@ export const UndefinedUserConfig = {
     favList1: [],
     favList2: [],
     favListExceptions: [],
+    isRegexEnabled: false,
 } as const satisfies UserConfig;
