@@ -1,8 +1,10 @@
 # DishDecider Assistant
 
+## Introduction
 DishDecider Assistant is a browser extension that helps you decide what food to order.  
 When you visit a __supported__ food delivery website, the Assistant marks certain foods on the menu as unwanted and highlights the ones that you will probably like, based on your preferences.  
 
+## Supported websites & browsers
 Supported food delivery services as of 2024 March:
   * Wolt.com
   * Teletal.hu
@@ -32,11 +34,11 @@ https://chromewebstore.google.com/detail/dishdecider/cjecdgchklcnnpkkceeepnlemch
    (e.g. Use Hungarian for Hungarian sites.)
  
 ### Line-by-line hints:
- * __Absolute favorites__: for your few top favorites. Try to be specific here. 
- * __Also liked__: for lowered standards and more generic/short keywords.
+ * __Absolute favorites__: for your few top favorites. Go for specific/long keywords (like _tikka masala_). 
+ * __Also liked__: for lowered standards, and for more generic/short keywords (like _chicken_).
  * __"Meh" list__: for foods that you mildly dislike. 
- * __Warn list__: for generic/short keywords like _egg_ that you dislike, but do not want to blacklist, because you worry that it would result in too many falsely blacklisted results (like _eggplant_).
- * __Blacklist__: for specific, long keywords, if you are confident that these are unwanted.
+ * __Warn list__: for generic/short keywords (like _egg_) that you dislike, but do not want to blacklist, because you worry that it would result in too many falsely blacklisted results (like _eggplant_).
+ * __Blacklist__: for specific/long keywords (like _omelette_), that you are confident to filter out.
 
 ### Advanced options:
  * __Exceptions from positive keywords__: For example, you may want to prevent highlighting _shell pasta_ on the main page as a favorite when _shell_ is a favorite. This does NOT mean that shell pasta is in any way disliked - it is just not a favorite because it is not shell.  
@@ -46,39 +48,38 @@ __Example:__ if _shell_ and _tuna_ are your favorites, but _shell pasta_ is an e
 Also, if you blacklist the term _spicy_, make sure to add _not spicy_ to the exceptions list!  
 Despite the exception, the food item might still be marked as favorite by another valid keyword match.  
 __Example:__ if  _egg_ and _chicken_ are blacklisted, but _eggplant_ is an exception, then _Chicken with eggplant_ will still be blacklisted.  
-__Be careful__ to only add very specific exceptions. You don't want to suppress a legit warning of a blacklisted keyword by adding an exception keyword that is too broad.
+__Be careful__ to only add very specific exceptions. You don't want to suppress a legit warning of a blacklisted keyword by adding an exception keyword that is too generic.
  * Both of the Exceptions lists work in a convoluted way: 
    Each positive/negative keyword from the regular lists is matched against the exception keywords, one by one. The regular keywords and the exception keywords are paired together. This is how the program achieves the correct handling of the above special cases. If you make a mistake and your regular keyword does not match the exception keyword, then the exception will not take effect.
  * __Regular expressions:__ If you enable regular expressions, it will make special characters gain special behaviour. You can use almost any regular expressions, but not commas (such as _.{1,20}_). Commas will always be treated as keyword separators and there is no way to escape them. The regular expressions in your input are not syntax checked, and it is possible that you will entirely break the logic with a bad character.  
 __Tip:__ Use https://regex101.com/ and https://chat.openai.com/ to construct regular expressions.
  * __"Egg with eggplant":__  If _egg_ is blacklisted, but _eggplant_ is an exception, then _Egg with eggplant_ will NOT be blacklisted, which is a problem. __Workaround__: enable regular expressions and blacklist the expressions _[^a-z]egg[^a-z]_ and _[^a-z]eggs[^a-z]_, additionally to blacklisting the term _egg_. This way, the exception _eggplant_ will not take effect on this food, because the food title matches the blacklisted term _[^a-z]egg[^a-z]_, and the exception _eggplant_ doesn't match it. 
 
-### Potential pitfalls:
+## Common pitfalls of the matching logic
  * __Spelling:__ Your spelling has to be 100% correct. If the food service website has typos, you have to spot them and add the misspelled words to your preferences form to match the typos.
  * __Division of words:__ As of 2024 March, the program does not automatically handle division of words. You have to manually add all the variations to your preferences form.
  * __Synonyms:__ The program does NOT know synonyms and does not read your mind. If you write _fish_, that will only mean _fish_. It will NOT mean _trout_, _salmon_, etc.
  * __False matches:__ Try to use specific keywords instead of very short, generic keywords, to avoid the _egg_/_eggplant_ pitfall.  
  * __Optional choices on the menu card:__ Most food service websites offer optional customization choices only when you are adding an item to the basket. In these cases, the program usually works correctly. However, if the website shows the optional choices on the menu card right away, then the program will assume that the food contains all the optional ingredients, even though it doesn't. __Workaround:__ Remove the ingredient from the form, or add it to the exceptions list. If the foods are customizable, then filtering for this ingredient should not be necessary anyway.
- * __Special characters:__ Certain special characters / character combinations are forbidden and they will be removed if you try to use them. 
-
-
-For Hungarian users:
- * If you enter keywords ending with 'a' or 'e' ("gomba", "csirke"), they will match the accented version as well ("gombás", "csirkés"). This makes the algorithm look smart, but it is NOT. The algorithm does not reflect any other peculiarity of the Hungarian language. For example, the program does NOT recognize that "halrúd" - "halrudak" should be the same.
-
+ * __Special characters:__ Certain special characters / character combinations are forbidden and they will be removed if you try to use them.
+   
 ## How are the food preferences evaluated?
 Each food item on the menu typically consists of many words: title, ingredients, description, etc. A food item's text might contain positive and negative keywords as well. The program searches for all the food preference keywords in the food item's text, and determines an overall rating for each food item.
 The negative keywords are always stronger than the positive keywords. A food will never be highlighted as a potential favorite if it matches any negative keyword (minding the exceptions).  
 A food will be highlighted as an absolute favorite if it matches a keyword from the _Absolute favorites_ list, and does not match any negative keywords (minding the exceptions).  
 If a food does not match the _Absolute favorites_ list, it will NOT be marked as an absolute favorite, no matter how many matches it has on the _Also liked_ list.  
 
+## Language-specific extra features
+ * __Hungarian:__ If you enter keywords ending with 'a' or 'e' ("gomba", "csirke"), they will match the accented version as well ("gombás", "csirkés"). This makes the algorithm look smart, but it is NOT. The algorithm does not reflect any other peculiarity of the Hungarian language. For example, the program does NOT recognize that "halrúd" - "halrudak" should be the same.   
+
+## Website-specific extra features
+ * __Teletal.hu__: If you click on the information button of a menu card, a full list of ingredients and allergens opens. There is also an alternative title for the food item. When you open the popup, the Assistant will perform another check and diplay all the warnlisted and blacklisted items found in the ingredients list and in the alternative title, and display the result at the top of the popup. Just keep in mind that all of this does not happen automatically: you have to open the popup. 
+
 ## Known bugs / Workarounds
  * If you are not sure that the extension did start running on a page: open Developer Tools and check the console log. It should print something like 'DishDecider Assistant script started...'.
  * If the food delivery page itself is slow, this will cause the Assistant to be slow as well. In case of Interfood.hu, it can take 30 seconds before the script can take effect.
  * If you cannot scroll on the page: press the numeric key '2' to force the evaluation of the food cards.
-
-## Website-specific extra features
- * __Only on Teletal.hu__: If you click on the information button of a menu card, a full list of ingredients and allergens opens. There is also an alternative title for the food item. When you open the popup, the Assistant will perform another check and diplay all the warnlisted and blacklisted items found in the ingredients list and in the alternative title, and display the result at the top of the popup. Just keep in mind that all of this does not happen automatically: you have to open the popup. 
-
+   
 ## Want to contribute / add support for a new site?
 Steps to be documented.
 
