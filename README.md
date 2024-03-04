@@ -1,16 +1,16 @@
 # DishDecider Assistant
 
 DishDecider Assistant is a browser extension that helps you decide what food to order.  
-When you visit a supported food delivery website, the Assistant marks certain foods on the menu as unwanted and highlights the ones that you will probably like, based on your preferences.  
-If you have some programming skills, you can customize your dietary preferences to the extreme.
+When you visit a __supported__ food delivery website, the Assistant marks certain foods on the menu as unwanted and highlights the ones that you will probably like, based on your preferences.  
 
-Supported food delivery services as of 2024 Feb:
+Supported food delivery services as of 2024 March:
   * Wolt.com
   * Teletal.hu
   * Interfood.hu
   * Ordit.hu
   * Pizzaforte.hu
-  * Pizzamonkey.hu  
+  * Pizzamonkey.hu
+  * Egeszsegkonyha.hu  
 
 Supported browsers: 
   * Chromium based desktop browsers (Chrome / Edge / Opera / etc...)
@@ -32,20 +32,25 @@ https://chromewebstore.google.com/detail/dishdecider/cjecdgchklcnnpkkceeepnlemch
    (e.g. Use Hungarian for Hungarian sites.)
  
 ### Line-by-line hints:
- * __Absolute favorites__: do not put too many keywords here. Reserve it for your few top favorites. 
- * __Also liked__: lowered standards go here. 
- * __"Meh" list__: When matched, prevents item from being highlighted as favorite. 
- * __Warn list__: use this line for short keywords like _egg_ that you dislike, but do not want to blacklist, because you worry that it would result in too many falsely blacklisted results (like _eggplant_).
- * __Blacklist__: specific, long keywords go here, if you are confident that these are unwanted.
+ * __Absolute favorites__: for your few top favorites. Try to be specific here. 
+ * __Also liked__: for lowered standards and more generic/short keywords.
+ * __"Meh" list__: for foods that you mildly dislike. 
+ * __Warn list__: for generic/short keywords like _egg_ that you dislike, but do not want to blacklist, because you worry that it would result in too many falsely blacklisted results (like _eggplant_).
+ * __Blacklist__: for specific, long keywords, if you are confident that these are unwanted.
 
 ### Advanced options:
- * __Exceptions from positive keywords__: For example, you may want to prevent highlighting _shell pasta_ on the main page as a favorite when _shell_ is a favorite. This does NOT mean that shell pasta is in any way disliked - it is just not a favorite because it is not shell. Despite the exception, the food item might still be marked as favorite by another valid keyword match. __Example:__ if _shell_ and _tuna_ are your favorites, but _shell pasta_ is an exception, then _Tuna with shell pasta_ will still be marked as favorite.
+ * __Exceptions from positive keywords__: For example, you may want to prevent highlighting _shell pasta_ on the main page as a favorite when _shell_ is a favorite. This does NOT mean that shell pasta is in any way disliked - it is just not a favorite because it is not shell.  
+Despite the exception, the food item might still be marked as favorite by another valid keyword match.  
+__Example:__ if _shell_ and _tuna_ are your favorites, but _shell pasta_ is an exception, then _Tuna with shell pasta_ will still be marked as favorite.
  * __Exceptions from negative keywords__: If _egg_ is blacklisted  / warnlisted / mehlisted, add _eggplant_ here to indicate that it has nothing to do with eggs.
-Also, if you blacklist the term _spicy_, make sure to add _not spicy_ to the exceptions list! Despite the exception, the food item might still be marked as favorite by another valid keyword match. __Example:__ if  _egg_ and _chicken_ are blacklisted, but _eggplant_ is an exception, then _Chicken with eggplant_ will still be blacklisted.
+Also, if you blacklist the term _spicy_, make sure to add _not spicy_ to the exceptions list!  
+Despite the exception, the food item might still be marked as favorite by another valid keyword match.  
+__Example:__ if  _egg_ and _chicken_ are blacklisted, but _eggplant_ is an exception, then _Chicken with eggplant_ will still be blacklisted.  
 __Be careful__ to only add very specific exceptions. You don't want to suppress a legit warning of a blacklisted keyword by adding an exception keyword that is too broad.
  * Both of the Exceptions lists work in a convoluted way: 
    Each positive/negative keyword from the regular lists is matched against the exception keywords, one by one. The regular keywords and the exception keywords are paired together. This is how the program achieves the correct handling of the above special cases. If you make a mistake and your regular keyword does not match the exception keyword, then the exception will not take effect.
- * __Regular expressions:__ If you are familiar with regular expressions, you can enable them in the advanced options section. This will make special characters gain special behaviour. Commas will always be treated as keyword separators and there is no way to escape them, so you cannot use regular expressions that include commas, such as _{1,20}_. The regular expressions in your input are not syntax checked, and it is possible that you will entirely break the logic with a bad character. Tip: Use https://regex101.com/ and https://chat.openai.com/ to construct regular expressions.
+ * __Regular expressions:__ If you enable regular expressions, it will make special characters gain special behaviour. You can use almost any regular expressions, but not commas (such as _.{1,20}_). Commas will always be treated as keyword separators and there is no way to escape them. The regular expressions in your input are not syntax checked, and it is possible that you will entirely break the logic with a bad character.  
+__Tip:__ Use https://regex101.com/ and https://chat.openai.com/ to construct regular expressions.
  * __"Egg with eggplant":__  If _egg_ is blacklisted, but _eggplant_ is an exception, then _Egg with eggplant_ will NOT be blacklisted, which is a problem. __Workaround__: enable regular expressions and blacklist the expressions _[^a-z]egg[^a-z]_ and _[^a-z]eggs[^a-z]_, additionally to blacklisting the term _egg_. This way, the exception _eggplant_ will not take effect on this food, because the food title matches the blacklisted term _[^a-z]egg[^a-z]_, and the exception _eggplant_ doesn't match it. 
 
 ### Potential pitfalls:
@@ -61,7 +66,7 @@ For Hungarian users:
  * If you enter keywords ending with 'a' or 'e' ("gomba", "csirke"), they will match the accented version as well ("gombás", "csirkés"). This makes the algorithm look smart, but it is NOT. The algorithm does not reflect any other peculiarity of the Hungarian language. For example, the program does NOT recognize that "halrúd" - "halrudak" should be the same.
 
 ## How are the food preferences evaluated?
-Each food item on the menu is made up of many words: title, ingredients, description, etc. A food item's text might contain positive and negative keywords as well. The program searches for all the food preference keywords in the food item's text, and determines an overall rating for each food item.
+Each food item on the menu typically consists of many words: title, ingredients, description, etc. A food item's text might contain positive and negative keywords as well. The program searches for all the food preference keywords in the food item's text, and determines an overall rating for each food item.
 The negative keywords are always stronger than the positive keywords. A food will never be highlighted as a potential favorite if it matches any negative keyword (minding the exceptions).  
 A food will be highlighted as an absolute favorite if it matches a keyword from the _Absolute favorites_ list, and does not match any negative keywords (minding the exceptions).  
 If a food does not match the _Absolute favorites_ list, it will NOT be marked as an absolute favorite, no matter how many matches it has on the _Also liked_ list.  
