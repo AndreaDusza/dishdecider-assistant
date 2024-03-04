@@ -1419,7 +1419,19 @@
         FoodService["pizzamonkey"] = "pizzamonkey";
         FoodService["egeszsegkonyha"] = "egeszsegkonyha";
     })(FoodService || (FoodService = {}));
+    function isCurrentSiteSupported() {
+        return getCurrentSiteOrUndefined() !== undefined;
+    }
     function getCurrentSite() {
+        const result = getCurrentSiteOrUndefined();
+        if (result === undefined) {
+            throw new AssistantError(`Assistant error: Unknown URL '${location.hostname}'`);
+        }
+        else {
+            return result;
+        }
+    }
+    function getCurrentSiteOrUndefined() {
         const hostname = location.hostname;
         switch (hostname) {
             case 'www.teletal.hu': return FoodService.teletal;
@@ -1434,8 +1446,8 @@
             case 'pecs.pizzamonkey.hu':
             case 'szeged.pizzamonkey.hu': return FoodService.pizzamonkey;
             case 'egeszsegkonyha.hu': return FoodService.egeszsegkonyha;
+            default: return undefined;
         }
-        throw new AssistantError(`Assistant error: Unknown URL '${hostname}'`);
     }
 
     class UnreachableCaseError extends Error {
@@ -1501,7 +1513,7 @@
         const styleId = "fo-assistant-styles-opacity";
         if ($('#' + styleId).length === 0) {
             $(document.body).append(`
-        <style id="fo-assistant-styles">
+        <style id="${styleId}">
           .fo-assistant-likelevel-${likeLevel} {
             opacity: ${opacityValue};
           }
@@ -1513,7 +1525,7 @@
         const styleId = "fo-assistant-styles-likelevel-background-colors";
         if ($('#' + styleId).length === 0) {
             $(document.body).append(`
-        <style id="fo-assistant-styles">
+        <style id="${styleId}">
             .fo-assistant-likelevel-${LikeLevel.blacklist} {
                 background-color: #ff6060;
             }
@@ -1630,28 +1642,37 @@
 
     async function main() {
         try {
-            console.log('DishDecider Assistant script started...');
-            const currentSite = getCurrentSite();
-            const uc = await getCurrentUserConfig();
-            console.log("loaded user config:");
-            console.log(uc);
-            sanitizeUserConfig(uc);
-            insertFeedbackText(uc);
-            console.log('DishDecider Assistant - user preferences:', uc.config);
-            mainWithUserConfig(uc);
+            if (isCurrentSiteSupported()) {
+                console.log('DishDecider Assistant script started...');
+                const currentSite = getCurrentSite();
+                const uc = await getCurrentUserConfig();
+                console.log("loaded user config:");
+                console.log(uc);
+                sanitizeUserConfig(uc);
+                insertFeedbackText(uc);
+                console.log('DishDecider Assistant - user preferences:', uc.config);
+                mainWithUserConfig(uc);
+            }
         }
         catch (error) {
             console.error('Initialization error', error);
         }
     }
-    function determineFoodCardsObject(currentSite) {
+    function getTextFromFoodCard(element) {
+        const currentSite = getCurrentSite();
+        switch (currentSite) {
+            case FoodService.foodora: return element.attr("aria-label");
+            default: return element.text();
+        }
+    }
+    function determineFoodCardsObject() {
+        const currentSite = getCurrentSite();
         switch (currentSite) {
             case FoodService.teletal: return $('.menu-card.uk-card-small');
             case FoodService.pizzaforte: return $('.product');
             case FoodService.ordit: return $('.meal-card');
             case FoodService.wolt: return $('[data-test-id=horizontal-item-card]');
-            case FoodService.foodora: return $('.product-button-overlay'); //NOT working at all
-            //TODO: handle the fact that foodora has food name is in aria-label. The value of .text() is empty
+            case FoodService.foodora: return $('.product-tile__button-overlay');
             case FoodService.interfood: return $('.cell');
             case FoodService.pizzamonkey: return $('.pm-products__product');
             case FoodService.egeszsegkonyha: return $('.etlapcella');
@@ -1691,6 +1712,10 @@
                 applyLikelevelBackgroundColors();
                 return;
             }
+            case FoodService.foodora: {
+                applyBorder('.product-tile__button-overlay', 5);
+                return;
+            }
             default: console.warn('applyStlyeTag not implemented for site ' + currentSite);
         }
     }
@@ -1723,7 +1748,7 @@
                 let oneProfile = result.dishdeciderAssistantConfig[0];
                 oneProfile.profileName = "Untitled";
                 oneProfile.profileId = selProfId;
-                oneProfile.isRegexEnabled = false;
+                oneProfile.isRegexEnabled = true;
                 let result2 = {
                     dishdeciderAssistantConfig: {
                         version: '1.3',
@@ -1828,10 +1853,10 @@
         function checkAllVisibleFoods(acceptanceLevel) {
             console.log('Running checkAllVisibleFoods()');
             insertFeedbackText(uc);
-            let $allVisibleFoodCardObjects = determineFoodCardsObject(getCurrentSite());
+            let $allVisibleFoodCardObjects = determineFoodCardsObject();
             //console.log('Number of visible food items: ' + $allVisibleFoodCardObjects.length + ', avg text() length: ' + avgTextLength($allVisibleFoodCardObjects));
             for (const $food of jxItems($allVisibleFoodCardObjects)) {
-                const foodText = $food.text();
+                const foodText = getTextFromFoodCard($food) ?? '';
                 const likeLevel = evaluateCardText(foodText, uc.config, acceptanceLevel);
                 if (![FoodService.interfood].includes(getCurrentSite())) {
                     applyDefaultHighlightToCellStyle($food, likeLevel);

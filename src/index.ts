@@ -2,7 +2,7 @@ import { fromEvent, throttleTime } from 'rxjs';
 import { evaluateCardText } from './logic';
 import { getMatchingIngredientsWholeName, getLcMatchesThatDoNotMatchAnException } from './logic';
 import { $, UIkit, waitForJquery } from './provided';
-import { FoodService, getCurrentSite } from './services';
+import { FoodService, getCurrentSite, isCurrentSiteSupported } from './services';
 import { applyDefaultHighlightToCellStyle } from './styles/common';
 import { applyBorder } from './styles/general-styles';
 import { applyBorderInDirection } from './styles/general-styles';
@@ -22,17 +22,19 @@ import { unique } from './utils/unique';
 
 async function main() {
   try {
-    console.log('DishDecider Assistant script started...');
-    const currentSite = getCurrentSite();
+    if (isCurrentSiteSupported()){
+      console.log('DishDecider Assistant script started...');
+      const currentSite = getCurrentSite();
 
-    const uc = await getCurrentUserConfig();
-    console.log("loaded user config:");
-    console.log(uc);
-    sanitizeUserConfig(uc); 
-    insertFeedbackText(uc);
+      const uc = await getCurrentUserConfig();
+      console.log("loaded user config:");
+      console.log(uc);
+      sanitizeUserConfig(uc); 
+      insertFeedbackText(uc);
 
-    console.log('DishDecider Assistant - user preferences:', uc.config);
-    mainWithUserConfig(uc);
+      console.log('DishDecider Assistant - user preferences:', uc.config);
+      mainWithUserConfig(uc);
+    }
   } catch (error) {
     console.error('Initialization error', error);
   }
@@ -40,14 +42,22 @@ async function main() {
 
 type CurrentUserConfig = { name: string, config: UserConfig };
 
-function determineFoodCardsObject(currentSite: FoodService){
+function getTextFromFoodCard(element: JQuery<HTMLElement>) {
+  const currentSite = getCurrentSite();
+  switch (currentSite) {
+      case FoodService.foodora: return element.attr("aria-label");
+      default: return element.text();
+  }
+}
+
+function determineFoodCardsObject(): JQuery<HTMLElement>{
+  const currentSite = getCurrentSite();
   switch (currentSite) {
     case FoodService.teletal: return $('.menu-card.uk-card-small');
     case FoodService.pizzaforte: return $('.product');
     case FoodService.ordit: return $('.meal-card');
     case FoodService.wolt: return $('[data-test-id=horizontal-item-card]');
-    case FoodService.foodora: return $('.product-button-overlay');   //NOT working at all
-    //TODO: handle the fact that foodora has food name is in aria-label. The value of .text() is empty
+    case FoodService.foodora: return $('.product-tile__button-overlay'); 
     case FoodService.interfood: return $('.cell'); 
     case FoodService.pizzamonkey: return $('.pm-products__product'); 
     case FoodService.egeszsegkonyha: return $('.etlapcella'); 
@@ -86,6 +96,10 @@ function applyStlyeTag(currentSite: FoodService) {
     case FoodService.egeszsegkonyha: {
       applyOpacity('.etlapcella', LikeLevel.blacklist, 0.3); 
       applyLikelevelBackgroundColors('.etlapcella');
+      return;
+    }
+    case FoodService.foodora: {
+      applyBorder('.product-tile__button-overlay', 5); 
       return;
     }
     default: console.warn('applyStlyeTag not implemented for site ' + currentSite);
@@ -128,7 +142,7 @@ function transformOptionsObjectToNewFormatIfNeeded(result: any){
       let oneProfile = result.dishdeciderAssistantConfig[0];
       oneProfile.profileName="Untitled";
       oneProfile.profileId = selProfId;
-      oneProfile.isRegexEnabled = false;
+      oneProfile.isRegexEnabled = true;
 
       let result2 = {
         dishdeciderAssistantConfig: {
@@ -266,12 +280,12 @@ function mainWithUserConfig(uc: CurrentUserConfig) {
   function checkAllVisibleFoods(acceptanceLevel) {
     console.log('Running checkAllVisibleFoods()');
     insertFeedbackText(uc);
-    let $allVisibleFoodCardObjects = determineFoodCardsObject(getCurrentSite());
+    let $allVisibleFoodCardObjects = determineFoodCardsObject();
 
     //console.log('Number of visible food items: ' + $allVisibleFoodCardObjects.length + ', avg text() length: ' + avgTextLength($allVisibleFoodCardObjects));
 
     for (const $food of jxItems($allVisibleFoodCardObjects)) {
-      const foodText = $food.text();
+      const foodText = getTextFromFoodCard($food) ?? '';
 
       const likeLevel = evaluateCardText(
         foodText,

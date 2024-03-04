@@ -63,19 +63,21 @@ async function saveOptions(e) {
       let time =  new Date();
      
       $('#error_message').hide();
+      $('#unsaved_changes_message').hide();
       $('#success_message').html("Changes saved at: " + time.toDateString() + " " + time.toLocaleTimeString());
 
       if (e instanceof SubmitEvent){
         $('#success_message').hide();
         $('#success_message').slideDown({ opacity: "show" }, "slow");
       } else {
-        $('#success_message').show({ opacity: "show" }, "slow");
+        $('#success_message').show();
       }
 
       //restoreOptions(e);
 
     } catch (ex) {
       $('#success_message').hide();
+      $('#unsaved_changes_message').hide();
       $('#error_message').html("An error occurred while saving! ");
       $('#error_message').slideDown({ opacity: "show" }, "slow");
       console.error("Error while saving options:", ex);
@@ -181,7 +183,7 @@ function transformOptionsObjectToNewFormatIfNeeded(result){
       let oneProfile = result.dishdeciderAssistantConfig[0];
       oneProfile.profileName="Untitled";
       oneProfile.profileId = selProfId;
-      oneProfile.isRegexEnabled = false;
+      oneProfile.isRegexEnabled = true;
 
       let result2 = {
         dishdeciderAssistantConfig: {
@@ -200,7 +202,7 @@ function transformOptionsObjectToNewFormatIfNeeded(result){
 // Keep the below limitations in mind when choosing the throttle/debounce interval:
 // MAX_WRITE_OPERATIONS_PER_MINUTE = 120 (every 500 milliseconds)
 // MAX_WRITE_OPERATIONS_PER_HOUR = 1800 (every 2000 milliseconds)
-function debounce(func, timeout = 600){
+function debounce(func, timeout = 1000){
   let timer;
   return (...args) => {
     clearTimeout(timer);
@@ -208,7 +210,15 @@ function debounce(func, timeout = 600){
   };
 }
 
-const autoSaveOptions = debounce((e) => saveOptions(e));
+const debouncedSave = debounce((e) => saveOptions(e));
+
+const autoSaveOptions = function(e) {
+  $('#success_message').hide();
+  $('#error_message').hide();
+  $('#unsaved_changes_message').html("Unsaved changes");
+  $('#unsaved_changes_message').show();
+  debouncedSave(e);
+}
 
 document.addEventListener("DOMContentLoaded", restoreOptions);
 

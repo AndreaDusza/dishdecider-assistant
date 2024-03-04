@@ -3,13 +3,11 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
+
+    <link rel="stylesheet" href="../css/bootstrap.min.css" />
+    <link rel="stylesheet" href="../css/bootstrap-toggle.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-    <link rel="stylesheet" href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" />
 
-
-     <!-- jQuery library -->
     <script src="../lib/jquery.min.js"></script>
     <script src="../lib/bootstrap-toggle.min.js"></script>
 
@@ -17,6 +15,7 @@
 
   <style>
     #success_message{ display: none;} 
+    #unsaved_changes_message{ display: none;} 
     #error_message{ display: none;} 
   </style>
 
@@ -136,7 +135,7 @@
         </div>
       </div>
 
-      <legend>Advanced options (requires reading the <b><a href="https://github.com/AndreaDusza/dishdecider-assistant/blob/master/README.md#dashboard">MANUAL</a></b>)</legend>
+      <legend>Advanced options</legend>
       <div id="advanced-options-div">
         <div class="form-group">
           <label class="col-md-2 control-label">Exceptions from positive keywords</label>
@@ -200,6 +199,7 @@
       </div>
 
       <div class="alert alert-success" role="alert" id="success_message"></div>
+      <div class="alert alert-warning" role="alert" id="unsaved_changes_message"></div>
       <div class="alert alert-danger" role="alert" id="error_message"></div>
 
       </fieldset>

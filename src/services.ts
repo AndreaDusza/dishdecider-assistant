@@ -11,7 +11,20 @@ export enum FoodService {
   egeszsegkonyha = 'egeszsegkonyha'
 }
 
-export function getCurrentSite(): FoodService {
+export function isCurrentSiteSupported(): boolean {
+  return getCurrentSiteOrUndefined() !== undefined;
+}
+
+export function getCurrentSite(): FoodService{
+  const result = getCurrentSiteOrUndefined();
+  if (result === undefined){
+    throw new AssistantError(`Assistant error: Unknown URL '${location.hostname}'`);
+  } else {
+    return result;
+  }
+}
+
+export function getCurrentSiteOrUndefined(): FoodService | undefined {
   const hostname = location.hostname;
   switch (hostname) {
     case 'www.teletal.hu': return FoodService.teletal;
@@ -26,6 +39,6 @@ export function getCurrentSite(): FoodService {
     case 'pecs.pizzamonkey.hu':
     case 'szeged.pizzamonkey.hu': return FoodService.pizzamonkey; 
     case 'egeszsegkonyha.hu': return FoodService.egeszsegkonyha; 
+    default: return undefined;
   }
-  throw new AssistantError(`Assistant error: Unknown URL '${hostname}'`);
 }

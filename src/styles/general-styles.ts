@@ -31,7 +31,7 @@ export function applyOpacity(selectorString: string, likeLevel: LikeLevel, opaci
     const styleId = "fo-assistant-styles-opacity";
     if ($('#' + styleId).length === 0) {
       $(document.body).append(`
-        <style id="fo-assistant-styles">
+        <style id="${styleId}">
           .fo-assistant-likelevel-${likeLevel} {
             opacity: ${opacityValue};
           }
@@ -44,7 +44,7 @@ export function applyLikelevelBackgroundColors(selectorString: string) {
     const styleId = "fo-assistant-styles-likelevel-background-colors";
     if ($('#' + styleId).length === 0) {  
       $(document.body).append(`
-        <style id="fo-assistant-styles">
+        <style id="${styleId}">
             .fo-assistant-likelevel-${LikeLevel.blacklist} {
                 background-color: #ff6060;
             }
