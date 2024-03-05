@@ -45,7 +45,7 @@ type CurrentUserConfig = { name: string, config: UserConfig };
 function getTextFromFoodCard(element: JQuery<HTMLElement>) {
   const currentSite = getCurrentSite();
   switch (currentSite) {
-      case FoodService.foodora: return element.attr("aria-label");
+      case FoodService.foodora: return element.text() + " ; " + element.attr("aria-label");
       default: return element.text();
   }
 }
@@ -57,7 +57,7 @@ function determineFoodCardsObject(): JQuery<HTMLElement>{
     case FoodService.pizzaforte: return $('.product');
     case FoodService.ordit: return $('.meal-card');
     case FoodService.wolt: return $('[data-test-id=horizontal-item-card]');
-    case FoodService.foodora: return $('.product-tile__button-overlay'); 
+    case FoodService.foodora: return $('.product-tile'); 
     case FoodService.interfood: return $('.cell'); 
     case FoodService.pizzamonkey: return $('.pm-products__product'); 
     case FoodService.egeszsegkonyha: return $('.etlapcella'); 
@@ -99,7 +99,7 @@ function applyStlyeTag(currentSite: FoodService) {
       return;
     }
     case FoodService.foodora: {
-      applyBorder('.product-tile__button-overlay', 5); 
+      applyBorder('.product-tile', 5); 
       return;
     }
     default: console.warn('applyStlyeTag not implemented for site ' + currentSite);
