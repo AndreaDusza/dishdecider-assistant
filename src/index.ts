@@ -45,7 +45,7 @@ type CurrentUserConfig = { name: string, config: UserConfig };
 function getTextFromFoodCard(element: JQuery<HTMLElement>) {
   const currentSite = getCurrentSite();
   switch (currentSite) {
-      case FoodService.foodora: return element.text() + " ; " + element.attr("aria-label");
+      case FoodService.foodora: return element.text();
       default: return element.text();
   }
 }

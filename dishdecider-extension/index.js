@@ -1661,7 +1661,7 @@
     function getTextFromFoodCard(element) {
         const currentSite = getCurrentSite();
         switch (currentSite) {
-            case FoodService.foodora: return element.text() + " ; " + element.attr("aria-label");
+            case FoodService.foodora: return element.text();
             default: return element.text();
         }
     }
